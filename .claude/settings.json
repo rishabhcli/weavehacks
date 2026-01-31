@@ -1,0 +1,147 @@
+{
+  "project": "patchpilot",
+  "version": "0.1.0",
+  "description": "Self-Healing QA Agent for Web Applications",
+  "skills": {
+    "directory": ".claude/skills",
+    "available": [
+      "browserbase-stagehand",
+      "redis-vectorstore",
+      "vercel-deployment",
+      "wandb-weave",
+      "google-adk",
+      "marimo-dashboards",
+      "patchpilot-agents"
+    ],
+    "autoload": []
+  },
+  "workflow": {
+    "method": "ralph-loop",
+    "phases": [
+      {
+        "id": 0,
+        "name": "Planning & Setup",
+        "status": "active",
+        "description": "Define PRD, set up environment, create demo app"
+      },
+      {
+        "id": 1,
+        "name": "Test Environment",
+        "status": "pending",
+        "description": "Browserbase + Stagehand integration, Tester Agent"
+      },
+      {
+        "id": 2,
+        "name": "Core PatchPilot Loop",
+        "status": "pending",
+        "description": "Triage, Fixer, Verifier agents and orchestration"
+      },
+      {
+        "id": 3,
+        "name": "Knowledge Base",
+        "status": "pending",
+        "description": "Redis vector store for learning from past bugs"
+      },
+      {
+        "id": 4,
+        "name": "Logging & Dashboard",
+        "status": "pending",
+        "description": "W&B Weave tracing and Marimo visualization"
+      },
+      {
+        "id": 5,
+        "name": "TraceTriage",
+        "status": "pending",
+        "description": "Self-improvement through trace analysis"
+      },
+      {
+        "id": 6,
+        "name": "RedTeam",
+        "status": "pending",
+        "description": "Adversarial testing and security hardening"
+      },
+      {
+        "id": 7,
+        "name": "Demo Preparation",
+        "status": "pending",
+        "description": "End-to-end validation and presentation"
+      }
+    ]
+  },
+  "agents": {
+    "tester": {
+      "description": "Runs E2E tests using Browserbase/Stagehand",
+      "skills": ["browserbase-stagehand"]
+    },
+    "triage": {
+      "description": "Diagnoses failures, queries knowledge base",
+      "skills": ["redis-vectorstore", "patchpilot-agents"]
+    },
+    "fixer": {
+      "description": "Generates code patches using LLM",
+      "skills": ["redis-vectorstore", "patchpilot-agents"]
+    },
+    "verifier": {
+      "description": "Applies patches, deploys, re-tests",
+      "skills": ["vercel-deployment", "patchpilot-agents"]
+    },
+    "orchestrator": {
+      "description": "Coordinates multi-agent workflow",
+      "skills": ["google-adk", "patchpilot-agents"]
+    }
+  },
+  "integrations": {
+    "browserbase": {
+      "purpose": "Cloud browser infrastructure for testing",
+      "docs": "https://docs.browserbase.com/"
+    },
+    "stagehand": {
+      "purpose": "AI-powered browser automation",
+      "docs": "https://www.stagehand.dev/"
+    },
+    "redis": {
+      "purpose": "Vector knowledge base for learning",
+      "docs": "https://redis.io/docs/stack/search/reference/vectors/"
+    },
+    "vercel": {
+      "purpose": "Instant deployment after fixes",
+      "docs": "https://vercel.com/docs"
+    },
+    "wandb-weave": {
+      "purpose": "Tracing and evaluation",
+      "docs": "https://wandb.ai/site/weave"
+    },
+    "google-adk": {
+      "purpose": "Multi-agent orchestration",
+      "docs": "https://cloud.google.com/agent-development-kit"
+    },
+    "marimo": {
+      "purpose": "Interactive analytics dashboard",
+      "docs": "https://marimo.io/"
+    }
+  },
+  "rules": {
+    "always": [
+      "Read CLAUDE.md at session start",
+      "Check TASKS.md before starting work",
+      "Write tests before marking tasks complete",
+      "Commit working code with descriptive messages",
+      "Keep secrets out of version control",
+      "Follow the defined tech stack",
+      "Log all agent actions to Weave",
+      "Store failure patterns in Redis",
+      "Verify fixes don't introduce regressions"
+    ],
+    "never": [
+      "Skip testing",
+      "Commit broken code",
+      "Add dependencies without justification",
+      "Ignore lint/type errors",
+      "Hardcode secrets or credentials",
+      "Deviate from phase scope without approval",
+      "Deploy untested patches",
+      "Ignore Redis lookup results",
+      "Skip Weave logging for agent runs"
+    ]
+  }
+}
