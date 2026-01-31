@@ -185,6 +185,8 @@ export class Orchestrator implements IOrchestrator {
 
       // Step 4: Verify the fix
       console.log('✔️ Verifying fix...');
+      // Pass failure report to verifier for learning
+      this.verifierAgent.setFailureReport(testResult.failureReport);
       const verifyResult = await this.verifierAgent.verify(patchResult.patch, testSpec);
 
       if (verifyResult.success) {

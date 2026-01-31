@@ -15,6 +15,7 @@ import type {
   PatchResult,
   FixerAgent as IFixerAgent,
 } from '@/lib/types';
+import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
 
 interface LLMPatchResponse {
   file: string;
@@ -27,8 +28,9 @@ interface LLMPatchResponse {
 export class FixerAgent implements IFixerAgent {
   private openai: OpenAI;
   private projectRoot: string;
+  private useRedis: boolean = true;
 
-  constructor(projectRoot: string = process.cwd()) {
+  constructor(projectRoot: string = process.cwd(), useRedis: boolean = true) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY environment variable is required');
@@ -36,6 +38,7 @@ export class FixerAgent implements IFixerAgent {
 
     this.openai = new OpenAI({ apiKey });
     this.projectRoot = projectRoot;
+    this.useRedis = useRedis;
   }
 
   /**
@@ -120,12 +123,51 @@ export class FixerAgent implements IFixerAgent {
   }
 
   /**
-   * Get similar fixes from knowledge base (placeholder)
+   * Get similar fixes from the Redis knowledge base
    */
-  private async getSimilarFixes(_diagnosis: DiagnosisReport): Promise<string> {
-    // TODO: Integrate with Redis in Phase 3
-    // For now, return empty string
-    return '';
+  private async getSimilarFixes(diagnosis: DiagnosisReport): Promise<string> {
+    // Check if Redis integration is enabled
+    if (!this.useRedis) {
+      return '';
+    }
+
+    try {
+      // Check if Redis is available
+      const available = await isRedisAvailable();
+      if (!available) {
+        console.log('Redis not available, skipping similar fixes lookup');
+        return '';
+      }
+
+      // Query the knowledge base for similar issues with fixes
+      const kb = getKnowledgeBase();
+      await kb.init();
+
+      // First, try to find similar failures
+      const similarFromDiagnosis = diagnosis.similarIssues
+        .filter((issue) => issue.diff)
+        .map((issue, i) => `### Fix ${i + 1} (Similarity: ${(issue.similarity * 100).toFixed(0)}%)\n${issue.fix}\n\`\`\`diff\n${issue.diff}\n\`\`\``)
+        .join('\n\n');
+
+      if (similarFromDiagnosis) {
+        console.log('Using similar fixes from diagnosis');
+        return similarFromDiagnosis;
+      }
+
+      // Fallback: get fix patterns for this failure type
+      const patterns = await kb.getFixPatterns(diagnosis.failureType, 3);
+      if (patterns.length > 0) {
+        console.log(`Found ${patterns.length} fix patterns for ${diagnosis.failureType}`);
+        return patterns
+          .map((p, i) => `### Fix Pattern ${i + 1}\n${p.description}\n\`\`\`diff\n${p.diff}\n\`\`\``)
+          .join('\n\n');
+      }
+
+      return '';
+    } catch (error) {
+      console.error('Error getting similar fixes:', error);
+      return '';
+    }
   }
 
   /**

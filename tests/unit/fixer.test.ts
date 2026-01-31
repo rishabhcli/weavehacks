@@ -71,7 +71,8 @@ describe('FixerAgent', () => {
 
   beforeEach(() => {
     process.env.OPENAI_API_KEY = 'test-key';
-    fixerAgent = new FixerAgent('/test/project');
+    // Disable Redis for unit tests (second param = useRedis)
+    fixerAgent = new FixerAgent('/test/project', false);
     vi.clearAllMocks();
   });
 
@@ -150,7 +151,7 @@ describe('FixerAgent', () => {
         ],
       });
 
-      const agent = new FixerAgent('/test');
+      const agent = new FixerAgent('/test', false);
       const result = await agent.generatePatch(diagnosis);
 
       // Should be rejected by validation

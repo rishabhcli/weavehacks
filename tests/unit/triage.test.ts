@@ -40,7 +40,8 @@ describe('TriageAgent', () => {
   beforeEach(() => {
     // Set required env var
     process.env.OPENAI_API_KEY = 'test-key';
-    triageAgent = new TriageAgent('/test/project');
+    // Disable Redis for unit tests (second param = useRedis)
+    triageAgent = new TriageAgent('/test/project', false);
   });
 
   describe('Failure Classification', () => {

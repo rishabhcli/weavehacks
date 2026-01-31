@@ -16,12 +16,14 @@ import type {
   SimilarIssue,
   TriageAgent as ITriageAgent,
 } from '@/lib/types';
+import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
 
 export class TriageAgent implements ITriageAgent {
   private openai: OpenAI;
   private projectRoot: string;
+  private useRedis: boolean = true;
 
-  constructor(projectRoot: string = process.cwd()) {
+  constructor(projectRoot: string = process.cwd(), useRedis: boolean = true) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY environment variable is required');
@@ -29,6 +31,7 @@ export class TriageAgent implements ITriageAgent {
 
     this.openai = new OpenAI({ apiKey });
     this.projectRoot = projectRoot;
+    this.useRedis = useRedis;
   }
 
   /**
@@ -229,12 +232,42 @@ What line number would this error most likely occur at? Just respond with a numb
   }
 
   /**
-   * Find similar issues from the knowledge base (placeholder)
+   * Find similar issues from the Redis knowledge base
    */
-  private async findSimilarIssues(_failure: FailureReport): Promise<SimilarIssue[]> {
-    // TODO: Integrate with Redis vector search in Phase 3
-    // For now, return empty array
-    return [];
+  private async findSimilarIssues(failure: FailureReport): Promise<SimilarIssue[]> {
+    // Check if Redis integration is enabled
+    if (!this.useRedis) {
+      return [];
+    }
+
+    try {
+      // Check if Redis is available
+      const available = await isRedisAvailable();
+      if (!available) {
+        console.log('Redis not available, skipping similar issues lookup');
+        return [];
+      }
+
+      // Query the knowledge base for similar failures
+      const kb = getKnowledgeBase();
+      await kb.init();
+
+      const similarIssues = await kb.findSimilar(
+        failure.error.message,
+        failure.error.stack,
+        3, // Top 3 similar issues
+        0.7 // Minimum similarity threshold
+      );
+
+      if (similarIssues.length > 0) {
+        console.log(`Found ${similarIssues.length} similar issues in knowledge base`);
+      }
+
+      return similarIssues;
+    } catch (error) {
+      console.error('Error finding similar issues:', error);
+      return [];
+    }
   }
 
   /**

@@ -13,21 +13,33 @@ import type {
   TestSpec,
   VerificationResult,
   DeploymentStatus,
+  FailureReport,
   VerifierAgent as IVerifierAgent,
 } from '@/lib/types';
 import { TesterAgent } from '@/agents/tester';
+import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
 
 export class VerifierAgent implements IVerifierAgent {
   private projectRoot: string;
   private testerAgent: TesterAgent;
   private vercelToken: string | undefined;
   private vercelProjectId: string | undefined;
+  private useRedis: boolean = true;
+  private currentFailureReport?: FailureReport;
 
-  constructor(projectRoot: string = process.cwd()) {
+  constructor(projectRoot: string = process.cwd(), useRedis: boolean = true) {
     this.projectRoot = projectRoot;
     this.testerAgent = new TesterAgent();
     this.vercelToken = process.env.VERCEL_TOKEN;
     this.vercelProjectId = process.env.VERCEL_PROJECT_ID;
+    this.useRedis = useRedis;
+  }
+
+  /**
+   * Set the current failure report for learning
+   */
+  setFailureReport(failure: FailureReport): void {
+    this.currentFailureReport = failure;
   }
 
   /**
@@ -90,6 +102,10 @@ export class VerifierAgent implements IVerifierAgent {
         if (testResult.passed) {
           // Clean up backup
           this.cleanupBackup(backupPath);
+
+          // Store successful fix in knowledge base for learning
+          await this.recordFixInKnowledgeBase(patch, true);
+
           return {
             success: true,
             deploymentUrl,
@@ -97,6 +113,10 @@ export class VerifierAgent implements IVerifierAgent {
           };
         } else {
           await this.restoreFile(patch.file, backupPath);
+
+          // Store failed fix attempt for learning
+          await this.recordFixInKnowledgeBase(patch, false);
+
           return {
             success: false,
             deploymentUrl,
@@ -285,6 +305,37 @@ export class VerifierAgent implements IVerifierAgent {
     }
 
     throw new Error('Deployment timed out');
+  }
+
+  /**
+   * Record a fix attempt in the knowledge base for learning
+   */
+  private async recordFixInKnowledgeBase(patch: Patch, success: boolean): Promise<void> {
+    if (!this.useRedis || !this.currentFailureReport) {
+      return;
+    }
+
+    try {
+      const available = await isRedisAvailable();
+      if (!available) {
+        console.log('Redis not available, skipping knowledge base update');
+        return;
+      }
+
+      const kb = getKnowledgeBase();
+      await kb.init();
+
+      // Store the failure with its fix
+      const failureId = await kb.storeFailure(this.currentFailureReport, patch, success);
+
+      if (success) {
+        console.log(`Stored successful fix in knowledge base: ${failureId}`);
+      } else {
+        console.log(`Stored failed fix attempt in knowledge base: ${failureId}`);
+      }
+    } catch (error) {
+      console.error('Error recording fix in knowledge base:', error);
+    }
   }
 }
 
