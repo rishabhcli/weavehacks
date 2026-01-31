@@ -8,7 +8,7 @@ This file tracks all project tasks organized by phase. Update this file as work 
 
 | ID | Task | Status | Assignee | Notes |
 |----|------|--------|----------|-------|
-| P0-001 | Define PRD and architecture | In Progress | - | Core planning |
+| P1-004 | Implement Tester Agent | In Progress | - | Testing with demo app |
 
 ---
 
@@ -26,18 +26,17 @@ This file tracks all project tasks organized by phase. Update this file as work 
   - Architecture diagram complete
   - Phase roadmap established
 
-- [ ] **P0-003**: Set up development environment
+- [x] **P0-003**: Set up development environment
   - Initialize pnpm workspace
   - Configure TypeScript
   - Set up ESLint and Prettier
   - Create .env.example with all variables
 
-- [ ] **P0-004**: Create Next.js demo app with intentional bugs
+- [x] **P0-004**: Create Next.js demo app with intentional bugs
   - Simple app with 2-3 pages
-  - Bug 1: Button missing onClick handler
-  - Bug 2: Form hitting wrong API endpoint
-  - Bug 3: JavaScript error from typo
-  - Dependencies: P0-003
+  - Bug 1: Button missing onClick handler (cart/page.tsx)
+  - Bug 2: API route calling non-existent /api/payments (api/checkout/route.ts)
+  - Bug 3: Null reference on preferences.newsletter (signup/page.tsx)
 
 - [ ] **P0-005**: Configure CI/CD pipeline
   - GitHub Actions for lint/test
@@ -46,30 +45,28 @@ This file tracks all project tasks organized by phase. Update this file as work 
 
 ### Phase 1: Test Environment (Browserbase + Stagehand)
 
-- [ ] **P1-001**: Set up Browserbase account and integration
-  - Create account and get API keys
-  - Install @browserbase/sdk
+- [x] **P1-001**: Set up Browserbase account and integration
+  - Install @browserbasehq/sdk
   - Configure project settings
-  - Dependencies: P0-003
+  - Created lib/browserbase/client.ts
 
-- [ ] **P1-002**: Integrate Stagehand SDK
-  - Install stagehand package
+- [x] **P1-002**: Integrate Stagehand SDK
+  - Install @browserbasehq/stagehand package
   - Configure with Browserbase
-  - Test basic page navigation
-  - Dependencies: P1-001
+  - Updated to use Stagehand v3 API
 
-- [ ] **P1-003**: Write critical user flow tests
-  - Test 1: "Sign up flow - fill form, submit, expect welcome"
-  - Test 2: "Login flow - enter credentials, click login, expect dashboard"
-  - Test 3: "Checkout flow - add item, checkout, expect confirmation"
-  - Dependencies: P1-002, P0-004
+- [x] **P1-003**: Write critical user flow tests
+  - Test 1: "Checkout flow - click checkout, expect confirmation" (test-checkout-001)
+  - Test 2: "Checkout with payment - add item, checkout" (test-checkout-002)
+  - Test 3: "Signup flow - fill form, submit, expect welcome" (test-signup-001)
+  - Created tests/e2e/specs.ts
 
-- [ ] **P1-004**: Implement Tester Agent
+- [~] **P1-004**: Implement Tester Agent
   - Execute tests via Stagehand
   - Capture screenshots on failure
   - Log errors and DOM state
   - Return structured failure reports
-  - Dependencies: P1-003
+  - Created agents/tester/index.ts
 
 ### Phase 2: Core PatchPilot Loop
 
