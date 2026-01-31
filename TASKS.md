@@ -8,7 +8,8 @@ This file tracks all project tasks organized by phase. Update this file as work 
 
 | ID | Task | Status | Assignee | Notes |
 |----|------|--------|----------|-------|
-| P1-004 | Implement Tester Agent | In Progress | - | Testing with demo app |
+| P1-005 | Verify Bug Detection | Blocked | - | Requires API credentials |
+| P2-005 | End-to-end loop validation | Blocked | - | Requires API credentials |
 
 ---
 
@@ -78,40 +79,39 @@ This file tracks all project tasks organized by phase. Update this file as work 
 
 ### Phase 2: Core PatchPilot Loop
 
-- [ ] **P2-001**: Implement Triage Agent
-  - Parse error messages and stack traces
-  - Capture minimal reproduction steps
-  - Identify failure type (UI bug, backend error, etc.)
-  - Generate diagnosis report
-  - Dependencies: P1-004
+- [x] **P2-001**: Implement Triage Agent
+  - Parse error messages and stack traces ✅
+  - Classify failure types (UI_BUG, BACKEND_ERROR, DATA_ERROR, TEST_FLAKY) ✅
+  - Localize bug to file/line ✅
+  - Generate diagnosis with LLM ✅
+  - Created agents/triage/index.ts
 
-- [ ] **P2-002**: Implement Fixer Agent
-  - Accept diagnosis from Triage Agent
-  - Use LLM to generate code patch
-  - Localize bug in codebase
-  - Output git diff or modified file
-  - Dependencies: P2-001
+- [x] **P2-002**: Implement Fixer Agent
+  - Accept diagnosis from Triage Agent ✅
+  - Use LLM to generate code patch ✅
+  - Validate patch safety ✅
+  - Generate unified diff format ✅
+  - Created agents/fixer/index.ts
 
-- [ ] **P2-003**: Implement Verifier Agent
-  - Apply patch to codebase
-  - Trigger Vercel deployment
-  - Wait for deployment to complete
-  - Re-run failing test
-  - Report pass/fail status
-  - Dependencies: P2-002
+- [x] **P2-003**: Implement Verifier Agent
+  - Apply patch to codebase ✅
+  - Backup and restore on failure ✅
+  - Syntax validation ✅
+  - Vercel deployment integration ✅
+  - Created agents/verifier/index.ts
 
-- [ ] **P2-004**: Create basic orchestration script
-  - Sequence: Tester → Triage → Fixer → Verifier
-  - Handle iteration loop
-  - Set max iterations limit
-  - Log each step
-  - Dependencies: P2-003
+- [x] **P2-004**: Create basic orchestration script
+  - Sequence: Tester → Triage → Fixer → Verifier ✅
+  - Handle iteration loop ✅
+  - Max iterations configurable ✅
+  - Progress logging ✅
+  - Created agents/orchestrator/index.ts
 
 - [ ] **P2-005**: End-to-end loop validation
   - Run full loop on known bug
   - Verify bug gets fixed
   - Document iteration count
-  - Dependencies: P2-004
+  - **BLOCKED**: Requires API credentials (BROWSERBASE_API_KEY, OPENAI_API_KEY)
 
 ### Phase 3: Knowledge Base (Redis)
 
