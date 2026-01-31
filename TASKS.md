@@ -115,70 +115,69 @@ This file tracks all project tasks organized by phase. Update this file as work 
 
 ### Phase 3: Knowledge Base (Redis)
 
-- [ ] **P3-001**: Set up Redis with vector search
-  - Deploy Redis Stack or use Redis Cloud
-  - Configure vector index for embeddings
-  - Test basic CRUD operations
-  - Dependencies: P0-003
+- [x] **P3-001**: Set up Redis with vector search
+  - Deploy Redis Stack or use Redis Cloud ✅
+  - Configure vector index for embeddings ✅
+  - Test basic CRUD operations ✅
+  - Created lib/redis/client.ts, embeddings.ts, index.ts
 
-- [ ] **P3-002**: Implement failure trace embedding
-  - Generate embeddings for error messages
-  - Store with metadata (file, line, fix applied)
-  - Create embedding pipeline
-  - Dependencies: P3-001
+- [x] **P3-002**: Implement failure trace embedding
+  - Generate embeddings for error messages ✅
+  - Store with metadata (file, line, fix applied) ✅
+  - Create embedding pipeline ✅
+  - Using OpenAI text-embedding-3-small (1536 dims)
 
-- [ ] **P3-003**: Create semantic lookup for similar issues
-  - Query by embedding similarity
-  - Return top-k matching failures
-  - Include fix descriptions in results
-  - Dependencies: P3-002
+- [x] **P3-003**: Create semantic lookup for similar issues
+  - Query by embedding similarity ✅
+  - Return top-k matching failures ✅
+  - Include fix descriptions in results ✅
+  - KNN search with HNSW index
 
-- [ ] **P3-004**: Integrate Redis with Triage Agent
-  - Query Redis on each failure
-  - Include similar past fixes in diagnosis
-  - Guide Fixer Agent with patterns
-  - Dependencies: P3-003, P2-001
+- [x] **P3-004**: Integrate Redis with Triage Agent
+  - Query Redis on each failure ✅
+  - Include similar past fixes in diagnosis ✅
+  - Guide Fixer Agent with patterns ✅
+  - Added findSimilarIssues() to TriageAgent
 
-- [ ] **P3-005**: Integrate Redis with Fixer Agent
-  - Retrieve successful fix patterns
-  - Use as context for LLM patch generation
-  - Store new successful fixes
-  - Dependencies: P3-004, P2-002
+- [x] **P3-005**: Integrate Redis with Fixer Agent
+  - Retrieve successful fix patterns ✅
+  - Use as context for LLM patch generation ✅
+  - Store new successful fixes ✅
+  - Added getSimilarFixes() and recordFix in Verifier
 
 ### Phase 4: Logging & Dashboard (Weave + Marimo)
 
-- [ ] **P4-001**: Integrate W&B Weave for tracing
-  - Install weave SDK
-  - Configure project and API key
-  - Wrap agent functions with tracing
-  - Dependencies: P2-004
+- [x] **P4-001**: Integrate W&B Weave for tracing
+  - Install weave SDK ✅
+  - Configure project and API key ✅
+  - Wrap agent functions with tracing ✅
+  - Created lib/weave/index.ts, metrics.ts, tracing.ts
 
-- [ ] **P4-002**: Log all agent steps and metrics
-  - Test start/end times
-  - Error messages and diagnoses
-  - Patch content
-  - Pass/fail results
-  - Iteration counts
-  - Dependencies: P4-001
+- [x] **P4-002**: Log all agent steps and metrics
+  - Test start/end times ✅
+  - Error messages and diagnoses ✅
+  - Patch content ✅
+  - Pass/fail results ✅
+  - Iteration counts ✅
+  - Orchestrator logs RunMetrics after each run
 
-- [ ] **P4-003**: Create Marimo dashboard
-  - Install marimo
-  - Connect to Weave logs
-  - Create basic layout
-  - Dependencies: P4-002
+- [x] **P4-003**: Create Marimo dashboard
+  - Install marimo ✅
+  - Connect to Weave logs ✅
+  - Create basic layout ✅
+  - Created dashboard/app.py with reactive cells
 
-- [ ] **P4-004**: Visualize key metrics
-  - Pass rate over time chart
-  - Time-to-fix histogram
-  - Bug types distribution
-  - Iterations per bug
-  - Dependencies: P4-003
+- [x] **P4-004**: Visualize key metrics
+  - Pass rate over time chart ✅
+  - Time-to-fix bar chart ✅
+  - Bug types distribution (pie chart) ✅
+  - Iterations per bug (area chart) ✅
 
-- [ ] **P4-005**: Create live leaderboard
-  - Tests passed vs total
-  - Current iteration status
-  - Recent fixes applied
-  - Dependencies: P4-004
+- [x] **P4-005**: Create live leaderboard
+  - Tests passed vs total ✅
+  - Current iteration status ✅
+  - Recent fixes table ✅
+  - Before/After comparison table ✅
 
 ### Phase 5: TraceTriage & Self-Improvement
 

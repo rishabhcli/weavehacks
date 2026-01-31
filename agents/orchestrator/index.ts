@@ -5,6 +5,7 @@
  * Tester → Triage → Fixer → Verifier → (repeat if needed)
  *
  * Implements the core self-healing QA agent workflow.
+ * Instrumented with W&B Weave for observability.
  */
 
 import type {
@@ -18,6 +19,8 @@ import { TesterAgent } from '@/agents/tester';
 import { TriageAgent } from '@/agents/triage';
 import { FixerAgent } from '@/agents/fixer';
 import { VerifierAgent } from '@/agents/verifier';
+import { initWeave, op, isWeaveEnabled } from '@/lib/weave';
+import { logRunMetrics, type RunMetrics } from '@/lib/weave/metrics';
 
 interface IterationResult {
   testId: string;
@@ -44,8 +47,13 @@ export class Orchestrator implements IOrchestrator {
 
   /**
    * Run the complete PatchPilot loop
+   * Traced by W&B Weave for observability
    */
-  async run(config: OrchestratorConfig): Promise<OrchestratorResult> {
+  run = isWeaveEnabled()
+    ? op(this._run.bind(this), { name: 'Orchestrator.run' })
+    : this._run.bind(this);
+
+  private async _run(config: OrchestratorConfig): Promise<OrchestratorResult> {
     const startTime = Date.now();
     const allPatches: Patch[] = [];
     let totalIterations = 0;
@@ -99,6 +107,9 @@ export class Orchestrator implements IOrchestrator {
 
       const totalDuration = Date.now() - startTime;
 
+      const passCount = finalResults.filter((r) => r.passed).length;
+      const failCount = finalResults.filter((r) => !r.passed).length;
+
       // Print summary
       this.printSummary({
         success: allPassed,
@@ -106,8 +117,22 @@ export class Orchestrator implements IOrchestrator {
         patches: allPatches,
         duration: totalDuration,
         testCount: config.testSpecs.length,
-        passCount: finalResults.filter((r) => r.passed).length,
+        passCount,
       });
+
+      // Log metrics to Weave
+      const metrics: RunMetrics = {
+        testsTotal: config.testSpecs.length,
+        testsPassed: passCount,
+        testsFailed: failCount,
+        bugsFound: allPatches.length,
+        bugsFixed: allPassed ? allPatches.length : allPatches.length - failCount,
+        iterationsTotal: totalIterations,
+        durationMs: totalDuration,
+        avgFixTimeMs: allPatches.length > 0 ? totalDuration / allPatches.length : 0,
+        success: allPassed,
+      };
+      logRunMetrics(metrics);
 
       // Convert last result to TestResult format
       const lastResult = finalResults[finalResults.length - 1];
@@ -263,6 +288,9 @@ export class Orchestrator implements IOrchestrator {
 async function main() {
   const targetUrl = process.env.TARGET_URL || 'http://localhost:3000';
   const maxIterations = parseInt(process.env.MAX_ITERATIONS || '5', 10);
+
+  // Initialize Weave for observability
+  await initWeave('patchpilot');
 
   // Import test specs
   const { allTestSpecs } = await import('@/tests/e2e/specs');

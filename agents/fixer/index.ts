@@ -3,6 +3,8 @@
  *
  * Generates code patches to fix bugs based on diagnosis reports.
  * Uses LLM to generate minimal, targeted fixes.
+ *
+ * Instrumented with W&B Weave for observability.
  */
 
 import OpenAI from 'openai';
@@ -16,6 +18,7 @@ import type {
   FixerAgent as IFixerAgent,
 } from '@/lib/types';
 import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
+import { op, isWeaveEnabled } from '@/lib/weave';
 
 interface LLMPatchResponse {
   file: string;
@@ -43,8 +46,13 @@ export class FixerAgent implements IFixerAgent {
 
   /**
    * Generate a patch to fix the diagnosed bug
+   * Traced by W&B Weave for observability
    */
-  async generatePatch(diagnosis: DiagnosisReport): Promise<PatchResult> {
+  generatePatch = isWeaveEnabled()
+    ? op(this._generatePatch.bind(this), { name: 'FixerAgent.generatePatch' })
+    : this._generatePatch.bind(this);
+
+  private async _generatePatch(diagnosis: DiagnosisReport): Promise<PatchResult> {
     try {
       // 1. Read the source file
       const sourceCode = await this.readSourceFile(diagnosis.localization.file);

@@ -3,10 +3,13 @@
  *
  * Executes E2E tests using Browserbase and Stagehand.
  * Captures detailed failure reports including screenshots, DOM state, and console logs.
+ *
+ * Instrumented with W&B Weave for observability.
  */
 
 import { Stagehand, type Page } from '@browserbasehq/stagehand';
 import type { TestSpec, TestResult, FailureReport, ConsoleLog } from '@/lib/types';
+import { op, isWeaveEnabled } from '@/lib/weave';
 
 export class TesterAgent {
   private stagehand: Stagehand | null = null;
@@ -50,8 +53,13 @@ export class TesterAgent {
 
   /**
    * Run a test specification
+   * Traced by W&B Weave for observability
    */
-  async runTest(spec: TestSpec): Promise<TestResult> {
+  runTest = isWeaveEnabled()
+    ? op(this._runTest.bind(this), { name: 'TesterAgent.runTest' })
+    : this._runTest.bind(this);
+
+  private async _runTest(spec: TestSpec): Promise<TestResult> {
     if (!this.stagehand) {
       await this.init();
     }

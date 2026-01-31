@@ -3,6 +3,8 @@
  *
  * Applies patches, deploys to Vercel, and verifies fixes work.
  * Re-runs the failing test to confirm the bug is fixed.
+ *
+ * Instrumented with W&B Weave for observability.
  */
 
 import { execSync } from 'child_process';
@@ -18,6 +20,7 @@ import type {
 } from '@/lib/types';
 import { TesterAgent } from '@/agents/tester';
 import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
+import { op, isWeaveEnabled } from '@/lib/weave';
 
 export class VerifierAgent implements IVerifierAgent {
   private projectRoot: string;
@@ -44,8 +47,13 @@ export class VerifierAgent implements IVerifierAgent {
 
   /**
    * Verify a patch by applying it, deploying, and re-running tests
+   * Traced by W&B Weave for observability
    */
-  async verify(patch: Patch, testSpec: TestSpec): Promise<VerificationResult> {
+  verify = isWeaveEnabled()
+    ? op(this._verify.bind(this), { name: 'VerifierAgent.verify' })
+    : this._verify.bind(this);
+
+  private async _verify(patch: Patch, testSpec: TestSpec): Promise<VerificationResult> {
     try {
       // 1. Create a backup of the original file
       const backupPath = await this.backupFile(patch.file);

@@ -4,6 +4,8 @@
  * Diagnoses failures and identifies root causes.
  * Classifies failure types, localizes bugs in the codebase,
  * and queries the knowledge base for similar issues.
+ *
+ * Instrumented with W&B Weave for observability.
  */
 
 import OpenAI from 'openai';
@@ -17,6 +19,7 @@ import type {
   TriageAgent as ITriageAgent,
 } from '@/lib/types';
 import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
+import { op, isWeaveEnabled } from '@/lib/weave';
 
 export class TriageAgent implements ITriageAgent {
   private openai: OpenAI;
@@ -36,8 +39,13 @@ export class TriageAgent implements ITriageAgent {
 
   /**
    * Diagnose a failure and generate a diagnosis report
+   * Traced by W&B Weave for observability
    */
-  async diagnose(failure: FailureReport): Promise<DiagnosisReport> {
+  diagnose = isWeaveEnabled()
+    ? op(this._diagnose.bind(this), { name: 'TriageAgent.diagnose' })
+    : this._diagnose.bind(this);
+
+  private async _diagnose(failure: FailureReport): Promise<DiagnosisReport> {
     // 1. Classify the failure type
     const failureType = this.classifyFailure(failure);
 
