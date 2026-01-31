@@ -62,11 +62,19 @@ This file tracks all project tasks organized by phase. Update this file as work 
   - Created tests/e2e/specs.ts
 
 - [~] **P1-004**: Implement Tester Agent
-  - Execute tests via Stagehand
-  - Capture screenshots on failure
-  - Log errors and DOM state
-  - Return structured failure reports
+  - Execute tests via Stagehand ✅
+  - Capture screenshots on failure ✅
+  - Log errors and DOM state ✅
+  - Return structured failure reports ✅
   - Created agents/tester/index.ts
+  - **BLOCKED**: Requires BROWSERBASE_API_KEY and OPENAI_API_KEY to validate
+
+- [ ] **P1-005**: Verify Bug Detection (requires API keys)
+  - Run tests against demo app
+  - Verify Test 1 detects Bug 1 (missing onClick)
+  - Verify Test 2 detects Bug 2 (wrong API route)
+  - Verify Test 3 detects Bug 3 (null reference)
+  - Dependencies: P1-004 + API credentials
 
 ### Phase 2: Core PatchPilot Loop
 
