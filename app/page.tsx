@@ -43,7 +43,7 @@ export default function LandingPage() {
             <span className="font-semibold text-lg">PatchPilot</span>
           </div>
           <a
-            href="https://github.com/rishabh-bansal/PatchPilot"
+            href="https://github.com/rishabhcli/weavehacks"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
