@@ -395,10 +395,7 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
-<<<<<<< Current (Your changes)
-=======
 
->>>>>>> Incoming (Background Agent changes)
       <VoiceAssistant />
     </div>
   );

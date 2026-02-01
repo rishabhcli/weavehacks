@@ -7,42 +7,17 @@
  * - Enables debugging and evaluation
  */
 
-<<<<<<< Current (Your changes)
-export {
-  initWeave,
-  isWeaveEnabled,
-  getWeaveClient,
-  tracedOp,
-  weave,
-  op,
-} from './core';
-
-// Re-export Weave modules for deep integration
-export { weaveInference, weaveInferenceWithJson } from './inference';
-export type { InferenceOptions } from './inference';
-export { queryRecentFailures, getTraceDetails, analyzeFailurePatterns } from './mcp-client';
-export type { TraceSummary } from './mcp-client';
-export { selfImprove } from './self-improve';
-export {
-  runEvaluation,
-  createDatasetFromRuns,
-  fixSuccessScorer,
-  efficiencyScorer,
-  knowledgeReuseScorer,
-  timeToFixScorer,
-} from './evaluations';
-export type { ScorerFn, EvalRow } from './evaluations';
-=======
 import * as weave from 'weave';
 import type { WeaveClient } from 'weave';
 
+// Local state for initialization
 let initialized = false;
 let weaveEnabled = true;
 let weaveClient: WeaveClient | null = null;
 
 /**
- * Initialize Weave with the PatchPilot project
- * Enhanced with project metadata for WeaveHacks observability
+ * Initialize Weave with the PatchPilot project.
+ * Enhanced with project metadata for WeaveHacks observability.
  */
 export async function initWeave(projectName: string = 'patchpilot'): Promise<void> {
   if (initialized) {
@@ -77,22 +52,22 @@ export async function initWeave(projectName: string = 'patchpilot'): Promise<voi
 }
 
 /**
- * Check if Weave is enabled
+ * Check if Weave is enabled.
  */
 export function isWeaveEnabled(): boolean {
   return weaveEnabled && initialized;
 }
 
 /**
- * Get the Weave client (if initialized)
+ * Get the Weave client (if initialized).
  */
 export function getWeaveClient(): WeaveClient | null {
   return weaveClient;
 }
 
 /**
- * Create a traced operation
- * Wraps a function to track inputs, outputs, and execution time in Weave
+ * Create a traced operation.
+ * Wraps a function to track inputs, outputs, and execution time in Weave.
  */
 export function tracedOp<T extends (...args: unknown[]) => unknown>(
   fn: T,
@@ -101,16 +76,30 @@ export function tracedOp<T extends (...args: unknown[]) => unknown>(
   if (!weaveEnabled) {
     return fn;
   }
-
   // Use weave.op to wrap the function
   return weave.op(fn, { name: name || fn.name }) as T;
 }
 
 /**
- * Weave reference for direct access
+ * Weave reference for direct access.
  */
 export { weave };
 
 // Re-export common weave functions
 export const op = weave.op;
->>>>>>> Incoming (Background Agent changes)
+
+// Re-export Weave modules for deep integration
+export { weaveInference, weaveInferenceWithJson } from './inference';
+export type { InferenceOptions } from './inference';
+export { queryRecentFailures, getTraceDetails, analyzeFailurePatterns } from './mcp-client';
+export type { TraceSummary } from './mcp-client';
+export { selfImprove } from './self-improve';
+export {
+  runEvaluation,
+  createDatasetFromRuns,
+  fixSuccessScorer,
+  efficiencyScorer,
+  knowledgeReuseScorer,
+  timeToFixScorer,
+} from './evaluations';
+export type { ScorerFn, EvalRow } from './evaluations';
