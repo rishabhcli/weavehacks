@@ -7,18 +7,16 @@ const SECRET_KEY = process.env.SESSION_SECRET || 'default-dev-secret-do-not-use-
 const key = new TextEncoder().encode(SECRET_KEY);
 
 export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  
   // Public paths that don't require auth
   const publicPaths = [
     '/_next',
     '/api/auth',
     '/static',
     '/favicon.ico',
-    '/demo', // Demo app is public? Maybe. Or maybe we want to protect it?
-             // Usually demo app is the target, so it shouldn't be behind dashboard auth.
-             // But let's assume /dashboard is the protected area.
+    '/demo',
   ];
-
-  const path = request.nextUrl.pathname;
 
   // Allow public paths
   if (publicPaths.some(p => path.startsWith(p)) || path === '/') {
@@ -32,28 +30,31 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  console.log('=== Middleware ===');
+  console.log('Path:', path);
+  console.log('All cookies:', request.cookies.getAll().map(c => c.name));
+
   // Verify session
   const sessionToken = request.cookies.get(SESSION_COOKIE)?.value;
 
+  console.log('Session token present:', !!sessionToken);
+  console.log('Session token length:', sessionToken?.length);
+
   if (!sessionToken) {
+    console.log('NO SESSION TOKEN - redirecting to /');
     if (path.startsWith('/api')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     } else {
-      // Redirect to settings/login page
-      // Assuming /dashboard/settings is where they connect? 
-      // Or if they are trying to access /dashboard/runs without auth, maybe send them to /?
-      // For now, redirect to home page or a login page if it exists.
-      // There isn't a dedicated login page, but there is "Connect GitHub".
-      
-      // Let's redirect to '/' if not authenticated, as that seems to be the entry point.
       return NextResponse.redirect(new URL('/', request.url));
     }
   }
 
   try {
-    await jwtVerify(sessionToken, key, { algorithms: ['HS256'] });
+    const verified = await jwtVerify(sessionToken, key, { algorithms: ['HS256'] });
+    console.log('JWT VERIFIED - user:', (verified.payload as any)?.user?.login);
     return NextResponse.next();
   } catch (error) {
+    console.log('JWT VERIFICATION FAILED:', error);
     // Invalid token
     if (path.startsWith('/api')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -1,5 +1,3 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { Github, ShieldCheck, Zap } from 'lucide-react';
 
 export default function LandingPage() {
@@ -23,12 +21,13 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <Button asChild size="lg" className="w-full gap-2">
-              <a href="/api/auth/github">
-                <Github className="h-5 w-5" />
-                Connect with GitHub
-              </a>
-            </Button>
+            <a
+              href="/api/auth/github"
+              className="inline-flex items-center justify-center gap-2 h-11 px-8 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 w-full"
+            >
+              <Github className="h-5 w-5" />
+              Connect with GitHub
+            </a>
             
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="h-3 w-3" />
