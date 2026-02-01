@@ -445,17 +445,17 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
             {/* Max Iterations */}
             <div className="grid gap-2">
               <Label htmlFor="iterations">Max Fix Iterations</Label>
-              <Select value={maxIterations} onValueChange={setMaxIterations}>
-                <SelectTrigger id="iterations">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 iteration</SelectItem>
-                  <SelectItem value="3">3 iterations</SelectItem>
-                  <SelectItem value="5">5 iterations (recommended)</SelectItem>
-                  <SelectItem value="10">10 iterations</SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                id="iterations"
+                value={maxIterations}
+                onChange={(e) => setMaxIterations(e.target.value)}
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="1">1 iteration</option>
+                <option value="3">3 iterations</option>
+                <option value="5">5 iterations (recommended)</option>
+                <option value="10">10 iterations</option>
+              </select>
               <p className="text-xs text-muted-foreground">
                 How many times to retry fixing each failing test
               </p>
