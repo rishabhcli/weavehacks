@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import '../globals.css';
 
 interface UserData {
   name: string;
@@ -60,8 +59,7 @@ export default function SignupPage() {
 
       // BUG 3: This will throw "Cannot read properties of undefined (reading 'newsletter')"
       // because userData.preferences is undefined
-      // @ts-expect-error - Intentional bug: accessing property on undefined
-      const welcomeMessage = `Welcome ${userData.name}! Newsletter subscription: ${userData.preferences.newsletter}`;
+      const welcomeMessage = `Welcome ${userData.name}! Newsletter subscription: ${userData.preferences?.newsletter ?? false}`;
 
       // eslint-disable-next-line no-console
       console.log(welcomeMessage);
@@ -77,7 +75,7 @@ export default function SignupPage() {
       <div className="card" style={{ maxWidth: '400px' }}>
         <h2>Welcome!</h2>
         <p className="success">Account created successfully!</p>
-        <a href="/">
+        <a href="/demo">
           <button>Start Shopping</button>
         </a>
       </div>
@@ -153,7 +151,7 @@ export default function SignupPage() {
       </form>
 
       <p style={{ textAlign: 'center', marginTop: '20px' }}>
-        Already have an account? <a href="/">Sign in</a>
+        Already have an account? <a href="/demo">Sign in</a>
       </p>
     </div>
   );

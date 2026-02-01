@@ -13,6 +13,7 @@ import type {
   OrchestratorResult,
   TestSpec,
   Patch,
+  DiagnosisReport,
   Orchestrator as IOrchestrator,
 } from '@/lib/types';
 import { TesterAgent } from '@/agents/tester';
@@ -21,6 +22,9 @@ import { FixerAgent } from '@/agents/fixer';
 import { VerifierAgent } from '@/agents/verifier';
 import { initWeave, op, isWeaveEnabled } from '@/lib/weave';
 import { logRunMetrics, type RunMetrics } from '@/lib/weave/metrics';
+
+// Callback for when patches are generated (used in cloud mode to create PRs)
+export type PatchGeneratedCallback = (patch: Patch, diagnosis: DiagnosisReport) => Promise<void>;
 
 interface IterationResult {
   testId: string;
@@ -38,11 +42,16 @@ export class Orchestrator implements IOrchestrator {
   private fixerAgent: FixerAgent;
   private verifierAgent: VerifierAgent;
 
+  // Optional callback for cloud mode - creates PRs when patches are generated
+  public onPatchGenerated?: PatchGeneratedCallback;
+
   constructor(projectRoot: string = process.cwd()) {
     this.testerAgent = new TesterAgent();
     this.triageAgent = new TriageAgent(projectRoot);
     this.fixerAgent = new FixerAgent(projectRoot);
     this.verifierAgent = new VerifierAgent(projectRoot);
+    // Share tester agent with verifier to avoid concurrent session limits
+    this.verifierAgent.setTesterAgent(this.testerAgent);
   }
 
   /**
@@ -208,6 +217,11 @@ export class Orchestrator implements IOrchestrator {
       console.log(`   Patch: ${patchResult.patch.description}`);
       patches.push(patchResult.patch);
 
+      // Call callback for cloud mode (creates PRs)
+      if (this.onPatchGenerated) {
+        await this.onPatchGenerated(patchResult.patch, diagnosis);
+      }
+
       // Step 4: Verify the fix
       console.log('✔️ Verifying fix...');
       // Pass failure report to verifier for learning
@@ -306,9 +320,13 @@ async function main() {
   process.exit(result.success ? 0 : 1);
 }
 
-main().catch((error) => {
-  console.error('Fatal error:', error);
-  process.exit(1);
-});
+// Only run main() when this file is executed directly, not when imported
+const isDirectRun = process.argv[1]?.includes('orchestrator');
+if (isDirectRun) {
+  main().catch((error) => {
+    console.error('Fatal error:', error);
+    process.exit(1);
+  });
+}
 
 export default Orchestrator;

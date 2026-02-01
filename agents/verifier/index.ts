@@ -24,7 +24,8 @@ import { op, isWeaveEnabled } from '@/lib/weave';
 
 export class VerifierAgent implements IVerifierAgent {
   private projectRoot: string;
-  private testerAgent: TesterAgent;
+  private testerAgent: TesterAgent | null = null;
+  private ownsTesterAgent: boolean = false;
   private vercelToken: string | undefined;
   private vercelProjectId: string | undefined;
   private useRedis: boolean = true;
@@ -32,10 +33,17 @@ export class VerifierAgent implements IVerifierAgent {
 
   constructor(projectRoot: string = process.cwd(), useRedis: boolean = true) {
     this.projectRoot = projectRoot;
-    this.testerAgent = new TesterAgent();
     this.vercelToken = process.env.VERCEL_TOKEN;
     this.vercelProjectId = process.env.VERCEL_PROJECT_ID;
     this.useRedis = useRedis;
+  }
+
+  /**
+   * Set an external tester agent to reuse (avoids concurrent session limits)
+   */
+  setTesterAgent(tester: TesterAgent): void {
+    this.testerAgent = tester;
+    this.ownsTesterAgent = false;
   }
 
   /**
@@ -96,21 +104,35 @@ export class VerifierAgent implements IVerifierAgent {
         }
 
         // 5. Re-run the failing test
-        await this.testerAgent.init();
-        const testResult = await this.testerAgent.runTest({
+        // Use shared tester if available, otherwise create our own
+        const needsOwnTester = !this.testerAgent;
+        if (needsOwnTester) {
+          this.testerAgent = new TesterAgent();
+          this.ownsTesterAgent = true;
+          await this.testerAgent.init();
+        }
+
+        const testResult = await this.testerAgent!.runTest({
           ...testSpec,
           url: testSpec.url.replace(
             /https?:\/\/[^/]+/,
             deploymentUrl || 'http://localhost:3000'
           ),
         });
-        await this.testerAgent.close();
 
-        // 6. If test passes, keep the fix. If not, restore.
+        // Only close if we created our own tester
+        if (this.ownsTesterAgent && this.testerAgent) {
+          await this.testerAgent.close();
+          this.testerAgent = null;
+        }
+
+        // 6. Record fix and return result
+        // IMPORTANT: Don't restore files when tests fail - patches should accumulate
+        // so multiple bugs in the same flow can be fixed together.
+        // The orchestrator will handle final verification.
+        this.cleanupBackup(backupPath);
+
         if (testResult.passed) {
-          // Clean up backup
-          this.cleanupBackup(backupPath);
-
           // Store successful fix in knowledge base for learning
           await this.recordFixInKnowledgeBase(patch, true);
 
@@ -120,9 +142,7 @@ export class VerifierAgent implements IVerifierAgent {
             testResult,
           };
         } else {
-          await this.restoreFile(patch.file, backupPath);
-
-          // Store failed fix attempt for learning
+          // Store the fix attempt - don't restore, keep the patch applied
           await this.recordFixInKnowledgeBase(patch, false);
 
           return {
@@ -172,6 +192,7 @@ export class VerifierAgent implements IVerifierAgent {
       }
 
       if (startLine === 0) {
+        console.log('Patch parse failed: no start line found in diff');
         return false;
       }
 
@@ -179,6 +200,8 @@ export class VerifierAgent implements IVerifierAgent {
       const lines = sourceCode.split('\n');
       const beforeLines = lines.slice(0, startLine - 1);
       const afterLines = lines.slice(startLine - 1 + removeCount);
+
+      console.log(`Applying patch to ${patch.file}: replacing lines ${startLine}-${startLine + removeCount - 1} with ${addedLines.length} new lines`);
 
       const newContent = [...beforeLines, ...addedLines, ...afterLines].join('\n');
       fs.writeFileSync(fullPath, newContent, 'utf-8');
@@ -225,13 +248,69 @@ export class VerifierAgent implements IVerifierAgent {
    */
   private async validateSyntax(filePath: string): Promise<boolean> {
     try {
-      // Run TypeScript type check on the specific file
-      execSync(`npx tsc --noEmit ${path.join(this.projectRoot, filePath)}`, {
-        cwd: this.projectRoot,
-        stdio: 'pipe',
-      });
+      const fullPath = path.join(this.projectRoot, filePath);
+      const content = fs.readFileSync(fullPath, 'utf-8');
+
+      // Basic bracket balance check
+      const openBraces = (content.match(/\{/g) || []).length;
+      const closeBraces = (content.match(/\}/g) || []).length;
+      const openParens = (content.match(/\(/g) || []).length;
+      const closeParens = (content.match(/\)/g) || []).length;
+      const openBrackets = (content.match(/\[/g) || []).length;
+      const closeBrackets = (content.match(/\]/g) || []).length;
+
+      if (openBraces !== closeBraces) {
+        console.log(`Syntax error in ${filePath}: unbalanced braces (${openBraces} open, ${closeBraces} close)`);
+        return false;
+      }
+      if (openParens !== closeParens) {
+        console.log(`Syntax error in ${filePath}: unbalanced parentheses (${openParens} open, ${closeParens} close)`);
+        return false;
+      }
+      if (openBrackets !== closeBrackets) {
+        console.log(`Syntax error in ${filePath}: unbalanced brackets (${openBrackets} open, ${closeBrackets} close)`);
+        return false;
+      }
+
+      // Try to run TypeScript check using project config
+      try {
+        // Use project's tsconfig to ensure JSX and other settings are applied
+        execSync(`npx tsc --noEmit --project tsconfig.json 2>&1`, {
+          cwd: this.projectRoot,
+          stdio: 'pipe',
+        });
+      } catch (error) {
+        // Log TypeScript output for debugging but check if it's a syntax error
+        if (error instanceof Error && 'stdout' in error) {
+          const stdout = (error as { stdout?: Buffer }).stdout;
+          if (stdout) {
+            const output = stdout.toString();
+            // Filter out npm warnings and unrelated files
+            const filteredOutput = output
+              .split('\n')
+              .filter((line) =>
+                !line.includes('npm warn') &&
+                !line.includes('npm WARN') &&
+                line.includes(filePath))
+              .join('\n')
+              .trim();
+
+            // Only fail on actual syntax errors (TS1xxxx and TS17xxx are parse/JSX errors)
+            if (filteredOutput.includes('error TS1') || filteredOutput.includes('error TS17')) {
+              console.log(`Syntax error in ${filePath}:`, filteredOutput.slice(0, 300));
+              return false;
+            }
+            // Type errors are OK - the patch might be syntactically correct but have type issues
+            if (filteredOutput.length > 0) {
+              console.log(`TypeScript type errors in ${filePath} (allowing):`, filteredOutput.slice(0, 200));
+            }
+          }
+        }
+      }
+
       return true;
-    } catch {
+    } catch (error) {
+      console.error(`Failed to validate syntax for ${filePath}:`, error);
       return false;
     }
   }

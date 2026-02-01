@@ -189,3 +189,54 @@ export interface VerifierAgent {
 export interface Orchestrator {
   run(config: OrchestratorConfig): Promise<OrchestratorResult>;
 }
+
+// ============================================================================
+// Dashboard Types
+// ============================================================================
+
+export type RunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+export type AgentStatus = 'idle' | 'running' | 'completed' | 'failed';
+export type AgentType = 'tester' | 'triage' | 'fixer' | 'verifier';
+
+export interface Run {
+  id: string;
+  repoId: string;
+  repoName: string;
+  status: RunStatus;
+  currentAgent: AgentType | null;
+  iteration: number;
+  maxIterations: number;
+  testSpecs: TestSpec[];
+  patches: Patch[];
+  testResults: TestResult[];
+  startedAt: Date;
+  completedAt?: Date;
+}
+
+export interface RunEvent {
+  type: 'status' | 'agent' | 'test' | 'patch' | 'complete' | 'error';
+  timestamp: Date;
+  runId: string;
+  data: unknown;
+}
+
+export interface GitHubRepo {
+  id: number;
+  name: string;
+  fullName: string;
+  url: string;
+  defaultBranch: string;
+}
+
+export interface GitHubUser {
+  id: number;
+  login: string;
+  name: string | null;
+  avatarUrl: string;
+}
+
+export interface Session {
+  user: GitHubUser | null;
+  accessToken: string | null;
+  repos: GitHubRepo[];
+}

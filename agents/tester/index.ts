@@ -26,14 +26,22 @@ export class TesterAgent {
       throw new Error('BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID are required');
     }
 
+    // Use Gemini if GOOGLE_API_KEY is set, otherwise fall back to OpenAI
+    const useGemini = !!process.env.GOOGLE_API_KEY;
+
     this.stagehand = new Stagehand({
       env: 'BROWSERBASE',
       apiKey,
       projectId,
-      model: {
-        modelName: 'gpt-4o',
-        apiKey: process.env.OPENAI_API_KEY,
-      },
+      model: useGemini
+        ? {
+            modelName: 'gemini-2.0-flash',
+            apiKey: process.env.GOOGLE_API_KEY,
+          }
+        : {
+            modelName: 'gpt-4o',
+            apiKey: process.env.OPENAI_API_KEY,
+          },
       verbose: process.env.DEBUG === 'true' ? 1 : 0,
     });
 

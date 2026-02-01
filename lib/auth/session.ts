@@ -1,0 +1,75 @@
+import { cookies } from 'next/headers';
+import { SignJWT, jwtVerify } from 'jose';
+import type { Session, GitHubUser, GitHubRepo } from '@/lib/types';
+
+const SESSION_COOKIE = 'patchpilot_session';
+const SECRET_KEY = process.env.SESSION_SECRET || 'default-dev-secret-do-not-use-in-prod';
+const key = new TextEncoder().encode(SECRET_KEY);
+
+export async function encrypt(payload: any) {
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('7d')
+    .sign(key);
+}
+
+export async function decrypt(input: string): Promise<any> {
+  const { payload } = await jwtVerify(input, key, {
+    algorithms: ['HS256'],
+  });
+  return payload;
+}
+
+export async function getSession(): Promise<Session | null> {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get(SESSION_COOKIE)?.value;
+
+  if (!sessionToken) return null;
+
+  try {
+    const payload = await decrypt(sessionToken);
+    return {
+      user: payload.user as GitHubUser,
+      accessToken: payload.accessToken as string,
+      repos: payload.repos as GitHubRepo[],
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function createSession(data: {
+  accessToken: string;
+  user: GitHubUser;
+  repos: GitHubRepo[];
+}): Promise<void> {
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const session = await encrypt({ ...data, expiresAt });
+
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, session, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    expires: expiresAt,
+    path: '/',
+  });
+}
+
+export async function destroySession(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
+}
+
+export async function updateSessionRepos(repos: GitHubRepo[]): Promise<void> {
+  const session = await getSession();
+  if (!session || !session.user || !session.accessToken) return;
+
+  // We need to create a new session with updated repos
+  await createSession({
+    accessToken: session.accessToken,
+    user: session.user,
+    repos,
+  });
+}

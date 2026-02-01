@@ -1,66 +1,66 @@
 /**
  * Embeddings Helper
  *
- * Generates text embeddings using OpenAI's embedding model.
+ * Generates text embeddings using Google's Gemini embedding model.
  * Used for semantic similarity search in the knowledge base.
  */
 
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Singleton OpenAI client for embeddings
-let openaiClient: OpenAI | null = null;
+// Singleton Gemini client for embeddings
+let geminiClient: GoogleGenerativeAI | null = null;
 
-// Embedding model configuration
-export const EMBEDDING_MODEL = 'text-embedding-3-small';
-export const EMBEDDING_DIMENSION = 1536;
+// Gemini embedding model configuration
+export const EMBEDDING_MODEL = 'text-embedding-004';
+export const EMBEDDING_DIMENSION = 768; // Gemini text-embedding-004 uses 768 dimensions
 export const MAX_INPUT_LENGTH = 8000; // Characters to truncate for token limit
 
 /**
- * Get or create the OpenAI client
+ * Get or create the Gemini client
  */
-function getOpenAIClient(): OpenAI {
-  if (!openaiClient) {
-    const apiKey = process.env.OPENAI_API_KEY;
+function getGeminiClient(): GoogleGenerativeAI {
+  if (!geminiClient) {
+    const apiKey = process.env.GOOGLE_API_KEY;
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY environment variable is required');
+      throw new Error('GOOGLE_API_KEY environment variable is required for embeddings');
     }
-    openaiClient = new OpenAI({ apiKey });
+    geminiClient = new GoogleGenerativeAI(apiKey);
   }
-  return openaiClient;
+  return geminiClient;
 }
 
 /**
  * Generate an embedding vector for the given text
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const openai = getOpenAIClient();
+  const genAI = getGeminiClient();
+  const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
 
   // Truncate text if too long
   const truncatedText = text.slice(0, MAX_INPUT_LENGTH);
 
-  const response = await openai.embeddings.create({
-    model: EMBEDDING_MODEL,
-    input: truncatedText,
-  });
-
-  return response.data[0].embedding;
+  const result = await model.embedContent(truncatedText);
+  return result.embedding.values;
 }
 
 /**
  * Generate embeddings for multiple texts (batched)
  */
 export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
-  const openai = getOpenAIClient();
+  const genAI = getGeminiClient();
+  const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
 
   // Truncate each text
   const truncatedTexts = texts.map((t) => t.slice(0, MAX_INPUT_LENGTH));
 
-  const response = await openai.embeddings.create({
-    model: EMBEDDING_MODEL,
-    input: truncatedTexts,
-  });
+  // Gemini doesn't support batch embedding, so we process sequentially
+  const embeddings: number[][] = [];
+  for (const text of truncatedTexts) {
+    const result = await model.embedContent(text);
+    embeddings.push(result.embedding.values);
+  }
 
-  return response.data.map((d) => d.embedding);
+  return embeddings;
 }
 
 /**

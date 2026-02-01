@@ -70,7 +70,8 @@ export class KnowledgeBase {
       console.log('Knowledge base index already exists');
     } catch (e: unknown) {
       // Index doesn't exist, create it
-      if (e instanceof Error && e.message.includes('Unknown index name')) {
+      // Handle both "Unknown index name" and "no such index" error formats
+      if (e instanceof Error && (e.message.includes('Unknown index name') || e.message.includes('no such index'))) {
         await redis.ft.create(
           INDEX_NAME,
           {

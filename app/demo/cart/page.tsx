@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import '../globals.css';
 
 interface CartItem {
   id: number;
@@ -53,7 +52,7 @@ export default function CartPage() {
       <div className="card">
         <h2>Order Confirmed!</h2>
         <p className="success">Thank you for your purchase!</p>
-        <a href="/">
+        <a href="/demo">
           <button>Continue Shopping</button>
         </a>
       </div>
@@ -67,7 +66,7 @@ export default function CartPage() {
       {cart.length === 0 ? (
         <div className="card">
           <p>Your cart is empty</p>
-          <a href="/">
+          <a href="/demo">
             <button>Browse Products</button>
           </a>
         </div>
@@ -107,9 +106,9 @@ export default function CartPage() {
               <h3>Total: ${total.toFixed(2)}</h3>
               {/* BUG 1: Missing onClick handler - the button does nothing when clicked */}
               <button
+                onClick={handleCheckout}
                 id="checkout-button"
                 disabled={isCheckingOut}
-                style={{ fontSize: '18px', padding: '15px 30px' }}
               >
                 {isCheckingOut ? 'Processing...' : 'Checkout'}
               </button>

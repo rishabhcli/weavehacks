@@ -13,6 +13,25 @@
  *   pnpm run demo --quick   # Run with fewer iterations
  */
 
+// Load environment variables from .env.local
+import * as fs from 'fs';
+import * as path from 'path';
+
+const envPath = path.join(process.cwd(), '.env.local');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf-8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const [key, ...valueParts] = trimmed.split('=');
+      const value = valueParts.join('=').replace(/^["']|["']$/g, '');
+      if (key && !process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  }
+}
+
 import { Orchestrator } from '@/agents/orchestrator';
 import { allTestSpecs } from '@/tests/e2e/specs';
 import { initWeave } from '@/lib/weave';

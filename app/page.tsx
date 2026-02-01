@@ -1,59 +1,41 @@
-'use client';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Github, ShieldCheck, Zap } from 'lucide-react';
 
-import { useState } from 'react';
-import './globals.css';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-}
-
-const products: Product[] = [
-  { id: 1, name: 'Wireless Headphones', price: 99.99, description: 'High-quality wireless headphones' },
-  { id: 2, name: 'Smart Watch', price: 199.99, description: 'Feature-rich smartwatch' },
-  { id: 3, name: 'Laptop Stand', price: 49.99, description: 'Ergonomic laptop stand' },
-];
-
-export default function HomePage() {
-  const [cart, setCart] = useState<number[]>([]);
-  const [message, setMessage] = useState('');
-
-  const addToCart = (productId: number) => {
-    setCart([...cart, productId]);
-    setMessage(`Added product ${productId} to cart!`);
-    setTimeout(() => setMessage(''), 2000);
-  };
-
+export default function LandingPage() {
   return (
-    <div>
-      <h2>Products</h2>
-      {message && <div className="success">{message}</div>}
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px', marginTop: '20px' }}>
-        {products.map((product) => (
-          <div key={product.id} className="card">
-            <h3>{product.name}</h3>
-            <p>{product.description}</p>
-            <p style={{ fontWeight: 'bold', fontSize: '18px' }}>${product.price}</p>
-            <button onClick={() => addToCart(product.id)}>Add to Cart</button>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8 text-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-12 w-12 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg flex items-center justify-center">
+            <Zap className="h-6 w-6 text-white" />
           </div>
-        ))}
-      </div>
+          <h1 className="text-3xl font-bold tracking-tight">PatchPilot</h1>
+          <p className="text-muted-foreground">Self-healing QA agent for your codebase</p>
+        </div>
 
-      <div style={{ marginTop: '30px', padding: '20px', background: '#f0f0f0', borderRadius: '8px' }}>
-        <h3>Cart ({cart.length} items)</h3>
-        {cart.length > 0 ? (
-          <>
-            <p>Items in cart: {cart.join(', ')}</p>
-            <a href="/cart">
-              <button>View Cart</button>
-            </a>
-          </>
-        ) : (
-          <p>Your cart is empty</p>
-        )}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Welcome Back</h2>
+            <p className="text-sm text-muted-foreground">
+              Connect your GitHub account to access the dashboard and manage your test runs.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Button asChild size="lg" className="w-full gap-2">
+              <a href="/api/auth/github">
+                <Github className="h-5 w-5" />
+                Connect with GitHub
+              </a>
+            </Button>
+            
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <ShieldCheck className="h-3 w-3" />
+              <span>Secured connection</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

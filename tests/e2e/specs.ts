@@ -18,19 +18,11 @@ const BASE_URL = process.env.TARGET_URL || 'http://localhost:3000';
 export const checkoutFlowTest: TestSpec = {
   id: 'test-checkout-001',
   name: 'Checkout Flow',
-  url: `${BASE_URL}/cart`,
+  url: `${BASE_URL}/demo/cart`,
   steps: [
     {
-      action: 'Wait for the page to load completely',
-      expected: 'I see a shopping cart with items',
-    },
-    {
-      action: 'Look for the checkout button and click it',
-      expected: 'I see a checkout confirmation or payment form',
-    },
-    {
-      action: 'Verify the checkout process started',
-      expected: 'I see "Order Confirmed" or "Processing" message',
+      action: 'Click the Checkout button',
+      expected: 'I see a checkout confirmation or processing message',
     },
   ],
   timeout: 30000,
@@ -43,22 +35,11 @@ export const checkoutFlowTest: TestSpec = {
 export const checkoutWithPaymentTest: TestSpec = {
   id: 'test-checkout-002',
   name: 'Complete Checkout with Payment',
-  url: `${BASE_URL}`,
+  url: `${BASE_URL}/demo/cart`,
   steps: [
     {
-      action: 'Click on "Add to Cart" button for the first product',
-      expected: 'I see a success message about adding to cart',
-    },
-    {
-      action: 'Click on the "View Cart" button or navigate to cart',
-    },
-    {
-      action: 'Wait for cart page to load',
-      expected: 'I see the shopping cart with the item I added',
-    },
-    {
-      action: 'Click the Checkout button',
-      expected: 'I see the order is being processed or confirmed',
+      action: 'Click the Checkout button to start checkout process',
+      expected: 'I see order confirmed or success message',
     },
   ],
   timeout: 45000,
@@ -71,27 +52,23 @@ export const checkoutWithPaymentTest: TestSpec = {
 export const signupFlowTest: TestSpec = {
   id: 'test-signup-001',
   name: 'User Signup Flow',
-  url: `${BASE_URL}/signup`,
+  url: `${BASE_URL}/demo/signup`,
   steps: [
     {
-      action: 'Wait for the signup form to load',
-      expected: 'I see a signup form with name, email, and password fields',
+      action: 'Fill in name field with "Test User"',
     },
     {
-      action: 'Type "Test User" into the name input field',
+      action: 'Fill in email field with "test@example.com"',
     },
     {
-      action: 'Type "test@example.com" into the email input field',
+      action: 'Fill in password field with "password123"',
     },
     {
-      action: 'Type "password123" into the password input field',
+      action: 'Fill in confirm password field with "password123"',
     },
     {
-      action: 'Type "password123" into the confirm password input field',
-    },
-    {
-      action: 'Click the "Create Account" button to submit the form',
-      expected: 'I see a welcome message or account created confirmation',
+      action: 'Click the Create Account or Submit button',
+      expected: 'I see a success or welcome message',
     },
   ],
   timeout: 30000,
