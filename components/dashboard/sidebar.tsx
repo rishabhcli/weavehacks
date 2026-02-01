@@ -25,11 +25,10 @@ import { useSession } from '@/lib/hooks/use-session';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const navigation = [
-  { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Runs', href: '/dashboard/runs', icon: Play },
   { name: 'Learning', href: '/dashboard/learning', icon: Brain },
   { name: 'Monitoring', href: '/dashboard/monitoring', icon: Radio },
-  { name: 'Tests', href: '/dashboard/tests', icon: TestTube2 },
   { name: 'Patches', href: '/dashboard/patches', icon: GitBranch },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];

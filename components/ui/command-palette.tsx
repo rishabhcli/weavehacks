@@ -112,7 +112,7 @@ export function CommandPalette() {
     // Navigation
     { 
       id: 'nav-overview', 
-      label: 'Go to Overview', 
+      label: 'Go to Dashboard', 
       description: 'Dashboard overview',
       icon: LayoutDashboard, 
       action: () => router.push('/dashboard'), 
@@ -544,7 +544,7 @@ function ShortcutsView({ onClose }: { onClose: () => void }) {
   const shortcuts = [
     { category: 'Navigation', items: [
       { keys: ['⌘/Ctrl', 'K'], description: 'Open command palette' },
-      { keys: ['G', 'then', 'O'], description: 'Go to Overview' },
+      { keys: ['G', 'then', 'D'], description: 'Go to Dashboard' },
       { keys: ['G', 'then', 'R'], description: 'Go to Runs' },
       { keys: ['G', 'then', 'T'], description: 'Go to Tests' },
       { keys: ['G', 'then', 'S'], description: 'Go to Settings' },

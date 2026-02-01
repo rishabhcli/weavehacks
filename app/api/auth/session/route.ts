@@ -1,9 +1,26 @@
-import { NextResponse } from 'next/server';
-import { getSession, destroySession } from '@/lib/auth/session';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSession, destroySession, decrypt } from '@/lib/auth/session';
 import { getGitHubRepos } from '@/lib/auth/github';
 
-export async function GET() {
-  const session = await getSession();
+export async function GET(request: NextRequest) {
+  let session = await getSession();
+
+  if (!session) {
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice('Bearer '.length);
+      try {
+        const payload = await decrypt(token);
+        session = {
+          user: payload.user,
+          accessToken: payload.accessToken,
+          repos: payload.repos,
+        };
+      } catch {
+        session = null;
+      }
+    }
+  }
 
   if (!session) {
     return NextResponse.json({ authenticated: false });

@@ -5,68 +5,59 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography, shadows } from '@/lib/theme/colors';
-import { api } from '@/lib/api/client';
+import { api, API_URL } from '@/lib/api/client';
 
 // Required for auth session to work properly
 WebBrowser.maybeCompleteAuthSession();
-
-const GITHUB_CLIENT_ID = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID || '';
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
-
-// Discovery document for GitHub OAuth
-const discovery = {
-  authorizationEndpoint: 'https://github.com/login/oauth/authorize',
-  tokenEndpoint: 'https://github.com/login/oauth/access_token',
-  revocationEndpoint: `https://github.com/settings/connections/applications/${GITHUB_CLIENT_ID}`,
-};
 
 export default function LoginScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Create auth request
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
-    {
-      clientId: GITHUB_CLIENT_ID,
-      scopes: ['read:user', 'repo'],
-      redirectUri: AuthSession.makeRedirectUri({
-        scheme: 'patchpilot',
-      }),
-    },
-    discovery
-  );
+  const redirectUri = AuthSession.makeRedirectUri({
+    scheme: 'patchpilot',
+  });
 
   const handleGitHubLogin = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await promptAsync();
+      const authUrl = `${API_URL}/api/auth/github?redirect=${encodeURIComponent(redirectUri)}`;
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
-      if (result.type === 'success' && result.params.code) {
-        // Exchange code for token via our backend
-        const tokenResponse = await api.post<{ token: string }>('/api/auth/mobile/exchange', {
-          code: result.params.code,
-          redirectUri: AuthSession.makeRedirectUri({ scheme: 'patchpilot' }),
-        });
+      if (result.type === 'success' && result.url) {
+        const returnUrl = new URL(result.url);
+        const errorCode = returnUrl.searchParams.get('error');
+        if (errorCode) {
+          const errorMessages: Record<string, string> = {
+            invalid_state: 'Invalid OAuth state. Please try again.',
+            no_code: 'No authorization code received.',
+            oauth_failed: 'OAuth authentication failed. Please try again.',
+          };
+          setError(errorMessages[errorCode] || 'Authentication failed');
+          return;
+        }
 
-        // Store the token
-        await api.setToken(tokenResponse.token);
+        const token = returnUrl.searchParams.get('token');
+        if (!token) {
+          setError('Authentication failed: missing session token');
+          return;
+        }
 
-        // Navigate to main app
+        await api.setToken(token);
         router.replace('/(tabs)');
-      } else if (result.type === 'error') {
-        setError(result.error?.message || 'Authentication failed');
       } else if (result.type === 'cancel') {
         setError('Authentication was cancelled');
+      } else if (result.type === 'dismiss') {
+        setError('Authentication was dismissed');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -107,7 +98,7 @@ export default function LoginScreen() {
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleGitHubLogin}
-            disabled={loading || !request}
+            disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color={colors.dark.primaryForeground} />

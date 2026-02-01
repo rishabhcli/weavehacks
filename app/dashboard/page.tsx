@@ -16,6 +16,12 @@ import {
   RefreshCw,
   TrendingUp,
   Zap,
+  Brain,
+  Radio,
+  Wrench,
+  Settings,
+  ChevronRight,
+  Plus,
 } from 'lucide-react';
 import { Header } from '@/components/dashboard/header';
 import { Button } from '@/components/ui/button';
@@ -26,6 +32,7 @@ import { VoiceAssistant } from '@/components/voice/voice-assistant';
 import { useToast } from '@/components/ui/toaster';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 
 interface RunStats {
@@ -50,6 +57,29 @@ interface Run {
   completedAt?: string;
 }
 
+interface Patch {
+  id: string;
+  file: string;
+  description: string;
+  status: 'applied' | 'pending';
+  runId: string;
+  createdAt: string;
+}
+
+interface LearningMetrics {
+  passRate: number;
+  avgTimeToFix: number;
+  firstTryRate: number;
+  knowledgeReuseRate: number;
+  improvementPercent: number;
+}
+
+interface MonitoringStatus {
+  monitoredRepos: number;
+  lastRun: string | null;
+  isHealthy: boolean;
+}
+
 const statusConfig = {
   completed: { label: 'Completed', icon: CheckCircle, className: 'status-success' },
   running: { label: 'Running', icon: Play, className: 'status-running' },
@@ -62,6 +92,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const { success, error: showError } = useToast();
   const [runs, setRuns] = useState<Run[]>([]);
+  const [patches, setPatches] = useState<Patch[]>([]);
+  const [learningMetrics, setLearningMetrics] = useState<LearningMetrics | null>(null);
+  const [monitoringStatus, setMonitoringStatus] = useState<MonitoringStatus | null>(null);
   const [stats, setStats] = useState<RunStats>({
     totalRuns: 0,
     passRate: 0,
@@ -73,9 +106,15 @@ export default function DashboardPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch('/api/runs', { credentials: 'include' });
-      if (response.ok) {
-        const data = await response.json();
+      const [runsRes, patchesRes, learningRes, monitoringRes] = await Promise.all([
+        fetch('/api/runs', { credentials: 'include' }),
+        fetch('/api/patches').catch(() => null),
+        fetch('/api/learning/metrics').catch(() => null),
+        fetch('/api/monitoring/configs').catch(() => null),
+      ]);
+
+      if (runsRes.ok) {
+        const data = await runsRes.json();
         setRuns(data.runs || []);
         setStats(data.stats || {
           totalRuns: 0,
@@ -83,8 +122,25 @@ export default function DashboardPage() {
           patchesApplied: 0,
           avgIterations: 0,
         });
-      } else {
-        showError('Failed to load dashboard data');
+      }
+
+      if (patchesRes?.ok) {
+        const data = await patchesRes.json();
+        setPatches(data.patches?.slice(0, 5) || []);
+      }
+
+      if (learningRes?.ok) {
+        const data = await learningRes.json();
+        setLearningMetrics(data);
+      }
+
+      if (monitoringRes?.ok) {
+        const data = await monitoringRes.json();
+        setMonitoringStatus({
+          monitoredRepos: data.configs?.length || 0,
+          lastRun: data.lastRun || null,
+          isHealthy: data.configs?.some((c: { enabled: boolean }) => c.enabled) || false,
+        });
       }
     } catch {
       showError('Failed to load dashboard data');
@@ -136,7 +192,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen">
-        <Header title="Overview" />
+        <Header title="Dashboard" />
         <DashboardSkeleton />
       </div>
     );
@@ -144,7 +200,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header title="Overview" />
+      <Header title="Dashboard" />
 
       <main className="p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
         {/* Welcome Section */}
@@ -165,8 +221,7 @@ export default function DashboardPage() {
               </div>
               <h1 className="text-2xl lg:text-3xl font-bold mb-2">Welcome to PatchPilot</h1>
               <p className="text-muted-foreground max-w-xl">
-                Automatically test your web app, find bugs, generate fixes, and verify them—
-                all without writing a single line of test code.
+                Your unified dashboard for automated testing, bug detection, and self-healing fixes.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -193,13 +248,14 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         >
           <StatCard
             title="Total Runs"
             value={stats.totalRuns}
             description="Test runs executed"
             icon={Rocket}
+            href="/dashboard/runs"
             trend={stats.totalRuns > 0 ? { value: 12, isPositive: true } : undefined}
           />
           <StatCard
@@ -207,6 +263,7 @@ export default function DashboardPage() {
             value={`${Math.round(stats.passRate)}%`}
             description="Tests passing after fixes"
             icon={TrendingUp}
+            href="/dashboard/runs"
             trend={stats.passRate > 0 ? { value: 7, isPositive: true } : undefined}
           />
           <StatCard
@@ -214,51 +271,43 @@ export default function DashboardPage() {
             value={stats.patchesApplied}
             description="Auto-generated fixes"
             icon={GitBranch}
+            href="/dashboard/patches"
           />
           <StatCard
-            title="Avg. Iterations"
-            value={stats.avgIterations.toFixed(1)}
-            description="Iterations per fix"
-            icon={Zap}
+            title="Knowledge Base"
+            value={learningMetrics?.knowledgeReuseRate ? `${Math.round(learningMetrics.knowledgeReuseRate)}%` : '0%'}
+            description="Pattern reuse rate"
+            icon={Brain}
+            href="/dashboard/learning"
           />
         </motion.section>
 
-        {/* Main Content Grid */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="grid lg:grid-cols-3 gap-6"
-        >
-          {/* Quick Actions */}
-          <div className="lg:col-span-1">
-            <div className="rounded-xl border bg-card p-6">
-              <h3 className="font-semibold flex items-center gap-2 mb-4">
-                <Activity className="h-4 w-4 text-primary" />
-                Quick Actions
-              </h3>
-              <div className="space-y-2">
-                <QuickActionLink href="/dashboard/runs" icon={Play} label="View All Runs" />
-                <QuickActionLink href="/dashboard/tests/new" icon={Sparkles} label="Create Test Spec" />
-                <QuickActionLink href="/dashboard/settings" icon={GitBranch} label="Connect GitHub" />
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Runs */}
-          <div className="lg:col-span-2">
-            <div className="rounded-xl border bg-card">
-              <div className="p-6 border-b flex items-center justify-between">
-                <h3 className="font-semibold">Recent Runs</h3>
-                <Link href="/dashboard/runs">
-                  <Button variant="ghost" size="sm">
-                    View All
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-              
-              <div className="p-6">
+        {/* Main Dashboard Grid */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left Column - Recent Runs */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="lg:col-span-2 space-y-6"
+          >
+            {/* Recent Runs */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Play className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">Recent Runs</CardTitle>
+                  </div>
+                  <Link href="/dashboard/runs">
+                    <Button variant="ghost" size="sm">
+                      View All
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
                 {recentRuns.length === 0 ? (
                   <EmptyState
                     variant="default"
@@ -302,7 +351,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right hidden sm:block">
-                              <p className="text-sm font-medium">{passRate}% pass rate</p>
+                              <p className="text-sm font-medium">{passRate}% pass</p>
                               <p className="text-xs text-muted-foreground">
                                 {run.patchesApplied} patch{run.patchesApplied !== 1 ? 'es' : ''}
                               </p>
@@ -316,10 +365,169 @@ export default function DashboardPage() {
                     })}
                   </div>
                 )}
-              </div>
-            </div>
-          </div>
-        </motion.section>
+              </CardContent>
+            </Card>
+
+            {/* Recent Patches */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Wrench className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">Recent Patches</CardTitle>
+                  </div>
+                  <Link href="/dashboard/patches">
+                    <Button variant="ghost" size="sm">
+                      View All
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {patches.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No patches generated yet. Patches will appear here after runs generate fixes.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {patches.slice(0, 3).map((patch) => (
+                      <div
+                        key={patch.id}
+                        className="flex items-center justify-between p-3 rounded-lg border bg-secondary/30"
+                      >
+                        <div className="flex items-center gap-3">
+                          <GitBranch className="h-4 w-4 text-primary" />
+                          <div>
+                            <p className="font-mono text-sm">{patch.file}</p>
+                            <p className="text-xs text-muted-foreground">{patch.description}</p>
+                          </div>
+                        </div>
+                        <Badge variant={patch.status === 'applied' ? 'default' : 'secondary'}>
+                          {patch.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.section>
+
+          {/* Right Column - Widgets */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="space-y-6"
+          >
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Quick Actions</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <QuickActionButton 
+                  href="/dashboard/runs" 
+                  icon={Play} 
+                  label="Start New Run" 
+                  description="Run tests on your app"
+                />
+                <QuickActionButton 
+                  href="/dashboard/monitoring" 
+                  icon={Radio} 
+                  label="Setup Monitoring" 
+                  description="Configure continuous testing"
+                />
+                <QuickActionButton 
+                  href="/dashboard/learning" 
+                  icon={Brain} 
+                  label="View Learning" 
+                  description="See improvement metrics"
+                />
+                <QuickActionButton 
+                  href="/dashboard/settings" 
+                  icon={Settings} 
+                  label="Settings" 
+                  description="Configure integrations"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Learning Progress */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Brain className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">Learning</CardTitle>
+                  </div>
+                  <Link href="/dashboard/learning">
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-emerald-500">
+                    +{learningMetrics?.improvementPercent ?? 0}%
+                  </div>
+                  <p className="text-sm text-muted-foreground">Improvement this week</p>
+                </div>
+                <div className="space-y-2">
+                  <MetricRow 
+                    label="First-Try Success" 
+                    value={`${Math.round(learningMetrics?.firstTryRate ?? 0)}%`} 
+                  />
+                  <MetricRow 
+                    label="Avg Time to Fix" 
+                    value={`${Math.round(learningMetrics?.avgTimeToFix ?? 0)}s`} 
+                  />
+                  <MetricRow 
+                    label="Knowledge Reuse" 
+                    value={`${Math.round(learningMetrics?.knowledgeReuseRate ?? 0)}%`} 
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Monitoring Status */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Radio className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">Monitoring</CardTitle>
+                  </div>
+                  <Link href="/dashboard/monitoring">
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Status</span>
+                  <Badge variant={monitoringStatus?.isHealthy ? 'default' : 'secondary'}>
+                    {monitoringStatus?.isHealthy ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Monitored Repos</span>
+                  <span className="font-medium">{monitoringStatus?.monitoredRepos ?? 0}</span>
+                </div>
+                {monitoringStatus?.lastRun && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Last Run</span>
+                    <span className="text-sm">{formatTimeAgo(monitoringStatus.lastRun)}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.section>
+        </div>
       </main>
 
       <VoiceAssistant />
@@ -333,55 +541,74 @@ function StatCard({
   value,
   description,
   icon: Icon,
+  href,
   trend,
 }: {
   title: string;
   value: string | number;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
+  href: string;
   trend?: { value: number; isPositive: boolean };
 }) {
   return (
-    <div className="rounded-xl border bg-card p-5 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
-        {trend && (
-          <div className={`flex items-center text-xs font-medium ${trend.isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
-            {trend.isPositive ? '↑' : '↓'} {trend.value}%
+    <Link href={href}>
+      <div className="rounded-xl border bg-card p-5 hover:shadow-md transition-shadow cursor-pointer h-full">
+        <div className="flex items-start justify-between">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Icon className="h-4 w-4 text-primary" />
           </div>
-        )}
+          {trend && (
+            <div className={`flex items-center text-xs font-medium ${trend.isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+              {trend.isPositive ? '↑' : '↓'} {trend.value}%
+            </div>
+          )}
+        </div>
+        <div className="mt-3">
+          <p className="text-2xl font-bold tabular-nums">{value}</p>
+          <p className="text-sm text-muted-foreground">{title}</p>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">{description}</p>
       </div>
-      <div className="mt-3">
-        <p className="text-2xl font-bold tabular-nums">{value}</p>
-        <p className="text-sm text-muted-foreground">{title}</p>
-      </div>
-      <p className="text-xs text-muted-foreground mt-1">{description}</p>
-    </div>
+    </Link>
   );
 }
 
-// Quick Action Link Component
-function QuickActionLink({
+// Quick Action Button Component
+function QuickActionButton({
   href,
   icon: Icon,
   label,
+  description,
 }: {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
+  description: string;
 }) {
   return (
     <Link
       href={href}
-      className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
+      className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
     >
-      <span className="flex items-center gap-3">
-        <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-        <span className="text-sm font-medium">{label}</span>
-      </span>
-      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="p-2 rounded-md bg-primary/10">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </div>
+      <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
     </Link>
+  );
+}
+
+// Metric Row Component
+function MetricRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium">{value}</span>
+    </div>
   );
 }
