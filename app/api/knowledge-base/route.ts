@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
 
+// Prevent static generation during build - this route requires Redis
+export const dynamic = 'force-dynamic';
+
 export interface KnowledgeBaseStats {
   available: boolean;
   totalBugsLearned: number;
