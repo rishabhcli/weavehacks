@@ -48,15 +48,21 @@ export async function POST(
       repoFullName,
       {
         id: patchId,
+        diagnosisId: patchId,
         file: patch.file,
         diff: patch.diff,
         description: patch.description,
-        status: patch.status,
+        metadata: patch.metadata || {
+          linesAdded: 0,
+          linesRemoved: 0,
+          llmModel: 'unknown',
+          promptTokens: 0,
+        },
       },
       {
         rootCause: patch.diagnosis.rootCause,
         confidence: patch.diagnosis.confidence,
-        suggestedFix: patch.diagnosis.suggestedFix || patch.description,
+        suggestedFix: patch.description,
       }
     );
 
