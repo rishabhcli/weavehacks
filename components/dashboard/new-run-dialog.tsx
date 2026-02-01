@@ -268,12 +268,10 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'quick' | 'advanced')}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="quick" className="gap-2">
-              <Wand2 className="h-4 w-4" />
+            <TabsTrigger value="quick">
               Quick Start
             </TabsTrigger>
-            <TabsTrigger value="advanced" className="gap-2">
-              <CheckCircle className="h-4 w-4" />
+            <TabsTrigger value="advanced">
               Advanced
             </TabsTrigger>
           </TabsList>
