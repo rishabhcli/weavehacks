@@ -102,4 +102,4 @@ export {
   knowledgeReuseScorer,
   timeToFixScorer,
 } from './evaluations';
-export type { ScorerFn, EvalRow } from './evaluations';
+export type { EvaluationRow } from './evaluations';
