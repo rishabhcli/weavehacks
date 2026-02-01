@@ -28,6 +28,11 @@ export function useSession() {
 
   const isAuthenticated = Boolean(data?.authenticated && data?.user);
 
+  const disconnect = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    await mutate(undefined, { revalidate: true });
+  };
+
   return {
     isAuthenticated,
     user: data?.user ?? null,
@@ -35,5 +40,6 @@ export function useSession() {
     isLoading,
     error,
     mutate,
+    disconnect,
   };
 }

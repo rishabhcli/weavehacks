@@ -43,29 +43,6 @@ export async function GET(request: NextRequest) {
     const sessionToken = await encrypt({ accessToken, user, expiresAt });
     console.log('Session token created, length:', sessionToken.length);
 
-<<<<<<< Current (Your changes)
-    // Create redirect response
-    const response = NextResponse.redirect(
-      `${APP_URL}/dashboard/settings?connected=true`
-    );
-
-    // Set session cookie using NextResponse cookie methods
-    response.cookies.set(SESSION_COOKIE, sessionToken, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      expires: expiresAt,
-      secure: process.env.NODE_ENV === 'production',
-    });
-
-    // Clear the OAuth state cookie
-    response.cookies.set('github_oauth_state', '', {
-      path: '/',
-      expires: new Date(0),
-    });
-
-    console.log('SUCCESS - redirecting to dashboard');
-=======
     const redirectUrl = new URL('/dashboard?connected=true', APP_URL);
     const response = NextResponse.redirect(redirectUrl);
 
@@ -86,7 +63,6 @@ export async function GET(request: NextRequest) {
     });
 
     console.log('SUCCESS - redirecting with session cookie set');
->>>>>>> Incoming (Background Agent changes)
     return response;
   } catch (error) {
     console.error('GitHub OAuth error:', error);
