@@ -39,9 +39,9 @@ This file tracks all project tasks organized by phase. Update this file as work 
   - Bug 2: API route calling non-existent /api/payments (api/checkout/route.ts)
   - Bug 3: Null reference on preferences.newsletter (signup/page.tsx)
 
-- [ ] **P0-005**: Configure CI/CD pipeline
-  - GitHub Actions for lint/test
-  - Vercel preview deployments
+- [x] **P0-005**: Configure CI/CD pipeline
+  - GitHub Actions for lint/test/build (.github/workflows/ci.yml)
+  - Vercel preview deployments (handled by Vercel GitHub integration)
   - Dependencies: P0-003, P0-004
 
 ### Phase 1: Test Environment (Browserbase + Stagehand)

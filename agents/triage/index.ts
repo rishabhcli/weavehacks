@@ -66,7 +66,7 @@ export class TriageAgent implements ITriageAgent {
     // 2. Localize the bug in the codebase
     const localization = await this.localizeBug(failure, failureType);
 
-    // 3. Query for similar issues (placeholder - will integrate with Redis)
+    // 3. Query knowledge base for similar issues
     const similarIssues = await this.findSimilarIssues(failure);
 
     // 4. Generate root cause analysis with LLM
