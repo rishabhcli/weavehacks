@@ -155,7 +155,7 @@ export default function LandingPage() {
 
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-3 w-3 text-green-500" />
-                <span>OAuth 2.0 secured • Read-only access by default</span>
+                <span>OAuth 2.0 secured • Repo access for PR creation</span>
               </div>
             </div>
           </motion.div>
