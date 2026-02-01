@@ -63,7 +63,7 @@ marimo run dashboard/app.py
 | **Vercel** | Instant deployment after fixes |
 | **Redis** | Vector knowledge base for learning from past bugs |
 | **W&B Weave** | Tracing and evaluation of agent runs |
-| **Google Cloud ADK** | Multi-agent orchestration |
+| **Custom Orchestrator (ADK/A2A-compatible)** | Multi-agent workflow coordination (ADK integration planned) |
 | **Marimo** | Interactive analytics dashboard |
 | **Next.js** | Demo application |
 | **OpenAI** | LLM for patch generation |
@@ -167,7 +167,7 @@ See [.env.example](./.env.example) for required environment variables:
 - `REDIS_URL` - Redis connection string
 - `VERCEL_TOKEN` - Vercel API token
 - `WANDB_API_KEY` - Weights & Biases API key
-- `GOOGLE_CLOUD_PROJECT` - Google Cloud project
+- `GOOGLE_CLOUD_PROJECT` - Google Cloud project (reserved for ADK/A2A integration)
 
 ## Demo
 
@@ -185,7 +185,7 @@ The system demonstrates its capabilities in a 3-minute flow:
 - [Stagehand](https://www.stagehand.dev/) - AI browser automation
 - [Browserbase](https://browserbase.com/) - Cloud browsers
 - [W&B Weave](https://wandb.ai/site/weave) - LLM observability
-- [Google ADK](https://cloud.google.com/agent-development-kit) - Agent orchestration
+- [Google ADK](https://cloud.google.com/agent-development-kit) - Planned orchestration framework
 - [Marimo](https://marimo.io/) - Reactive notebooks
 
 ## License

@@ -203,7 +203,7 @@ Increments for this iteration:
 > - **Redis** for learning from past bugs
 > - **Vercel** for instant deployment
 > - **W&B Weave** for tracing
-> - **Google ADK** for agent orchestration
+> - **Custom Orchestrator (ADK/A2A-compatible)** for agent orchestration (ADK planned)
 > - **Marimo** for visualization
 >
 > A self-improving agent that gets smarter with every bug it fixes."
@@ -268,7 +268,7 @@ Increments for this iteration:
 | **Redis** | Vector knowledge base | Stores failure patterns, enables semantic search |
 | **Vercel** | Deployment platform | Auto-deploys fixes, provides preview URLs |
 | **W&B Weave** | Observability | Traces all agent operations, logs metrics |
-| **Google ADK** | Agent orchestration | Coordinates multi-agent workflow |
+| **Custom Orchestrator (ADK/A2A-compatible)** | Agent orchestration | Coordinates multi-agent workflow (ADK planned) |
 | **Marimo** | Dashboard | Visualizes pass rates, fix times, improvements |
 
 ---

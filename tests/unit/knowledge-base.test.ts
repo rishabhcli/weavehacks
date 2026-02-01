@@ -5,15 +5,15 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock OpenAI for embeddings
-vi.mock('openai', () => {
+// Mock Google Generative AI for embeddings
+vi.mock('@google/generative-ai', () => {
   return {
-    default: vi.fn().mockImplementation(() => ({
-      embeddings: {
-        create: vi.fn().mockResolvedValue({
-          data: [{ embedding: new Array(1536).fill(0.1) }],
+    GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
+      getGenerativeModel: vi.fn().mockReturnValue({
+        embedContent: vi.fn().mockResolvedValue({
+          embedding: { values: new Array(768).fill(0.1) },
         }),
-      },
+      }),
     })),
   };
 });
@@ -29,7 +29,7 @@ import {
 
 describe('Embeddings Utilities', () => {
   beforeEach(() => {
-    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.GOOGLE_API_KEY = 'test-key';
     vi.clearAllMocks();
   });
 
@@ -108,8 +108,8 @@ describe('Embeddings Utilities', () => {
   });
 
   describe('EMBEDDING_DIMENSION', () => {
-    it('should be 1536 for text-embedding-3-small', () => {
-      expect(EMBEDDING_DIMENSION).toBe(1536);
+    it('should be 768 for Gemini text-embedding-004', () => {
+      expect(EMBEDDING_DIMENSION).toBe(768);
     });
   });
 });

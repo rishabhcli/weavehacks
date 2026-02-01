@@ -9,64 +9,37 @@ import {
   XCircle,
   Clock,
   TestTube2,
-  Search,
   Wrench,
-  ShieldCheck,
-  ExternalLink,
-  Image,
-  Brain,
-  GitPullRequest,
-  Sparkles,
   RefreshCw,
   Loader2,
+  Ban,
 } from 'lucide-react';
 import { Header } from '@/components/dashboard/header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils/cn';
-
-interface TestResult {
-  passed: boolean;
-  duration: number;
-  failureReport?: {
-    testId: string;
-    step: number;
-    error: {
-      message: string;
-      type: string;
-    };
-  };
-}
-
-interface Patch {
-  id: string;
-  diagnosisId: string;
-  file: string;
-  diff: string;
-  description: string;
-  metadata: {
-    linesAdded: number;
-    linesRemoved: number;
-    llmModel: string;
-    promptTokens: number;
-  };
-}
-
-interface TestSpec {
-  id: string;
-  name: string;
-  url: string;
-  steps: Array<{ action: string; expected?: string }>;
-}
+import { EnhancedAgentPipeline } from '@/components/runs/enhanced-agent-pipeline';
+import { ActivityLog } from '@/components/runs/activity-log';
+import { DiagnosticsPanel } from '@/components/diagnostics';
+import type {
+  TestResult,
+  Patch,
+  TestSpec,
+  AgentType,
+  RunStatus,
+  ActivityLogEntry,
+  DiagnosticsData,
+  AgentExecutionState,
+} from '@/lib/types';
 
 interface Run {
   id: string;
   repoId: string;
   repoName: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-  currentAgent: string | null;
+  status: RunStatus;
+  currentAgent: AgentType | null;
   iteration: number;
   maxIterations: number;
   testSpecs: TestSpec[];
@@ -76,103 +49,372 @@ interface Run {
   completedAt?: string;
 }
 
-const agentConfig = {
-  tester: { label: 'Tester', icon: TestTube2, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-  triage: { label: 'Triage', icon: Search, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
-  fixer: { label: 'Fixer', icon: Wrench, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
-  verifier: { label: 'Verifier', icon: ShieldCheck, color: 'text-green-400', bgColor: 'bg-green-500/20' },
-};
-
 const statusConfig = {
-  completed: { label: 'Completed', variant: 'success' as const, icon: CheckCircle, color: 'text-emerald-400' },
+  completed: {
+    label: 'Completed',
+    variant: 'success' as const,
+    icon: CheckCircle,
+    color: 'text-emerald-400',
+  },
   running: { label: 'Running', variant: 'default' as const, icon: Play, color: 'text-primary' },
   failed: { label: 'Failed', variant: 'destructive' as const, icon: XCircle, color: 'text-red-400' },
-  pending: { label: 'Pending', variant: 'secondary' as const, icon: Clock, color: 'text-muted-foreground' },
-  cancelled: { label: 'Cancelled', variant: 'secondary' as const, icon: XCircle, color: 'text-muted-foreground' },
+  pending: {
+    label: 'Pending',
+    variant: 'secondary' as const,
+    icon: Clock,
+    color: 'text-muted-foreground',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    variant: 'secondary' as const,
+    icon: Ban,
+    color: 'text-muted-foreground',
+  },
 };
 
-// Agent pipeline visualization
-function AgentPipeline({ currentAgent, status }: { currentAgent: string | null; status: string }) {
-  const agents = ['tester', 'triage', 'fixer', 'verifier'] as const;
-  
-  // Determine which agents are completed based on current agent
-  const currentIndex = currentAgent ? agents.indexOf(currentAgent as typeof agents[number]) : -1;
-  const isRunComplete = status === 'completed' || status === 'failed';
-
-  return (
-    <div className="flex items-center justify-between py-4">
-      {agents.map((agent, index) => {
-        const agentInfo = agentConfig[agent];
-        const Icon = agentInfo.icon;
-        const isActive = currentAgent === agent;
-        const isCompleted = isRunComplete || (currentIndex > index);
-        const isFailed = status === 'failed' && currentAgent === agent;
-
-        return (
-          <div key={agent} className="flex items-center flex-1">
-            <div className="flex flex-col items-center gap-3">
-              <div className="relative">
-                <div
-                  className={cn(
-                    'w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300',
-                    isActive && !isFailed && 'bg-primary/20 ring-2 ring-primary shadow-lg shadow-primary/25',
-                    isCompleted && !isActive && 'bg-emerald-500/20 ring-2 ring-emerald-500/50',
-                    isFailed && 'bg-red-500/20 ring-2 ring-red-500/50',
-                    !isActive && !isCompleted && !isFailed && 'bg-muted/50'
-                  )}
-                >
-                  {isActive && !isFailed ? (
-                    <Loader2 className={cn('h-6 w-6 animate-spin', agentInfo.color)} />
-                  ) : (
-                    <Icon
-                      className={cn(
-                        'h-6 w-6 transition-colors',
-                        isCompleted ? 'text-emerald-400' : isFailed ? 'text-red-400' : agentInfo.color
-                      )}
-                    />
-                  )}
-                </div>
-                {isCompleted && !isActive && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-white" />
-                  </div>
-                )}
-              </div>
-
-              <div className="text-center">
-                <p className={cn('text-sm font-medium', isActive && 'text-primary')}>{agentInfo.label}</p>
-                {isActive && (
-                  <p className="text-xs text-muted-foreground animate-pulse">Running...</p>
-                )}
-              </div>
-            </div>
-
-            {index < 3 && (
-              <div className="flex-1 mx-4">
-                <div
-                  className={cn(
-                    'h-1 rounded-full transition-all duration-500',
-                    isCompleted ? 'bg-gradient-to-r from-emerald-500 to-emerald-500/50' : 'bg-muted/30'
-                  )}
-                />
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// Format duration in human readable form
 function formatDuration(startedAt: string, completedAt?: string): string {
   const start = new Date(startedAt).getTime();
   const end = completedAt ? new Date(completedAt).getTime() : Date.now();
   const seconds = Math.floor((end - start) / 1000);
-  
+
   if (seconds < 60) return `${seconds}s`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
   return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
+}
+
+// Generate mock activity log entries for demo purposes
+function generateMockActivityLog(run: Run): ActivityLogEntry[] {
+  const entries: ActivityLogEntry[] = [];
+  const baseTime = new Date(run.startedAt).getTime();
+
+  if (run.status === 'pending') return entries;
+
+  // Tester agent activities
+  entries.push({
+    id: '1',
+    timestamp: new Date(baseTime),
+    agent: 'tester',
+    action: 'started',
+    message: 'Starting test execution',
+  });
+
+  run.testSpecs.forEach((spec, i) => {
+    entries.push({
+      id: `test-nav-${i}`,
+      timestamp: new Date(baseTime + 1000 + i * 3000),
+      agent: 'tester',
+      action: 'navigation',
+      message: `Navigating to ${spec.url}`,
+      details: { url: spec.url },
+    });
+
+    spec.steps.forEach((step, j) => {
+      entries.push({
+        id: `test-step-${i}-${j}`,
+        timestamp: new Date(baseTime + 2000 + i * 3000 + j * 500),
+        agent: 'tester',
+        action: 'test_step',
+        message: `Step ${j + 1}: ${step.action}`,
+        details: { testStep: { step: j + 1, action: step.action } },
+      });
+    });
+  });
+
+  const testResult = run.testResults[0];
+  if (testResult) {
+    if (testResult.passed) {
+      entries.push({
+        id: 'test-complete',
+        timestamp: new Date(baseTime + 10000),
+        agent: 'tester',
+        action: 'completed',
+        message: 'All tests passed',
+      });
+    } else {
+      entries.push({
+        id: 'test-failed',
+        timestamp: new Date(baseTime + 10000),
+        agent: 'tester',
+        action: 'failed',
+        message: testResult.failureReport?.error.message || 'Test failed',
+        details: {
+          error: {
+            message: testResult.failureReport?.error.message || 'Unknown error',
+          },
+        },
+      });
+
+      // Triage activities
+      if (run.currentAgent === 'triage' || run.currentAgent === 'fixer' || run.currentAgent === 'verifier' || run.status === 'completed') {
+        entries.push({
+          id: 'triage-start',
+          timestamp: new Date(baseTime + 11000),
+          agent: 'triage',
+          action: 'started',
+          message: 'Analyzing test failure',
+        });
+
+        entries.push({
+          id: 'triage-llm',
+          timestamp: new Date(baseTime + 12000),
+          agent: 'triage',
+          action: 'llm_call',
+          message: 'LLM Call (gpt-4o)',
+          details: {
+            llmCall: {
+              model: 'gpt-4o',
+              prompt: 'Analyze the following test failure...',
+              response: 'Based on the error, the issue appears to be...',
+              tokens: 1250,
+              duration: 2500,
+            },
+          },
+        });
+
+        entries.push({
+          id: 'triage-diagnosis',
+          timestamp: new Date(baseTime + 15000),
+          agent: 'triage',
+          action: 'diagnosis',
+          message: 'Root cause identified: Missing onClick handler',
+        });
+
+        entries.push({
+          id: 'triage-complete',
+          timestamp: new Date(baseTime + 16000),
+          agent: 'triage',
+          action: 'completed',
+          message: 'Diagnosis complete',
+        });
+      }
+
+      // Fixer activities
+      if (run.currentAgent === 'fixer' || run.currentAgent === 'verifier' || run.status === 'completed') {
+        entries.push({
+          id: 'fixer-start',
+          timestamp: new Date(baseTime + 17000),
+          agent: 'fixer',
+          action: 'started',
+          message: 'Generating patch',
+        });
+
+        entries.push({
+          id: 'fixer-llm',
+          timestamp: new Date(baseTime + 18000),
+          agent: 'fixer',
+          action: 'llm_call',
+          message: 'LLM Call (gpt-4o)',
+          details: {
+            llmCall: {
+              model: 'gpt-4o',
+              prompt: 'Generate a fix for the following issue...',
+              response: 'Here is the corrected code...',
+              tokens: 890,
+              duration: 1800,
+            },
+          },
+        });
+
+        entries.push({
+          id: 'fixer-patch',
+          timestamp: new Date(baseTime + 21000),
+          agent: 'fixer',
+          action: 'patch',
+          message: 'Patch generated for app/cart/page.tsx',
+        });
+
+        entries.push({
+          id: 'fixer-complete',
+          timestamp: new Date(baseTime + 22000),
+          agent: 'fixer',
+          action: 'completed',
+          message: 'Patch applied successfully',
+        });
+      }
+
+      // Verifier activities
+      if (run.currentAgent === 'verifier' || run.status === 'completed') {
+        entries.push({
+          id: 'verifier-start',
+          timestamp: new Date(baseTime + 23000),
+          agent: 'verifier',
+          action: 'started',
+          message: 'Deploying fix to Vercel',
+        });
+
+        entries.push({
+          id: 'verifier-deploy',
+          timestamp: new Date(baseTime + 24000),
+          agent: 'verifier',
+          action: 'deploy',
+          message: 'Deployment in progress',
+        });
+
+        if (run.status === 'completed') {
+          entries.push({
+            id: 'verifier-deployed',
+            timestamp: new Date(baseTime + 30000),
+            agent: 'verifier',
+            action: 'deploy',
+            message: 'Deployment successful',
+            details: { url: 'https://app-preview.vercel.app' },
+          });
+
+          entries.push({
+            id: 'verifier-retest',
+            timestamp: new Date(baseTime + 32000),
+            agent: 'verifier',
+            action: 'test_step',
+            message: 'Re-running failed test',
+          });
+
+          entries.push({
+            id: 'verifier-complete',
+            timestamp: new Date(baseTime + 35000),
+            agent: 'verifier',
+            action: 'completed',
+            message: 'Verification successful - all tests pass',
+          });
+        }
+      }
+    }
+  }
+
+  return entries.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+}
+
+// Generate mock diagnostics data
+function generateMockDiagnostics(run: Run): DiagnosticsData {
+  const testResult = run.testResults[0];
+
+  if (!testResult || testResult.passed) return {};
+
+  return {
+    testFailure: {
+      errorMessage: testResult.failureReport?.error.message || 'Unknown error',
+      failedStep: testResult.failureReport?.step,
+      consoleLogs: [
+        { type: 'error', message: "Cannot read property 'onClick' of undefined", timestamp: Date.now() - 5000 },
+        { type: 'error', message: 'at CartPage (cart/page.tsx:45)', timestamp: Date.now() - 4900 },
+        { type: 'warn', message: 'React does not recognize the `isActive` prop on a DOM element', timestamp: Date.now() - 4000 },
+        { type: 'log', message: 'Cart loaded with 3 items', timestamp: Date.now() - 6000 },
+      ],
+      url: run.testSpecs[0]?.url || 'http://localhost:3000/cart',
+    },
+    triage: run.currentAgent !== 'tester' ? {
+      reasoning: 'The test failure indicates a missing onClick handler on the checkout button. This is likely due to a recent refactor where the handler was accidentally removed. The error occurs when the user attempts to click the button, but no action is attached.',
+      confidenceBreakdown: [
+        { category: 'Error Pattern Match', score: 0.95 },
+        { category: 'Code Similarity', score: 0.82 },
+        { category: 'Historical Fix Success', score: 0.88 },
+      ],
+      similarIssuesCount: 3,
+      diagnosis: {
+        failureId: 'fail-001',
+        failureType: 'UI_BUG',
+        rootCause: 'Missing onClick handler on checkout button',
+        localization: {
+          file: 'app/cart/page.tsx',
+          startLine: 42,
+          endLine: 48,
+          codeSnippet: `<Button
+  className="w-full"
+  disabled={items.length === 0}
+>
+  Proceed to Checkout
+</Button>`,
+        },
+        similarIssues: [],
+        suggestedFix: 'Add onClick handler to trigger checkout flow',
+        confidence: 0.92,
+      },
+    } : undefined,
+    patch: run.patches.length > 0 ? {
+      filePath: run.patches[0].file,
+      beforeCode: `<Button
+  className="w-full"
+  disabled={items.length === 0}
+>
+  Proceed to Checkout
+</Button>`,
+      afterCode: `<Button
+  className="w-full"
+  disabled={items.length === 0}
+  onClick={handleCheckout}
+>
+  Proceed to Checkout
+</Button>`,
+      linesAdded: run.patches[0].metadata.linesAdded,
+      linesRemoved: run.patches[0].metadata.linesRemoved,
+      llmReasoning: 'Added the missing onClick handler that triggers the handleCheckout function. This function was already defined in the component but was not connected to the button.',
+    } : undefined,
+    verification: run.currentAgent === 'verifier' || run.status === 'completed' ? {
+      deploymentUrl: 'https://patchpilot-preview.vercel.app',
+      deploymentStatus: run.status === 'completed' ? 'ready' : 'building',
+      retestPassed: run.status === 'completed',
+      retestDuration: run.status === 'completed' ? 4500 : undefined,
+    } : undefined,
+  };
+}
+
+// Generate mock agent states
+function generateAgentStates(run: Run): Partial<Record<AgentType, AgentExecutionState>> {
+  const states: Partial<Record<AgentType, AgentExecutionState>> = {};
+  const baseTime = new Date(run.startedAt);
+
+  // Determine which agents have completed based on current state
+  const agents: AgentType[] = ['tester', 'triage', 'fixer', 'verifier'];
+  const currentIndex = run.currentAgent ? agents.indexOf(run.currentAgent) : -1;
+
+  agents.forEach((agent, index) => {
+    if (index < currentIndex) {
+      states[agent] = {
+        agent,
+        status: 'completed',
+        startTime: new Date(baseTime.getTime() + index * 8000),
+        endTime: new Date(baseTime.getTime() + (index + 1) * 8000),
+        duration: 8000,
+      };
+    } else if (index === currentIndex) {
+      states[agent] = {
+        agent,
+        status: 'running',
+        startTime: new Date(baseTime.getTime() + index * 8000),
+        currentAction: agent === 'tester' ? 'Running tests...' :
+                       agent === 'triage' ? 'Analyzing failure...' :
+                       agent === 'fixer' ? 'Generating patch...' :
+                       'Deploying fix...',
+        progress: 45,
+      };
+    } else {
+      states[agent] = {
+        agent,
+        status: 'idle',
+      };
+    }
+  });
+
+  if (run.status === 'completed') {
+    agents.forEach((agent, index) => {
+      states[agent] = {
+        agent,
+        status: 'completed',
+        startTime: new Date(baseTime.getTime() + index * 8000),
+        endTime: new Date(baseTime.getTime() + (index + 1) * 8000),
+        duration: 8000,
+      };
+    });
+  }
+
+  if (run.status === 'failed' && run.currentAgent) {
+    states[run.currentAgent] = {
+      ...states[run.currentAgent]!,
+      status: 'failed',
+      error: 'Agent encountered an error',
+    };
+  }
+
+  return states;
 }
 
 export default function RunDetailPage({ params }: { params: Promise<{ runId: string }> }) {
@@ -181,6 +423,9 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activityLog, setActivityLog] = useState<ActivityLogEntry[]>([]);
+  const [diagnostics, setDiagnostics] = useState<DiagnosticsData>({});
+  const [agentStates, setAgentStates] = useState<Partial<Record<AgentType, AgentExecutionState>>>({});
 
   const fetchRun = useCallback(async () => {
     try {
@@ -194,8 +439,14 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
         return;
       }
       const data = await res.json();
-      setRun(data.run);
+      const fetchedRun = data.run as Run;
+      setRun(fetchedRun);
       setError(null);
+
+      // Generate mock data for demo
+      setActivityLog(generateMockActivityLog(fetchedRun));
+      setDiagnostics(generateMockDiagnostics(fetchedRun));
+      setAgentStates(generateAgentStates(fetchedRun));
     } catch (err) {
       setError('Failed to fetch run data');
     } finally {
@@ -305,7 +556,8 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                Run #{run.id.slice(0, 8)} · Iteration {run.iteration}/{run.maxIterations} · {run.testSpecs.length} test(s)
+                Run #{run.id.slice(0, 8)} · Iteration {run.iteration}/{run.maxIterations} ·{' '}
+                {run.testSpecs.length} test(s)
               </p>
             </div>
           </div>
@@ -329,7 +581,9 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Tests</p>
-                  <p className="text-2xl font-bold">{passedTests}/{totalTests}</p>
+                  <p className="text-2xl font-bold">
+                    {passedTests}/{totalTests}
+                  </p>
                 </div>
                 <TestTube2 className="h-8 w-8 text-blue-400 opacity-50" />
               </div>
@@ -353,7 +607,9 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Iteration</p>
-                  <p className="text-2xl font-bold">{run.iteration}/{run.maxIterations}</p>
+                  <p className="text-2xl font-bold">
+                    {run.iteration}/{run.maxIterations}
+                  </p>
                 </div>
                 <RefreshCw className="h-8 w-8 text-amber-400 opacity-50" />
               </div>
@@ -373,23 +629,27 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
           </Card>
         </div>
 
-        {/* Agent Pipeline */}
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-3 bg-gradient-to-r from-muted/30 to-transparent">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-400" />
-              Agent Pipeline
-            </CardTitle>
-            <CardDescription>AI agents working together to test, diagnose, fix, and verify</CardDescription>
-          </CardHeader>
-          <CardContent className="py-6">
-            <AgentPipeline currentAgent={run.currentAgent} status={run.status} />
-          </CardContent>
-        </Card>
+        {/* Enhanced Agent Pipeline */}
+        <EnhancedAgentPipeline
+          currentAgent={run.currentAgent}
+          status={run.status}
+          agentStates={agentStates}
+        />
 
-        {/* Tabs */}
-        <Tabs defaultValue="tests" className="space-y-4">
+        {/* Activity Log & Diagnostics Tabs */}
+        <Tabs defaultValue="activity" className="space-y-4">
           <TabsList className="bg-muted/50">
+            <TabsTrigger value="activity" className="gap-2">
+              Activity Log
+              {activityLog.length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-xs">
+                  {activityLog.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="diagnostics" className="gap-2">
+              Diagnostics
+            </TabsTrigger>
             <TabsTrigger value="tests" className="gap-2">
               <TestTube2 className="h-4 w-4" />
               Tests ({run.testSpecs.length})
@@ -398,11 +658,18 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
               <Wrench className="h-4 w-4" />
               Patches ({run.patches.length})
             </TabsTrigger>
-            <TabsTrigger value="results" className="gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Results ({run.testResults.length})
-            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="activity">
+            <ActivityLog
+              entries={activityLog}
+              isLive={run.status === 'running'}
+            />
+          </TabsContent>
+
+          <TabsContent value="diagnostics">
+            <DiagnosticsPanel diagnostics={diagnostics} />
+          </TabsContent>
 
           <TabsContent value="tests" className="space-y-4">
             <Card>
@@ -415,7 +682,7 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
                       const result = run.testResults[index];
                       const passed = result?.passed;
                       const hasResult = result !== undefined;
-                      
+
                       return (
                         <div
                           key={spec.id}
@@ -427,12 +694,14 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
                           )}
                         >
                           <div className="flex items-center gap-4">
-                            <div className={cn(
-                              'w-10 h-10 rounded-lg flex items-center justify-center',
-                              hasResult && passed && 'bg-emerald-500/20',
-                              hasResult && !passed && 'bg-red-500/20',
-                              !hasResult && 'bg-muted'
-                            )}>
+                            <div
+                              className={cn(
+                                'w-10 h-10 rounded-lg flex items-center justify-center',
+                                hasResult && passed && 'bg-emerald-500/20',
+                                hasResult && !passed && 'bg-red-500/20',
+                                !hasResult && 'bg-muted'
+                              )}
+                            >
                               {!hasResult ? (
                                 <Clock className="h-5 w-5 text-muted-foreground" />
                               ) : passed ? (
@@ -466,7 +735,9 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
             <Card>
               <CardContent className="pt-6">
                 {run.patches.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No patches generated yet</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    No patches generated yet
+                  </p>
                 ) : (
                   <div className="space-y-4">
                     {run.patches.map((patch) => (
@@ -476,8 +747,12 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <p className="font-mono text-sm font-medium text-primary">{patch.file}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{patch.description}</p>
+                            <p className="font-mono text-sm font-medium text-primary">
+                              {patch.file}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {patch.description}
+                            </p>
                             <div className="flex items-center gap-4 mt-3">
                               <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
                                 +{patch.metadata.linesAdded} added
@@ -496,54 +771,6 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
                           <pre className="mt-3 p-3 bg-background rounded-lg text-xs font-mono overflow-x-auto border">
                             {patch.diff}
                           </pre>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="results" className="space-y-4">
-            <Card>
-              <CardContent className="pt-6">
-                {run.testResults.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No test results yet</p>
-                ) : (
-                  <div className="space-y-4">
-                    {run.testResults.map((result, index) => (
-                      <div
-                        key={index}
-                        className={cn(
-                          'p-4 rounded-xl border',
-                          result.passed ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          {result.passed ? (
-                            <CheckCircle className="h-5 w-5 text-emerald-400" />
-                          ) : (
-                            <XCircle className="h-5 w-5 text-red-400" />
-                          )}
-                          <div className="flex-1">
-                            <p className="font-medium">
-                              Test {index + 1}: {result.passed ? 'Passed' : 'Failed'}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Duration: {(result.duration / 1000).toFixed(1)}s
-                            </p>
-                          </div>
-                        </div>
-                        {result.failureReport && (
-                          <div className="mt-3 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                            <p className="text-sm font-medium text-red-400">
-                              Step {result.failureReport.step} failed
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {result.failureReport.error.message}
-                            </p>
-                          </div>
                         )}
                       </div>
                     ))}

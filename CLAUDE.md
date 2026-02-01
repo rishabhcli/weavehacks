@@ -6,7 +6,7 @@ This file is the **single source of truth** for AI agents working on this projec
 
 **Project:** PatchPilot - Self-Healing QA Agent
 **Description:** A self-improving QA agent that automatically tests web applications, identifies bugs, applies fixes to the app's code, and verifies the fixes – all without human intervention. It combines automated bug-finding and fixing in a closed-loop system that iterates until all tests pass.
-**Status:** Phase 0 - Planning
+**Status:** Phase 8 - Complete (Dashboard UI & GitHub OAuth)
 
 ### Why This Matters
 
@@ -25,7 +25,7 @@ This file is the **single source of truth** for AI agents working on this projec
 | Hosting/Deployment | **Vercel** | Host web app and instant deploy after fixes |
 | Vector Memory | **Redis** | Store failure traces, fixes, and enable semantic lookup |
 | Observability | **W&B Weave** | Trace agent runs, log metrics, evaluate improvements |
-| Orchestration | **Google Cloud ADK/A2A** | Multi-agent workflow coordination |
+| Orchestration | **Custom Orchestrator (ADK/A2A-compatible)** | Multi-agent workflow coordination (ADK/A2A integration planned) |
 | Dashboard | **Marimo** | Interactive analytics and live visualization |
 | Demo App | **Next.js** | Target application for testing/fixing |
 | LLM | **OpenAI/Anthropic** | Patch generation and diagnosis |
@@ -40,7 +40,7 @@ This file is the **single source of truth** for AI agents working on this projec
 2. **Triage Agent** - Diagnoses failures, collects reproduction steps, queries knowledge base
 3. **Fixer Agent** - Generates code patches using LLM + past fix patterns from Redis
 4. **Verifier Agent** - Applies patches, redeploys via Vercel, re-runs tests
-5. **Orchestrator** - Coordinates workflow via Google ADK/A2A
+5. **Orchestrator** - Coordinates workflow via a custom, ADK/A2A-compatible orchestrator (integration planned)
 
 ### The PatchPilot Loop
 
@@ -79,51 +79,57 @@ This file is the **single source of truth** for AI agents working on this projec
 
 ### Phase 0: Planning & Setup
 - [x] Define PRD and architecture
-- [ ] Set up project structure
-- [ ] Configure development environment
-- [ ] Initialize Next.js demo app with intentional bugs
+- [x] Set up project structure
+- [x] Configure development environment
+- [x] Initialize Next.js demo app with intentional bugs
 
 ### Phase 1: Test Environment (Browserbase + Stagehand)
-- [ ] Set up Browserbase account and API access
-- [ ] Integrate Stagehand SDK
-- [ ] Write 2-3 critical user flow tests
-- [ ] Implement Tester Agent with failure detection
+- [x] Set up Browserbase account and API access
+- [x] Integrate Stagehand SDK
+- [x] Write 2-3 critical user flow tests
+- [x] Implement Tester Agent with failure detection
 
 ### Phase 2: Core PatchPilot Loop
-- [ ] Implement Triage Agent (failure analysis)
-- [ ] Implement Fixer Agent (LLM patch generation)
-- [ ] Implement Verifier Agent (deploy + retest)
-- [ ] Create basic orchestration script
+- [x] Implement Triage Agent (failure analysis)
+- [x] Implement Fixer Agent (LLM patch generation)
+- [x] Implement Verifier Agent (deploy + retest)
+- [x] Create basic orchestration script
 
 ### Phase 3: Knowledge Base (Redis)
-- [ ] Set up Redis with vector search
-- [ ] Implement failure trace embedding
-- [ ] Create semantic lookup for similar issues
-- [ ] Store and retrieve fix patterns
+- [x] Set up Redis with vector search
+- [x] Implement failure trace embedding
+- [x] Create semantic lookup for similar issues
+- [x] Store and retrieve fix patterns
 
 ### Phase 4: Logging & Dashboard (Weave + Marimo)
-- [ ] Integrate W&B Weave for tracing
-- [ ] Log all agent steps and metrics
-- [ ] Create Marimo dashboard
-- [ ] Visualize pass rate, time-to-fix, iterations
+- [x] Integrate W&B Weave for tracing
+- [x] Log all agent steps and metrics
+- [x] Create Marimo dashboard
+- [x] Visualize pass rate, time-to-fix, iterations
 
 ### Phase 5: TraceTriage & Self-Improvement
-- [ ] Implement trace analysis for agent failures
-- [ ] Auto-label failure causes (tool error, prompt drift, etc.)
-- [ ] A/B test workflow improvements
-- [ ] Refine prompts based on trace data
+- [x] Implement trace analysis for agent failures
+- [x] Auto-label failure causes (tool error, prompt drift, etc.)
+- [x] A/B test workflow improvements
+- [x] Refine prompts based on trace data
 
 ### Phase 6: RedTeam Integration
-- [ ] Create adversarial test suite
-- [ ] Add fuzzing for edge cases
-- [ ] Implement safety/jailbreak checks
-- [ ] Continuous regression for security
+- [x] Create adversarial test suite
+- [x] Add fuzzing for edge cases
+- [x] Implement safety/jailbreak checks
+- [x] Continuous regression for security
 
 ### Phase 7: Demo Preparation
-- [ ] End-to-end run validation
-- [ ] Record demo scenarios
-- [ ] Prepare 3-minute presentation
-- [ ] Document sponsor integrations
+- [x] End-to-end run validation
+- [x] Record demo scenarios
+- [x] Prepare 3-minute presentation
+- [x] Document sponsor integrations
+
+### Phase 8: Dashboard UI & GitHub OAuth
+- [x] Build interactive dashboard UI
+- [x] Implement GitHub OAuth authentication
+- [x] Add MCP server configuration
+- [x] Final integration testing
 
 ---
 
@@ -134,6 +140,8 @@ This file is the **single source of truth** for AI agents working on this projec
 cp .env.example .env.local
 ```
 
+### Core Services
+
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `BROWSERBASE_API_KEY` | Browserbase API key for browser automation | Yes |
@@ -143,8 +151,25 @@ cp .env.example .env.local
 | `VERCEL_TOKEN` | Vercel API token for deployments | Yes |
 | `VERCEL_PROJECT_ID` | Vercel project identifier | Yes |
 | `WANDB_API_KEY` | Weights & Biases API key for Weave | Yes |
-| `GOOGLE_CLOUD_PROJECT` | Google Cloud project for ADK | Yes |
-| `ANTHROPIC_API_KEY` | Anthropic API key (optional, backup LLM) | No |
+| `GOOGLE_CLOUD_PROJECT` | Reserved for ADK/A2A integration (not required today) | No |
+| `ANTHROPIC_API_KEY` | Anthropic API key (backup LLM) | No |
+
+### GitHub Integration
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GITHUB_TOKEN` | GitHub token for code operations | Yes |
+| `GITHUB_CLIENT_ID` | GitHub OAuth App client ID | Yes |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth App client secret | Yes |
+| `SESSION_SECRET` | Session encryption key (use `openssl rand -hex 32`) | Yes |
+
+### MCP Server Integrations (Optional)
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | PostgreSQL connection string | No |
+| `SLACK_BOT_TOKEN` | Slack bot token for notifications | No |
+| `LINEAR_API_KEY` | Linear API key for issue tracking | No |
 
 ---
 
@@ -191,7 +216,7 @@ The `.claude/skills/` directory contains domain-specific knowledge modules:
 | `redis-vectorstore/` | Vector embeddings, semantic search, knowledge base |
 | `vercel-deployment/` | Programmatic deployments, git integration |
 | `wandb-weave/` | Tracing, evaluation, metrics logging |
-| `google-adk/` | Multi-agent orchestration, A2A protocol |
+| `google-adk/` | Reference patterns for planned ADK/A2A integration |
 | `marimo-dashboards/` | Reactive notebooks, data visualization |
 | `patchpilot-agents/` | Agent implementations, prompts, workflows |
 
@@ -283,8 +308,8 @@ weavehacks/
 
 ## Current Focus
 
-**Active Phase:** Phase 0 - Planning
-**Current Task:** Define full project structure and documentation
+**Active Phase:** Complete - All phases implemented
+**Current Task:** Maintenance and improvements
 **Blockers:** None
 
 ---
@@ -308,9 +333,9 @@ weavehacks/
 - [Browserbase Docs](https://docs.browserbase.com/) - Cloud browser infrastructure
 - [Redis Vector Search](https://redis.io/docs/stack/search/reference/vectors/) - Semantic similarity
 - [W&B Weave](https://wandb.ai/site/weave) - LLM observability
-- [Google ADK](https://cloud.google.com/agent-development-kit) - Agent orchestration
+- [Google ADK](https://cloud.google.com/agent-development-kit) - Planned orchestration framework
 - [Marimo](https://marimo.io/) - Reactive Python notebooks
 
 ---
 
-*Last updated: 2024*
+*Last updated: January 2026*

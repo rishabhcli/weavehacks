@@ -57,24 +57,25 @@ export function useRunStream({
             const newState = { ...prev, events: [...prev.events, data] };
 
             // Update state based on event type
+            const eventData = data.data as Record<string, unknown>;
             switch (data.type) {
               case 'status':
-                newState.status = data.data.status as RunStreamState['status'];
+                newState.status = eventData.status as RunStreamState['status'];
                 break;
               case 'agent':
-                if (data.data.status === 'started') {
-                  newState.currentAgent = data.data.agent as string;
+                if (eventData.status === 'started') {
+                  newState.currentAgent = eventData.agent as string;
                 }
                 break;
               case 'complete':
-                newState.status = data.data.success ? 'completed' : 'failed';
+                newState.status = eventData.success ? 'completed' : 'failed';
                 newState.currentAgent = null;
-                onComplete?.(data.data.success as boolean);
+                onComplete?.(eventData.success as boolean);
                 break;
               case 'error':
-                newState.error = data.data.error as string;
+                newState.error = eventData.error as string;
                 newState.status = 'failed';
-                onError?.(data.data.error as string);
+                onError?.(eventData.error as string);
                 break;
             }
 

@@ -10,7 +10,7 @@ This document captures key architecture decisions using the ADR (Architecture De
 
 | ID | Title | Status | Date |
 |----|-------|--------|------|
-| ADR-001 | Multi-Agent Architecture with Google ADK | Accepted | 2024 |
+| ADR-001 | Multi-Agent Architecture (ADK/A2A-compatible) | Accepted | 2024 |
 | ADR-002 | Browserbase + Stagehand for Browser Automation | Accepted | 2024 |
 | ADR-003 | Redis for Vector Knowledge Base | Accepted | 2024 |
 | ADR-004 | Vercel for Deployment Automation | Accepted | 2024 |
@@ -21,7 +21,7 @@ This document captures key architecture decisions using the ADR (Architecture De
 
 ---
 
-## ADR-001: Multi-Agent Architecture with Google ADK
+## ADR-001: Multi-Agent Architecture (ADK/A2A-compatible)
 
 **Status:** Accepted
 **Date:** 2024
@@ -33,32 +33,29 @@ PatchPilot requires coordination between multiple specialized components: testin
 
 ### Decision
 
-Use Google Cloud's Agent Development Kit (ADK) and Agent-to-Agent (A2A) protocol to orchestrate our multi-agent workflow.
+Implement a custom orchestrator now, keeping agent interfaces ADK/A2A-compatible and deferring full ADK/A2A integration until a dedicated integration phase.
 
 ### Consequences
 
 **Positive:**
-- Well-defined handoff of context between agents
-- Structured message passing
-- Built-in support for agent lifecycle management
-- Scalable to more complex workflows
-- Aligns with hackathon sponsor (Google Cloud)
+- Immediate integration with the existing TypeScript codebase
+- No new runtime dependency for the MVP
+- Clear agent boundaries for future ADK/A2A mapping
 
 **Negative:**
-- Learning curve for ADK
-- Adds dependency on Google Cloud
-- May be overkill for MVP
+- Missing ADK/A2A features (standardized orchestration, tools, telemetry)
+- Additional migration work later
 
 **Mitigation:**
-- Start with simple linear orchestration script
-- Graduate to full ADK as time permits
-- Keep agent interfaces ADK-compatible from start
+- Keep agent inputs/outputs explicit and stable
+- Document ADK/A2A mapping points
+- Revisit ADK/A2A integration post-MVP
 
 ### Alternatives Considered
 
-1. **Simple script orchestration**: Rejected - doesn't scale, hard to debug
-2. **LangGraph**: Rejected - different paradigm, not sponsor
-3. **Custom orchestration**: Rejected - reinventing the wheel
+1. **Adopt ADK/A2A now**: Deferred - integration not implemented yet
+2. **Custom orchestration**: Chosen - fastest path for MVP
+3. **LangGraph**: Rejected - different paradigm, not sponsor
 
 ---
 
@@ -523,7 +520,7 @@ Create a simple Next.js application with 2-3 pages and intentional bugs that can
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                            PATCHPILOT SYSTEM                             │
 │  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                    ORCHESTRATOR (Google ADK)                       │  │
+│  │              ORCHESTRATOR (Custom, ADK-compatible)                 │  │
 │  │                                                                    │  │
 │  │    ┌──────────┐      ┌──────────┐      ┌──────────┐               │  │
 │  │    │  TESTER  │─────▶│  TRIAGE  │─────▶│  FIXER   │               │  │
@@ -632,7 +629,7 @@ Create a simple Next.js application with 2-3 pages and intentional bugs that can
 | Tracing | W&B Weave | Observability | Free |
 | Dashboard | Marimo | Visualization | Free |
 | LLM | OpenAI | Patch generation | Pay-as-go |
-| Orchestration | Google ADK | Agent coordination | Free |
+| Orchestration | Custom (ADK/A2A-compatible; ADK planned) | Agent coordination | n/a |
 
 ### Resource Limits (Free Tier)
 

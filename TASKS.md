@@ -267,7 +267,7 @@ This file tracks all project tasks organized by phase. Update this file as work 
   - Redis knowledge base showcase ✅
   - Vercel deployment integration ✅
   - W&B Weave tracing demos ✅
-  - Google ADK orchestration ✅
+  - ADK/A2A-compatible orchestration documentation (integration planned) ✅
   - Marimo dashboard documentation ✅
   - Architecture diagram included
 

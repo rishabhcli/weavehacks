@@ -106,7 +106,7 @@ function printTechStack() {
    ${colors.blue}Redis${colors.reset}                    →  Vector knowledge base for learning patterns
    ${colors.blue}Vercel${colors.reset}                   →  Instant deployment after fixes
    ${colors.blue}W&B Weave${colors.reset}                →  Tracing and observability
-   ${colors.blue}Google ADK${colors.reset}               →  Multi-agent orchestration
+   ${colors.blue}Custom Orchestrator${colors.reset}      →  Multi-agent orchestration (ADK/A2A planned)
    ${colors.blue}Marimo${colors.reset}                   →  Interactive analytics dashboard
 
 `);

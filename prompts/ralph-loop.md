@@ -442,7 +442,7 @@ Redis knowledge base for similar past fixes."
 - Redis for learning from past bugs
 - Vercel for instant deployment
 - W&B Weave for tracing
-- Google ADK for orchestration
+- Custom orchestrator (ADK/A2A-compatible; ADK planned)
 - Marimo for visualization
 
 A self-improving agent that gets smarter with every bug it fixes."

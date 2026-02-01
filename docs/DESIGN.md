@@ -18,7 +18,7 @@
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                         ORCHESTRATOR (Google ADK)                    │   │
+│  │                  ORCHESTRATOR (Custom, ADK-compatible)               │   │
 │  │                                                                      │   │
 │  │   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐        │   │
 │  │   │  TESTER  │──▶│  TRIAGE  │──▶│  FIXER   │──▶│ VERIFIER │        │   │
@@ -45,6 +45,8 @@
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+**Note:** The current implementation uses a custom orchestrator with ADK/A2A-compatible interfaces. Full ADK/A2A integration is planned.
 
 ### 1.2 Data Flow
 

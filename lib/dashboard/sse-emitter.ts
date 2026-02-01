@@ -1,4 +1,12 @@
-import type { RunEvent } from '@/lib/types';
+import type {
+  RunEvent,
+  ActivityLogEntry,
+  DiagnosticsData,
+  AgentType,
+  ActivityAction,
+  LLMCallDetails,
+} from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
 
 type SSECallback = (event: RunEvent) => void;
 
@@ -122,4 +130,117 @@ export function emitRunError(runId: string, error: string): void {
     runId,
     data: { error },
   });
+}
+
+// ============================================================================
+// Activity Log Emitters
+// ============================================================================
+
+export function emitActivity(
+  runId: string,
+  agent: AgentType,
+  action: ActivityAction,
+  message: string,
+  details?: ActivityLogEntry['details']
+): void {
+  const entry: ActivityLogEntry = {
+    id: uuidv4(),
+    timestamp: new Date(),
+    agent,
+    action,
+    message,
+    details,
+  };
+
+  sseEmitter.emit({
+    type: 'activity' as RunEvent['type'],
+    timestamp: new Date(),
+    runId,
+    data: entry,
+  });
+}
+
+export function emitLLMCall(
+  runId: string,
+  agent: AgentType,
+  llmCall: LLMCallDetails
+): void {
+  emitActivity(runId, agent, 'llm_call', `LLM Call (${llmCall.model})`, {
+    llmCall,
+  });
+}
+
+export function emitTestStep(
+  runId: string,
+  step: number,
+  action: string,
+  passed?: boolean
+): void {
+  const status = passed === undefined ? '' : passed ? ' - Passed' : ' - Failed';
+  emitActivity(runId, 'tester', 'test_step', `Step ${step}: ${action}${status}`, {
+    testStep: { step, action, passed },
+  });
+}
+
+export function emitNavigation(runId: string, agent: AgentType, url: string): void {
+  emitActivity(runId, agent, 'navigation', `Navigating to ${url}`, { url });
+}
+
+export function emitScreenshot(runId: string, agent: AgentType, screenshotUrl: string): void {
+  emitActivity(runId, agent, 'screenshot', 'Screenshot captured', {
+    screenshot: screenshotUrl,
+  });
+}
+
+export function emitDiagnosis(runId: string, diagnosis: string): void {
+  emitActivity(runId, 'triage', 'diagnosis', diagnosis);
+}
+
+export function emitPatchActivity(runId: string, file: string, description: string): void {
+  emitActivity(runId, 'fixer', 'patch', `Patching ${file}: ${description}`);
+}
+
+export function emitDeployActivity(runId: string, status: string, url?: string): void {
+  emitActivity(runId, 'verifier', 'deploy', status, url ? { url } : undefined);
+}
+
+// ============================================================================
+// Diagnostics Emitters
+// ============================================================================
+
+export function emitDiagnostics(runId: string, diagnostics: Partial<DiagnosticsData>): void {
+  sseEmitter.emit({
+    type: 'diagnostics' as RunEvent['type'],
+    timestamp: new Date(),
+    runId,
+    data: diagnostics,
+  });
+}
+
+export function emitTestFailureDiagnostics(
+  runId: string,
+  testFailure: DiagnosticsData['testFailure']
+): void {
+  emitDiagnostics(runId, { testFailure });
+}
+
+export function emitTriageDiagnostics(
+  runId: string,
+  triage: DiagnosticsData['triage']
+): void {
+  emitDiagnostics(runId, { triage });
+}
+
+export function emitPatchDiagnostics(
+  runId: string,
+  patch: DiagnosticsData['patch']
+): void {
+  emitDiagnostics(runId, { patch });
+}
+
+export function emitVerificationDiagnostics(
+  runId: string,
+  verification: DiagnosticsData['verification']
+): void {
+  emitDiagnostics(runId, { verification });
 }

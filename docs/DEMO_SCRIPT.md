@@ -102,12 +102,12 @@ pnpm run demo
 
 **[Show: Dashboard with all metrics]**
 
-> "PatchPilot integrates seven sponsor technologies:
+> "PatchPilot integrates six sponsor technologies today and plans Google ADK integration:
 > - **Browserbase** and **Stagehand** for cloud browser testing
 > - **Redis** for learning from past bugs
 > - **Vercel** for instant deployments
 > - **W&B Weave** for tracing every agent action
-> - **Google ADK** for multi-agent orchestration
+> - **Custom Orchestrator (ADK/A2A-compatible)** for multi-agent orchestration (ADK integration planned)
 > - **Marimo** for real-time visualization
 >
 > A self-improving QA agent that gets smarter with every bug it fixes."
@@ -126,7 +126,7 @@ pnpm run demo
 
 - **W&B Weave**: "Every agent action is traced. We can see exactly what the LLM was thinking, what Redis returned, how long each step took."
 
-- **Google ADK**: "Our agents coordinate through Google's Agent Development Kit. The orchestrator sequences Tester → Triage → Fixer → Verifier."
+- **Custom Orchestrator (ADK/A2A-compatible)**: "Our agents coordinate through a custom orchestrator today, designed to map cleanly to Google ADK/A2A in a future integration. It sequences Tester → Triage → Fixer → Verifier."
 
 - **Marimo**: "The dashboard is a reactive Python notebook. Charts update in real-time as PatchPilot finds and fixes bugs."
 

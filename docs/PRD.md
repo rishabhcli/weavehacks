@@ -170,10 +170,12 @@ The system operates in a closed-loop: deploy app → test → find bugs → fix 
 - [ ] Logs all steps to Weave
 
 **Technical Requirements:**
-- Google ADK/A2A integration
+- ADK/A2A-compatible orchestration (full ADK/A2A integration planned)
 - Agent-to-agent message passing
 - State management across iterations
 - Weave trace integration
+
+**Implementation Note:** The current codebase uses a custom orchestrator; ADK/A2A integration is deferred.
 
 ---
 
@@ -404,7 +406,7 @@ The system operates in a closed-loop: deploy app → test → find bugs → fix 
 | **Vercel** | Hosting and deployment | Instant deploy after fixes |
 | **Redis** | Vector knowledge base | Learn from past bugs |
 | **W&B Weave** | Tracing and evaluation | Prove agent improvement |
-| **Google ADK** | Agent orchestration | Coordinate multi-agent workflow |
+| **Google ADK (planned)** | Agent orchestration | Coordinate multi-agent workflow |
 | **Marimo** | Interactive dashboard | Visualize metrics and progress |
 
 ---

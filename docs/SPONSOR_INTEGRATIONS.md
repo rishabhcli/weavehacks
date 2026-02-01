@@ -1,6 +1,6 @@
 # Sponsor Integrations
 
-PatchPilot integrates seven sponsor technologies to create a self-healing QA system. This document details how each technology is used.
+PatchPilot integrates six sponsor technologies today and plans Google ADK integration. This document details current usage and planned alignment.
 
 ---
 
@@ -13,7 +13,7 @@ PatchPilot integrates seven sponsor technologies to create a self-healing QA sys
 | Redis | Vector database | Knowledge base for patterns |
 | Vercel | Deployment platform | Auto-deploy after fixes |
 | W&B Weave | Observability | Tracing all agent actions |
-| Google ADK | Agent framework | Multi-agent orchestration |
+| Google ADK (planned) | Agent framework | Multi-agent orchestration |
 | Marimo | Dashboard framework | Real-time analytics |
 
 ---
@@ -307,16 +307,16 @@ export function logRunMetrics(metrics: RunMetrics) {
 
 ---
 
-## 5. Google ADK
+## 5. Google ADK (Planned)
 
 ### Overview
-Google Agent Development Kit provides the framework for multi-agent coordination. The Orchestrator uses ADK patterns for sequencing agents.
+Google Agent Development Kit integration is planned. The current Orchestrator is custom but follows ADK-style sequencing to keep interfaces compatible for a future ADK/A2A migration.
 
-### Integration Points
+### Current Implementation (ADK-compatible Pattern)
 
 **File:** `agents/orchestrator/index.ts`
 ```typescript
-// ADK-style agent coordination
+// Custom orchestrator with ADK-compatible sequencing
 export class Orchestrator {
   private agents: Map<string, Agent> = new Map();
 
@@ -329,7 +329,7 @@ export class Orchestrator {
   }
 
   async runPipeline(config: OrchestratorConfig) {
-    // ADK-style sequential execution with context passing
+    // Sequential execution with context passing (ADK-compatible pattern)
     let context = { testSpecs: config.testSpecs };
 
     for (const [name, agent] of this.agents) {
@@ -344,7 +344,7 @@ export class Orchestrator {
 }
 ```
 
-### Key Features Used
+### Design Principles Used
 - **Agent Registry**: Central management of agent instances
 - **Context Passing**: Share state between agents
 - **Pipeline Execution**: Sequential agent coordination
@@ -352,7 +352,7 @@ export class Orchestrator {
 ### Why This Matters
 - Modular architecture - add/remove agents easily
 - Clear data flow - each agent knows its inputs/outputs
-- Debugging - isolate issues to specific agents
+- Future ADK/A2A adoption without rewrites
 
 ---
 
@@ -429,7 +429,7 @@ def recent_fixes(mo, pd):
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │   ┌──────────────────────────────────────────────────────────┐  │
-│   │                    Google ADK (Orchestration)            │  │
+│   │          Custom Orchestrator (ADK-compatible)            │  │
 │   │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │  │
 │   │  │  Tester  │→ │  Triage  │→ │  Fixer   │→ │ Verifier │ │  │
 │   │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘ │  │
@@ -467,7 +467,7 @@ def recent_fixes(mo, pd):
 | `VERCEL_TOKEN` | Vercel | Deployment API access |
 | `VERCEL_PROJECT_ID` | Vercel | Project identifier |
 | `WANDB_API_KEY` | W&B Weave | Observability API access |
-| `GOOGLE_CLOUD_PROJECT` | Google ADK | Cloud project identifier |
+| `GOOGLE_CLOUD_PROJECT` | Google ADK (planned) | Cloud project identifier |
 
 ### Required Dependencies
 
@@ -501,5 +501,5 @@ Built with:
 - **[Redis](https://redis.io)** - Vector database with semantic search
 - **[Vercel](https://vercel.com)** - Instant deployments
 - **[W&B Weave](https://wandb.ai/site/weave)** - LLM observability
-- **[Google ADK](https://cloud.google.com/agent-development-kit)** - Agent orchestration
+- **[Google ADK](https://cloud.google.com/agent-development-kit)** - Planned orchestration framework
 - **[Marimo](https://marimo.io)** - Reactive Python notebooks
