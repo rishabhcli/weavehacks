@@ -8,6 +8,7 @@
 import { createClient, RedisClientType } from 'redis';
 
 let redisClient: RedisClientType | null = null;
+let connectionFailed = false;
 
 export interface RedisConfig {
   url: string;
@@ -15,32 +16,67 @@ export interface RedisConfig {
 }
 
 /**
+ * Check if we're in a build environment (no Redis available)
+ */
+function isBuildTime(): boolean {
+  return process.env.NEXT_PHASE === 'phase-production-build' ||
+         process.env.VERCEL_ENV === undefined && !process.env.REDIS_URL;
+}
+
+/**
  * Get or create the Redis client singleton
  */
 export async function getRedisClient(): Promise<RedisClientType> {
+  // Don't attempt connection during build
+  if (isBuildTime()) {
+    throw new Error('Redis not available during build');
+  }
+
+  // Don't retry if connection already failed
+  if (connectionFailed) {
+    throw new Error('Redis connection previously failed');
+  }
+
   if (redisClient && redisClient.isOpen) {
     return redisClient;
   }
 
-  const url = process.env.REDIS_URL || 'redis://localhost:6379';
+  const url = process.env.REDIS_URL;
+  if (!url) {
+    connectionFailed = true;
+    throw new Error('REDIS_URL not configured');
+  }
+
   const useTls = url.startsWith('rediss://');
 
   redisClient = createClient({
     url,
-    socket: useTls
-      ? {
-          tls: true,
-          rejectUnauthorized: false,
-        }
-      : undefined,
+    socket: {
+      connectTimeout: 5000,
+      ...(useTls
+        ? {
+            tls: true,
+            rejectUnauthorized: false,
+          }
+        : {}),
+    },
   });
 
   redisClient.on('error', (err) => {
-    console.error('Redis client error:', err);
+    // Only log once per session
+    if (!connectionFailed) {
+      console.error('Redis client error:', err.message);
+    }
   });
 
-  await redisClient.connect();
-  return redisClient;
+  try {
+    await redisClient.connect();
+    return redisClient;
+  } catch (err) {
+    connectionFailed = true;
+    redisClient = null;
+    throw err;
+  }
 }
 
 /**
@@ -57,6 +93,15 @@ export async function closeRedisClient(): Promise<void> {
  * Check if Redis connection is available
  */
 export async function isRedisAvailable(): Promise<boolean> {
+  // Don't attempt connection during build
+  if (isBuildTime() || connectionFailed) {
+    return false;
+  }
+
+  if (!process.env.REDIS_URL) {
+    return false;
+  }
+
   try {
     const client = await getRedisClient();
     await client.ping();
