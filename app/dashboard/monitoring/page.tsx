@@ -25,32 +25,38 @@ export default function MonitoringPage() {
   const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before accessing browser APIs
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
       const [configsRes, metricsRes, queueRes, reposRes] = await Promise.all([
-        fetch('/api/monitoring/configs'),
-        fetch('/api/monitoring/metrics'),
-        fetch('/api/monitoring/queue'),
-        fetch('/api/auth/session'),
+        fetch('/api/monitoring/configs').catch(() => null),
+        fetch('/api/monitoring/metrics').catch(() => null),
+        fetch('/api/monitoring/queue').catch(() => null),
+        fetch('/api/auth/session').catch(() => null),
       ]);
 
-      if (configsRes.ok) {
+      if (configsRes?.ok) {
         const data = await configsRes.json();
         setConfigs(data.configs || []);
       }
 
-      if (metricsRes.ok) {
+      if (metricsRes?.ok) {
         const data = await metricsRes.json();
         setMetrics(data.metrics || []);
       }
 
-      if (queueRes.ok) {
+      if (queueRes?.ok) {
         const data = await queueRes.json();
         setRecentRuns(data.items || []);
       }
 
-      if (reposRes.ok) {
+      if (reposRes?.ok) {
         const data = await reposRes.json();
         setRepos(data.repos || []);
       }
@@ -62,8 +68,10 @@ export default function MonitoringPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (mounted) {
+      fetchData();
+    }
+  }, [fetchData, mounted]);
 
   const handleToggle = async (repoId: string, enabled: boolean) => {
     const res = await fetch(`/api/monitoring/configs/${repoId}`, {
@@ -125,16 +133,16 @@ export default function MonitoringPage() {
     }
   };
 
-  const webhookUrl =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/api/webhooks/github`
-      : '';
+  // Only compute webhookUrl after mount to avoid hydration mismatch
+  const webhookUrl = mounted
+    ? `${window.location.origin}/api/webhooks/github`
+    : '';
 
   const selectedConfig = selectedRepo
     ? configs.find((c) => c.repoId === selectedRepo)
     : null;
 
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return (
       <div className="p-8 space-y-6">
         <div className="flex justify-between items-center">

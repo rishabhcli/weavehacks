@@ -70,11 +70,16 @@ export function OnboardingWizard() {
 
   useEffect(() => {
     setMounted(true);
-    const completed = localStorage.getItem(STORAGE_KEY);
-    if (!completed) {
-      // Show onboarding after a short delay for better UX
-      const timer = setTimeout(() => setIsOpen(true), 1000);
-      return () => clearTimeout(timer);
+    // Check localStorage safely after mount
+    try {
+      const completed = localStorage.getItem(STORAGE_KEY);
+      if (!completed) {
+        // Show onboarding after a short delay for better UX
+        const timer = setTimeout(() => setIsOpen(true), 1000);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      // localStorage not available, skip onboarding
     }
   }, []);
 
@@ -93,12 +98,20 @@ export function OnboardingWizard() {
   };
 
   const handleComplete = () => {
-    localStorage.setItem(STORAGE_KEY, 'true');
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    } catch {
+      // localStorage not available
+    }
     setIsOpen(false);
   };
 
   const handleSkip = () => {
-    localStorage.setItem(STORAGE_KEY, 'true');
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    } catch {
+      // localStorage not available
+    }
     setIsOpen(false);
   };
 

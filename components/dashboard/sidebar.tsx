@@ -41,7 +41,7 @@ interface StoredRepo {
   active?: boolean;
 }
 
-function getStoredRepoName() {
+function getStoredRepoName(): string | null {
   if (typeof window === 'undefined') return null;
 
   try {
@@ -51,13 +51,18 @@ function getStoredRepoName() {
     const activeRepo = repos.find((repo) => repo.active) ?? repos[0];
     return activeRepo?.fullName || activeRepo?.name || null;
   } catch {
+    // sessionStorage not available or invalid data
     return null;
   }
 }
 
 function getStoredCollapsedState(): boolean {
   if (typeof window === 'undefined') return false;
-  return localStorage.getItem('sidebar_collapsed') === 'true';
+  try {
+    return localStorage.getItem('sidebar_collapsed') === 'true';
+  } catch {
+    return false;
+  }
 }
 
 export function Sidebar() {
@@ -106,7 +111,11 @@ export function Sidebar() {
   const toggleCollapsed = () => {
     const newState = !isCollapsed;
     setIsCollapsed(newState);
-    localStorage.setItem('sidebar_collapsed', String(newState));
+    try {
+      localStorage.setItem('sidebar_collapsed', String(newState));
+    } catch {
+      // localStorage not available
+    }
   };
 
   const connectionStatus = isLoading

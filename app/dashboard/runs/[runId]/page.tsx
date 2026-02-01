@@ -638,20 +638,20 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
           agentStates={agentStates}
         />
 
-        {/* Live Browser Viewer & Agent Terminal */}
-        <div className="grid lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
+        {/* Live Browser Viewer - Full Width for Better Visibility */}
+        <div className="grid lg:grid-cols-5 gap-4">
+          <div className="lg:col-span-3">
             <LiveBrowserViewer
               runId={run.id}
               isRunning={run.status === 'running'}
-              className="h-full"
+              className="h-full min-h-[400px]"
             />
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-2">
             <AgentTerminal
               entries={activityLog}
               isLive={run.status === 'running'}
-              className="h-full"
+              className="h-full min-h-[400px]"
             />
           </div>
         </div>
