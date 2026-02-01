@@ -9,7 +9,7 @@ import {
   Easing,
 } from 'remotion';
 
-// Intro Scene - PatchPilot Logo
+// Intro Scene - QAgent Logo
 const IntroScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -92,7 +92,7 @@ const IntroScene: React.FC = () => {
             letterSpacing: -2,
           }}
         >
-          PatchPilot
+          QAgent
         </h1>
 
         <p
@@ -194,7 +194,7 @@ const FeatureScene: React.FC<{
   );
 };
 
-// Flow Scene - Shows the PatchPilot loop
+// Flow Scene - Shows the QAgent loop
 const FlowScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -226,7 +226,7 @@ const FlowScene: React.FC = () => {
           }),
         }}
       >
-        The PatchPilot Loop
+        The QAgent Loop
       </h2>
 
       <div
@@ -406,7 +406,7 @@ const OutroScene: React.FC = () => {
 };
 
 // Main Composition
-export const PatchPilotDemo: React.FC = () => {
+export const QAgentDemo: React.FC = () => {
   return (
     <AbsoluteFill style={{ fontFamily: 'system-ui, sans-serif' }}>
       {/* Intro - 0 to 90 frames (3 seconds) */}

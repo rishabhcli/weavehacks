@@ -42,7 +42,7 @@ interface RecentCommand {
   timestamp: number;
 }
 
-const RECENT_COMMANDS_KEY = 'patchpilot_recent_commands';
+const RECENT_COMMANDS_KEY = 'qagent_recent_commands';
 const MAX_RECENT_COMMANDS = 5;
 
 function useRecentCommands() {
@@ -173,7 +173,7 @@ export function CommandPalette() {
     { 
       id: 'nav-settings', 
       label: 'Go to Settings', 
-      description: 'Configure PatchPilot',
+      description: 'Configure QAgent',
       icon: Settings, 
       action: () => router.push('/dashboard/settings'), 
       category: 'navigation',

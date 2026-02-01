@@ -1,7 +1,7 @@
 /**
  * RedTeam Test Runner
  *
- * Executes adversarial tests against PatchPilot agents
+ * Executes adversarial tests against QAgent agents
  * and generates security reports.
  */
 

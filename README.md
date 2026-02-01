@@ -1,10 +1,10 @@
-# PatchPilot - Self-Healing QA Agent
+# QAgent - Self-Healing QA Agent
 
 A self-improving QA agent that automatically tests web applications, identifies bugs, applies fixes, and verifies the fixes – all without human intervention.
 
 ## Overview
 
-PatchPilot is a multi-agent system that creates a closed-loop for automated bug detection and fixing:
+QAgent is a multi-agent system that creates a closed-loop for automated bug detection and fixing:
 
 ```
 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
@@ -24,7 +24,7 @@ PatchPilot is a multi-agent system that creates a closed-loop for automated bug 
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Why PatchPilot?
+### Why QAgent?
 
 - **Continuous Testing**: Runs E2E tests like a QA engineer, simulating real user flows
 - **Automatic Bug Fixing**: Doesn't just report bugs – it fixes them and redeploys
@@ -48,7 +48,7 @@ cp .env.example .env.local
 # Run development server (demo app)
 pnpm dev
 
-# Run the PatchPilot agent
+# Run the QAgent agent
 pnpm run agent
 
 # Start the Marimo dashboard
@@ -91,7 +91,7 @@ weavehacks/
 │       ├── wandb-weave/
 │       ├── google-adk/
 │       ├── marimo-dashboards/
-│       └── patchpilot-agents/
+│       └── qagent-agents/
 ├── agents/                   # Agent implementations
 │   ├── tester/
 │   ├── triage/
@@ -108,7 +108,7 @@ weavehacks/
 
 ## How It Works
 
-### The PatchPilot Loop
+### The QAgent Loop
 
 1. **Test** - Tester Agent runs E2E tests using Browserbase/Stagehand
 2. **Detect** - Failures are captured with screenshots, DOM state, logs
@@ -181,7 +181,7 @@ The system demonstrates its capabilities in a 3-minute flow:
 
 ## References
 
-- [PatchPilot Paper](https://arxiv.org/html/2502.02747v1) - Agentic patching framework
+- [QAgent Paper](https://arxiv.org/html/2502.02747v1) - Agentic patching framework
 - [Stagehand](https://www.stagehand.dev/) - AI browser automation
 - [Browserbase](https://browserbase.com/) - Cloud browsers
 - [W&B Weave](https://wandb.ai/site/weave) - LLM observability

@@ -1,5 +1,5 @@
 """
-PatchPilot Voice Agent using Pipecat + Daily
+QAgent Voice Agent using Pipecat + Daily
 """
 import asyncio
 import os
@@ -16,9 +16,9 @@ import aiohttp
 ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://localhost:3000")
 
 
-class PatchPilotVoiceAgent:
+class QAgentVoiceAgent:
     def __init__(self):
-        self.system_prompt = """You are PatchPilot, a self-healing QA agent.
+        self.system_prompt = """You are QAgent, a self-healing QA agent.
 You help developers find and fix bugs automatically.
 
 Available commands:
@@ -90,12 +90,12 @@ Be concise, friendly, and technical. Always explain what you're doing."""
 
 
 async def main():
-    agent = PatchPilotVoiceAgent()
+    agent = QAgentVoiceAgent()
 
     transport = DailyTransport(
         room_url=os.getenv("DAILY_ROOM_URL"),
         token=os.getenv("DAILY_TOKEN"),
-        bot_name="PatchPilot",
+        bot_name="QAgent",
         params=DailyParams(
             audio_in_enabled=True,
             audio_out_enabled=True,

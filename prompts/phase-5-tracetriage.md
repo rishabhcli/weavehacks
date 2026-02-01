@@ -8,7 +8,7 @@
 
 ## Overview
 
-Phase 5 implements TraceTriage, a meta-system that analyzes PatchPilot's own execution traces to identify failure patterns and improve performance. The system automatically categorizes agent failures, identifies root causes, and generates corrective actions that can be applied to improve prompts, workflows, or configurations.
+Phase 5 implements TraceTriage, a meta-system that analyzes QAgent's own execution traces to identify failure patterns and improve performance. The system automatically categorizes agent failures, identifies root causes, and generates corrective actions that can be applied to improve prompts, workflows, or configurations.
 
 ---
 
@@ -19,7 +19,7 @@ Phase 5 implements TraceTriage, a meta-system that analyzes PatchPilot's own exe
 ├── SKILL.md      # Trace analysis patterns
 └── reference.md  # TraceTriage implementation
 
-.claude/skills/patchpilot-agents/
+.claude/skills/qagent-agents/
 ├── SKILL.md      # Agent behavior understanding
 └── reference.md  # Agent interfaces
 ```

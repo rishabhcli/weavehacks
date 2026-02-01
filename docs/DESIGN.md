@@ -1,6 +1,6 @@
 # Design Specifications
 
-## Project: PatchPilot - Self-Healing QA Agent
+## Project: QAgent - Self-Healing QA Agent
 
 **Version:** 1.0
 **Status:** Approved
@@ -442,7 +442,7 @@ const failureIndex = {
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  PatchPilot Dashboard                                    [Live] 🟢  │
+│  QAgent Dashboard                                    [Live] 🟢  │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐           │
@@ -558,7 +558,7 @@ const vercel = new Vercel({
 
 // Weave
 import weave from 'weave';
-weave.init({ project: 'patchpilot' });
+weave.init({ project: 'qagent' });
 
 // OpenAI
 const openai = new OpenAI({
@@ -597,7 +597,7 @@ interface CircuitBreaker {
 ### 7.1 Weave Trace Structure
 
 ```
-Run: patchpilot-run-123
+Run: qagent-run-123
 ├── Orchestrator
 │   ├── [10:00:00] Start run
 │   ├── [10:00:01] Dispatch to Tester

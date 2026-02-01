@@ -1,10 +1,10 @@
-# CLAUDE.md - PatchPilot
+# CLAUDE.md - QAgent
 
 This file is the **single source of truth** for AI agents working on this project. Read this file at the start of every session.
 
 ## Project Overview
 
-**Project:** PatchPilot - Self-Healing QA Agent
+**Project:** QAgent - Self-Healing QA Agent
 **Description:** A self-improving QA agent that automatically tests web applications, identifies bugs, applies fixes to the app's code, and verifies the fixes – all without human intervention. It combines automated bug-finding and fixing in a closed-loop system that iterates until all tests pass.
 **Status:** Phase 8 - Complete (Dashboard UI & GitHub OAuth)
 
@@ -42,7 +42,7 @@ This file is the **single source of truth** for AI agents working on this projec
 4. **Verifier Agent** - Applies patches, redeploys via Vercel, re-runs tests
 5. **Orchestrator** - Coordinates workflow via a custom, ADK/A2A-compatible orchestrator (integration planned)
 
-### The PatchPilot Loop
+### The QAgent Loop
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -89,7 +89,7 @@ This file is the **single source of truth** for AI agents working on this projec
 - [x] Write 2-3 critical user flow tests
 - [x] Implement Tester Agent with failure detection
 
-### Phase 2: Core PatchPilot Loop
+### Phase 2: Core QAgent Loop
 - [x] Implement Triage Agent (failure analysis)
 - [x] Implement Fixer Agent (LLM patch generation)
 - [x] Implement Verifier Agent (deploy + retest)
@@ -182,7 +182,7 @@ pnpm install
 # Run development server (demo app)
 pnpm dev
 
-# Run the PatchPilot agent
+# Run the QAgent agent
 pnpm run agent
 
 # Run tests manually
@@ -218,7 +218,7 @@ The `.claude/skills/` directory contains domain-specific knowledge modules:
 | `wandb-weave/` | Tracing, evaluation, metrics logging |
 | `google-adk/` | Reference patterns for planned ADK/A2A integration |
 | `marimo-dashboards/` | Reactive notebooks, data visualization |
-| `patchpilot-agents/` | Agent implementations, prompts, workflows |
+| `qagent-agents/` | Agent implementations, prompts, workflows |
 
 ---
 
@@ -274,7 +274,7 @@ weavehacks/
 │       ├── wandb-weave/
 │       ├── google-adk/
 │       ├── marimo-dashboards/
-│       └── patchpilot-agents/
+│       └── qagent-agents/
 ├── agents/
 │   ├── tester/
 │   ├── triage/
@@ -353,7 +353,7 @@ weavehacks/
 
 | Time | Section | Content |
 |------|---------|---------|
-| 0:00-0:20 | Intro | Show buggy app, explain PatchPilot concept |
+| 0:00-0:20 | Intro | Show buggy app, explain QAgent concept |
 | 0:20-1:10 | Detection | Run Tester agent, show failure capture |
 | 1:10-2:10 | Fix | Show diagnosis, patch generation, Vercel deploy |
 | 2:10-2:40 | Verify | Re-run test, show success, Weave dashboard |
@@ -363,7 +363,7 @@ weavehacks/
 
 ## References
 
-- [PatchPilot Paper](https://arxiv.org/html/2502.02747v1) - Five-step agentic patching framework
+- [QAgent Paper](https://arxiv.org/html/2502.02747v1) - Five-step agentic patching framework
 - [Stagehand Docs](https://www.stagehand.dev/) - AI-powered browser automation
 - [Browserbase Docs](https://docs.browserbase.com/) - Cloud browser infrastructure
 - [Redis Vector Search](https://redis.io/docs/stack/search/reference/vectors/) - Semantic similarity

@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "PatchPilot.app"
-               BlueprintName = "PatchPilot"
-               ReferencedContainer = "container:PatchPilot.xcodeproj">
+               BuildableName = "QAgent.app"
+               BlueprintName = "QAgent"
+               ReferencedContainer = "container:QAgent.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "PatchPilotTests.xctest"
-               BlueprintName = "PatchPilotTests"
-               ReferencedContainer = "container:PatchPilot.xcodeproj">
+               BuildableName = "QAgentTests.xctest"
+               BlueprintName = "QAgentTests"
+               ReferencedContainer = "container:QAgent.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "PatchPilot.app"
-            BlueprintName = "PatchPilot"
-            ReferencedContainer = "container:PatchPilot.xcodeproj">
+            BuildableName = "QAgent.app"
+            BlueprintName = "QAgent"
+            ReferencedContainer = "container:QAgent.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "PatchPilot.app"
-            BlueprintName = "PatchPilot"
-            ReferencedContainer = "container:PatchPilot.xcodeproj">
+            BuildableName = "QAgent.app"
+            BlueprintName = "QAgent"
+            ReferencedContainer = "container:QAgent.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

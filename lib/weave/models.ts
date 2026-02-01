@@ -1,5 +1,5 @@
 /**
- * Weave Models for PatchPilot Agents
+ * Weave Models for QAgent Agents
  *
  * Defines agents as Weave Models for proper versioning, comparison,
  * and evaluation tracking. Each agent's core method is a Model.predict().
@@ -8,7 +8,7 @@
 import { weave, isWeaveEnabled } from './core';
 
 /**
- * Base interface for PatchPilot agent models
+ * Base interface for QAgent agent models
  */
 export interface AgentModelConfig {
   name: string;
@@ -39,7 +39,7 @@ export const TesterModel = isWeaveEnabled()
           timestamp: new Date().toISOString(),
         };
       },
-      { name: 'PatchPilot.TesterModel' }
+      { name: 'QAgent.TesterModel' }
     )
   : null;
 
@@ -63,7 +63,7 @@ export const TriageModel = isWeaveEnabled()
           timestamp: new Date().toISOString(),
         };
       },
-      { name: 'PatchPilot.TriageModel' }
+      { name: 'QAgent.TriageModel' }
     )
   : null;
 
@@ -88,7 +88,7 @@ export const FixerModel = isWeaveEnabled()
           timestamp: new Date().toISOString(),
         };
       },
-      { name: 'PatchPilot.FixerModel' }
+      { name: 'QAgent.FixerModel' }
     )
   : null;
 
@@ -109,7 +109,7 @@ export const VerifierModel = isWeaveEnabled()
           timestamp: new Date().toISOString(),
         };
       },
-      { name: 'PatchPilot.VerifierModel' }
+      { name: 'QAgent.VerifierModel' }
     )
   : null;
 
@@ -130,7 +130,7 @@ export const OrchestratorModel = isWeaveEnabled()
           timestamp: new Date().toISOString(),
         };
       },
-      { name: 'PatchPilot.OrchestratorModel' }
+      { name: 'QAgent.OrchestratorModel' }
     )
   : null;
 
@@ -177,7 +177,7 @@ export const AGENT_VERSIONS: Record<string, AgentModelConfig> = {
   orchestrator: {
     name: 'Orchestrator',
     version: '1.0.0',
-    description: 'Full PatchPilot pipeline coordination',
+    description: 'Full QAgent pipeline coordination',
     parameters: {
       maxIterations: 5,
       parallel: false,

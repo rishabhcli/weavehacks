@@ -26,7 +26,7 @@ export function VoiceAssistant() {
         throw new Error(data.error ?? 'Failed to start session');
       }
       setTranscript([
-        "PatchPilot: Hello! I'm ready to help. You can ask me to run tests, show bugs, or explain fixes.",
+        "QAgent: Hello! I'm ready to help. You can ask me to run tests, show bugs, or explain fixes.",
       ]);
       setIsConnected(true);
     } catch (error) {
@@ -54,7 +54,7 @@ export function VoiceAssistant() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Mic className="h-5 w-5" />
-              Talk to PatchPilot
+              Talk to QAgent
             </DialogTitle>
           </DialogHeader>
 

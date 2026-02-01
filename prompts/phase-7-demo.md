@@ -8,7 +8,7 @@
 
 ## Overview
 
-Phase 7 is the final phase before the hackathon presentation. The focus is on ensuring everything works flawlessly end-to-end, creating compelling demo materials, and preparing backup plans. By the end of this phase, PatchPilot should be ready for a polished 3-minute demo.
+Phase 7 is the final phase before the hackathon presentation. The focus is on ensuring everything works flawlessly end-to-end, creating compelling demo materials, and preparing backup plans. By the end of this phase, QAgent should be ready for a polished 3-minute demo.
 
 ---
 
@@ -23,7 +23,7 @@ All skills for reference:
 ├── wandb-weave/            # Observability
 ├── google-adk/             # Orchestration
 ├── marimo-dashboards/      # Visualization
-└── patchpilot-agents/      # Core agents
+└── qagent-agents/      # Core agents
 ```
 
 ---
@@ -70,7 +70,7 @@ Increments for this iteration:
 ## Tasks
 
 ### P7.1: End-to-End Validation
-- [ ] Run full PatchPilot loop on all 3 bugs
+- [ ] Run full QAgent loop on all 3 bugs
 - [ ] Verify each agent performs correctly
 - [ ] Confirm Redis learning works
 - [ ] Check Weave traces are complete
@@ -120,7 +120,7 @@ Increments for this iteration:
 
 **Action:** Show buggy app
 **Say:**
-> "This is PatchPilot, a self-healing QA agent. Watch as it automatically finds a bug, fixes it, and verifies the fix."
+> "This is QAgent, a self-healing QA agent. Watch as it automatically finds a bug, fixes it, and verifies the fix."
 
 **Show:**
 - Demo app with checkout button
@@ -131,9 +131,9 @@ Increments for this iteration:
 
 ### Bug Detection (0:20-1:10)
 
-**Action:** Start PatchPilot
+**Action:** Start QAgent
 **Say:**
-> "PatchPilot is now running E2E tests using Browserbase and Stagehand - AI-powered browser automation in the cloud."
+> "QAgent is now running E2E tests using Browserbase and Stagehand - AI-powered browser automation in the cloud."
 
 **Show:**
 - Terminal running Tester Agent
@@ -198,7 +198,7 @@ Increments for this iteration:
 
 **Action:** Show integrations
 **Say:**
-> "PatchPilot used:
+> "QAgent used:
 > - **Browserbase + Stagehand** for cloud browser testing
 > - **Redis** for learning from past bugs
 > - **Vercel** for instant deployment
@@ -245,7 +245,7 @@ Increments for this iteration:
 - [ ] All 3 bugs are present
 - [ ] No other issues interfere
 
-### PatchPilot
+### QAgent
 - [ ] All agents are working
 - [ ] Orchestrator completes successfully
 - [ ] Dashboard shows data
@@ -344,7 +344,7 @@ Phase 7 is complete when:
 
 ## Final Deliverables
 
-- [ ] Working PatchPilot system
+- [ ] Working QAgent system
 - [ ] 3-minute demo (live or recorded)
 - [ ] Dashboard showing improvement metrics
 - [ ] Documentation of all sponsor integrations

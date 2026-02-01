@@ -1,7 +1,7 @@
 /**
  * TraceTriage
  *
- * Self-improvement system that analyzes PatchPilot's execution traces
+ * Self-improvement system that analyzes QAgent's execution traces
  * to identify failure patterns and improve performance.
  *
  * Main exports:

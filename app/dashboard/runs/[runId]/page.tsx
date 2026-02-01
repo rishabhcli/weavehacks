@@ -351,7 +351,7 @@ function generateMockDiagnostics(run: Run): DiagnosticsData {
       llmReasoning: 'Added the missing onClick handler that triggers the handleCheckout function. This function was already defined in the component but was not connected to the button.',
     } : undefined,
     verification: run.currentAgent === 'verifier' || run.status === 'completed' ? {
-      deploymentUrl: 'https://patchpilot-preview.vercel.app',
+      deploymentUrl: 'https://qagent-preview.vercel.app',
       deploymentStatus: run.status === 'completed' ? 'ready' : 'building',
       retestPassed: run.status === 'completed',
       retestDuration: run.status === 'completed' ? 4500 : undefined,

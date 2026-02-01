@@ -55,7 +55,7 @@ export default function LearningPage() {
         <div>
           <h1 className="text-3xl font-bold">Self-Improvement</h1>
           <p className="text-muted-foreground">
-            Watch PatchPilot get smarter over time
+            Watch QAgent get smarter over time
           </p>
         </div>
         <div className="text-right">

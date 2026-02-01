@@ -1,6 +1,6 @@
 /**
  * Unit tests for Orchestrator
- * Tests the main PatchPilot loop coordination
+ * Tests the main QAgent loop coordination
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

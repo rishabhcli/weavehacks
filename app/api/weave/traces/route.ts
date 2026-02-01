@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 
     if (status === 'error') {
       try {
-        traces = await queryRecentFailures('patchpilot');
+        traces = await queryRecentFailures('qagent');
       } catch (error) {
         console.error('Failed to query failures:', error);
       }
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 
     // Get failure patterns analysis
     try {
-      patterns = await analyzeFailurePatterns('patchpilot');
+      patterns = await analyzeFailurePatterns('qagent');
     } catch (error) {
       console.error('Failed to analyze patterns:', error);
     }

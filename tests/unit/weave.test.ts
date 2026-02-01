@@ -283,7 +283,7 @@ describe('Integration Scenarios', () => {
   it('should handle a complete run metrics flow', () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-    // Simulate a PatchPilot run
+    // Simulate a QAgent run
     const metrics: RunMetrics = {
       testsTotal: 3,
       testsPassed: 3,

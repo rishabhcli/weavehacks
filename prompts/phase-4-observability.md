@@ -8,7 +8,7 @@
 
 ## Overview
 
-Phase 4 adds observability to PatchPilot through W&B Weave for tracing agent operations and Marimo for building an interactive analytics dashboard. This enables monitoring, debugging, and demonstrating the system's improvement over time.
+Phase 4 adds observability to QAgent through W&B Weave for tracing agent operations and Marimo for building an interactive analytics dashboard. This enables monitoring, debugging, and demonstrating the system's improvement over time.
 
 ---
 
@@ -102,7 +102,7 @@ Increments for this iteration:
 - [ ] Add recent fixes table
 
 ### P4.6: Dashboard Styling
-- [ ] Add PatchPilot branding
+- [ ] Add QAgent branding
 - [ ] Configure color scheme (green/blue)
 - [ ] Add responsive layout
 - [ ] Add loading states
@@ -123,7 +123,7 @@ Increments for this iteration:
 import weave from 'weave';
 
 // Initialize at app startup
-weave.init('patchpilot');
+weave.init('qagent');
 ```
 
 ### Agent Method Decoration
@@ -180,7 +180,7 @@ async function logRunMetrics(result: OrchestratorResult): Promise<void> {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     PatchPilot Dashboard                         │
+│                     QAgent Dashboard                         │
 │                  Self-Healing QA Agent Analytics                 │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │

@@ -328,7 +328,7 @@ export class VerifierAgent implements IVerifierAgent {
 
     try {
       // 1. Commit the change
-      const commitMessage = `fix: ${patch.description}\n\nApplied by PatchPilot`;
+      const commitMessage = `fix: ${patch.description}\n\nApplied by QAgent`;
       execSync(`git add ${patch.file}`, { cwd: this.projectRoot, stdio: 'pipe' });
       execSync(`git commit -m "${commitMessage}"`, {
         cwd: this.projectRoot,

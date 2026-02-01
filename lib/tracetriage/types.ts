@@ -1,7 +1,7 @@
 /**
  * TraceTriage Type Definitions
  *
- * Types for the self-improvement system that analyzes PatchPilot's
+ * Types for the self-improvement system that analyzes QAgent's
  * execution traces to identify failure patterns and improve performance.
  */
 
@@ -30,7 +30,7 @@ export interface TraceOperation {
 }
 
 /**
- * Complete trace of a PatchPilot run
+ * Complete trace of a QAgent run
  */
 export interface TraceData {
   id: string;
@@ -53,7 +53,7 @@ export interface TraceData {
 // ============================================================================
 
 /**
- * Agents in the PatchPilot system
+ * Agents in the QAgent system
  */
 export type AgentName = 'Tester' | 'Triage' | 'Fixer' | 'Verifier' | 'Orchestrator';
 

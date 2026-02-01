@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     let githubToken: string | undefined;
     if (cloudMode) {
       const cookieStore = await cookies();
-      const session = cookieStore.get('patchpilot_session');
+      const session = cookieStore.get('qagent_session');
       if (session) {
         try {
           const sessionData = JSON.parse(session.value);
@@ -173,7 +173,7 @@ async function runCloudOrchestrator(
     }
 
     // eslint-disable-next-line no-console
-    console.log(`\n🚀 Starting PatchPilot cloud run ${runId}`);
+    console.log(`\n🚀 Starting QAgent cloud run ${runId}`);
     // eslint-disable-next-line no-console
     console.log(`   Repo: ${repoFullName}`);
     // eslint-disable-next-line no-console
@@ -278,7 +278,7 @@ async function runLocalOrchestrator(
   
   try {
     // eslint-disable-next-line no-console
-    console.log(`\n🚀 Starting PatchPilot local run ${runId}\n   Target: ${appTargetUrl}\n   Tests: ${testSpecs.length}\n   Max iterations: ${maxIterations}\n`);
+    console.log(`\n🚀 Starting QAgent local run ${runId}\n   Target: ${appTargetUrl}\n   Tests: ${testSpecs.length}\n   Max iterations: ${maxIterations}\n`);
     
     const emitAgentProgress = (agent: AgentType, status: 'started' | 'completed') => {
       if (status === 'started') {

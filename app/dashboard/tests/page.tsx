@@ -78,7 +78,7 @@ export default function TestsPage() {
         {/* Actions Bar */}
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground">
-            Configure E2E tests that PatchPilot will run against your application.
+            Configure E2E tests that QAgent will run against your application.
           </p>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
@@ -153,7 +153,7 @@ export default function TestsPage() {
           <EmptyState
             icon={TestTube2}
             title="No test specs yet"
-            description="Create test specifications that PatchPilot will use to automatically test your application and find bugs."
+            description="Create test specifications that QAgent will use to automatically test your application and find bugs."
             action={
               <Link href="/dashboard/tests/new">
                 <Button>

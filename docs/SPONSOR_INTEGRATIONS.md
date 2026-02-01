@@ -1,6 +1,6 @@
 # Sponsor Integrations
 
-PatchPilot integrates six sponsor technologies today and plans Google ADK integration. This document details current usage and planned alignment.
+QAgent integrates six sponsor technologies today and plans Google ADK integration. This document details current usage and planned alignment.
 
 ---
 
@@ -162,7 +162,7 @@ export async function findSimilarIssues(errorMessage: string, k = 5) {
 ## 3. Vercel
 
 ### Overview
-Vercel provides instant deployments after PatchPilot applies fixes. The Verifier Agent triggers deployments programmatically.
+Vercel provides instant deployments after QAgent applies fixes. The Verifier Agent triggers deployments programmatically.
 
 ### Integration Points
 
@@ -382,7 +382,7 @@ def fetch_data(use_mock):
         ])
     else:
         import weave
-        client = weave.init('patchpilot')
+        client = weave.init('qagent')
         return fetch_from_weave(client)
 
 @app.cell
@@ -425,7 +425,7 @@ def recent_fixes(mo, pd):
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        PatchPilot System                        │
+│                        QAgent System                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │   ┌──────────────────────────────────────────────────────────┐  │
@@ -499,7 +499,7 @@ Add these to `.env.local` for full WeaveHacks demo:
 
 ```bash
 # Weave project (explicit)
-WEAVE_PROJECT=patchpilot
+WEAVE_PROJECT=qagent
 
 # Daily/Pipecat Voice Integration
 DAILY_API_KEY=

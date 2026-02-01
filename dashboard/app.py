@@ -1,5 +1,5 @@
 """
-PatchPilot Dashboard
+QAgent Dashboard
 
 Interactive analytics dashboard built with Marimo.
 Displays metrics, charts, and recent fixes from W&B Weave.
@@ -30,7 +30,7 @@ def header(mo):
     return mo.Html("""
     <div style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
                 padding: 2rem; border-radius: 12px; color: white; margin-bottom: 1rem;">
-        <h1 style="margin: 0; font-size: 2.5rem;">PatchPilot Dashboard</h1>
+        <h1 style="margin: 0; font-size: 2.5rem;">QAgent Dashboard</h1>
         <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1.1rem;">
             Self-Healing QA Agent Analytics
         </p>
@@ -70,7 +70,7 @@ def fetch_data(pd, use_mock, os):
             if not os.environ.get('WANDB_API_KEY'):
                 raise ValueError("WANDB_API_KEY not set")
 
-            client = weave.init('patchpilot')
+            client = weave.init('qagent')
             runs_list = list(client.runs(limit=50))
 
             data = []
@@ -323,7 +323,7 @@ def footer(mo):
     """Dashboard footer with credits"""
     return mo.Html("""
     <div style="text-align: center; padding: 1rem; color: #6b7280; font-size: 0.9rem; margin-top: 2rem;">
-        <p>PatchPilot - Self-Healing QA Agent | Powered by Browserbase, Redis, Vercel, W&B Weave</p>
+        <p>QAgent - Self-Healing QA Agent | Powered by Browserbase, Redis, Vercel, W&B Weave</p>
         <p>Built for WeaveHacks 2024</p>
     </div>
     """)

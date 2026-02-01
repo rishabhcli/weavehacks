@@ -1,16 +1,18 @@
 import * as SecureStore from 'expo-secure-store';
 
 // API URL from environment or default
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://patchpilot.vercel.app';
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://qagent.vercel.app';
+// OAuth base URL (can point to production even if API_URL is local)
+export const OAUTH_URL = process.env.EXPO_PUBLIC_OAUTH_URL || API_URL;
 
-const TOKEN_KEY = 'patchpilot_access_token';
+const TOKEN_KEY = 'qagent_access_token';
 
 interface FetchOptions extends RequestInit {
   authenticated?: boolean;
 }
 
 /**
- * API client for making requests to the PatchPilot backend
+ * API client for making requests to the QAgent backend
  */
 export async function apiClient<T>(
   endpoint: string,

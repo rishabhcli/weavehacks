@@ -41,7 +41,7 @@ interface FTInfoResponse {
 }
 
 async function main() {
-  console.log('=== PatchPilot Redis Initialization ===\n');
+  console.log('=== QAgent Redis Initialization ===\n');
 
   const url = process.env.REDIS_URL || 'redis://localhost:6379';
   const useTls = url.startsWith('rediss://');

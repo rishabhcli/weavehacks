@@ -2,7 +2,7 @@
  * PromptImprover
  *
  * Analyzes failure patterns and generates improved prompts
- * for PatchPilot agents to reduce errors.
+ * for QAgent agents to reduce errors.
  */
 
 import { isWeaveEnabled, op } from '@/lib/weave';

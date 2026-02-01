@@ -1,6 +1,6 @@
-# PatchPilot Mobile
+# QAgent Mobile
 
-React Native mobile app for PatchPilot - a self-healing QA agent for your codebase.
+React Native mobile app for QAgent - a self-healing QA agent for your codebase.
 
 ## Features
 
@@ -45,6 +45,7 @@ Create a `.env` file in the mobile directory:
 
 ```env
 EXPO_PUBLIC_API_URL=https://your-api-url.com
+EXPO_PUBLIC_OAUTH_URL=https://qagent.vercel.app
 EXPO_PUBLIC_GITHUB_CLIENT_ID=your_github_client_id
 ```
 

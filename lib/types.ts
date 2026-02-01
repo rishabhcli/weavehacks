@@ -1,5 +1,5 @@
 /**
- * PatchPilot Core Type Definitions
+ * QAgent Core Type Definitions
  */
 
 // ============================================================================

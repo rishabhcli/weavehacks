@@ -11,7 +11,7 @@ import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography, shadows } from '@/lib/theme/colors';
-import { api, API_URL } from '@/lib/api/client';
+import { api, OAUTH_URL } from '@/lib/api/client';
 
 // Required for auth session to work properly
 WebBrowser.maybeCompleteAuthSession();
@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const redirectUri = AuthSession.makeRedirectUri({
-    scheme: 'patchpilot',
+    scheme: 'qagent',
   });
 
   const handleGitHubLogin = async () => {
@@ -30,7 +30,7 @@ export default function LoginScreen() {
     setError(null);
 
     try {
-      const authUrl = `${API_URL}/api/auth/github?redirect=${encodeURIComponent(redirectUri)}`;
+      const authUrl = `${OAUTH_URL}/api/auth/github?redirect=${encodeURIComponent(redirectUri)}`;
       const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
       if (result.type === 'success' && result.url) {
@@ -77,7 +77,7 @@ export default function LoginScreen() {
           <View style={styles.logoIcon}>
             <Ionicons name="flash" size={32} color={colors.dark.primaryForeground} />
           </View>
-          <Text style={styles.logoText}>PatchPilot</Text>
+          <Text style={styles.logoText}>QAgent</Text>
           <Text style={styles.tagline}>Self-healing QA for your codebase</Text>
         </View>
 

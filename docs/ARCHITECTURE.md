@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-## Project: PatchPilot - Self-Healing QA Agent
+## Project: QAgent - Self-Healing QA Agent
 
 This document captures key architecture decisions using the ADR (Architecture Decision Record) format.
 
@@ -29,7 +29,7 @@ This document captures key architecture decisions using the ADR (Architecture De
 
 ### Context
 
-PatchPilot requires coordination between multiple specialized components: testing, diagnosis, fixing, and verification. We need a way to structure these as independent agents that can communicate and hand off work reliably.
+QAgent requires coordination between multiple specialized components: testing, diagnosis, fixing, and verification. We need a way to structure these as independent agents that can communicate and hand off work reliably.
 
 ### Decision
 
@@ -120,7 +120,7 @@ await stagehand.assert("I see a welcome message");
 
 ### Context
 
-PatchPilot's self-improvement capability requires storing past failures and fixes, then retrieving similar ones when new bugs are encountered. This needs semantic similarity search, not just keyword matching.
+QAgent's self-improvement capability requires storing past failures and fixes, then retrieving similar ones when new bugs are encountered. This needs semantic similarity search, not just keyword matching.
 
 ### Decision
 
@@ -220,7 +220,7 @@ Use Vercel for hosting the demo application and programmatic deployment after pa
 ```typescript
 // After patch is applied and committed
 const deployment = await vercel.deployments.create({
-  name: 'patchpilot-demo',
+  name: 'qagent-demo',
   gitSource: {
     type: 'github',
     ref: 'main',
@@ -284,7 +284,7 @@ Use Weights & Biases Weave for tracing and evaluation of the multi-agent system.
 ```typescript
 import weave from 'weave';
 
-weave.init({ project: 'patchpilot' });
+weave.init({ project: 'qagent' });
 
 // Wrap agent methods
 class TesterAgent {
@@ -355,7 +355,7 @@ app = mo.App()
 def metrics():
     # Fetch from Weave
     runs = weave.query(
-        project='patchpilot',
+        project='qagent',
         entity='team'
     )
 
@@ -458,7 +458,7 @@ Generate a minimal fix. Return JSON:
 
 ### Context
 
-We need a demo web application that the PatchPilot agent will test and fix. It should be simple, have intentional bugs, and be easy to deploy on Vercel.
+We need a demo web application that the QAgent agent will test and fix. It should be simple, have intentional bugs, and be easy to deploy on Vercel.
 
 ### Decision
 
@@ -515,7 +515,7 @@ Create a simple Next.js application with 2-3 pages and intentional bugs that can
 │                              USER/DEVELOPER                              │
 └───────────────────────────────────┬─────────────────────────────────────┘
                                     │
-                                    │ Triggers PatchPilot
+                                    │ Triggers QAgent
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                            PATCHPILOT SYSTEM                             │
@@ -560,7 +560,7 @@ Create a simple Next.js application with 2-3 pages and intentional bugs that can
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### PatchPilot Loop Sequence
+### QAgent Loop Sequence
 
 ```
     User          Orchestrator      Tester        Triage        Fixer       Verifier
@@ -615,7 +615,7 @@ Create a simple Next.js application with 2-3 pages and intentional bugs that can
 |-------------|-----|---------|
 | Development | localhost:3000 | Local development |
 | Preview | *.vercel.app | PR preview deployments |
-| Production | patchpilot-demo.vercel.app | Live demo application |
+| Production | qagent-demo.vercel.app | Live demo application |
 | Dashboard | localhost:2718 | Marimo dashboard |
 
 ### Services

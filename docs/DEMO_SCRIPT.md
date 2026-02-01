@@ -1,4 +1,4 @@
-# PatchPilot Demo Script
+# QAgent Demo Script
 
 **Duration:** 3 minutes
 **Format:** Live demo with narration
@@ -22,11 +22,11 @@
 
 **[Show: Browser with demo app cart page]**
 
-> "This is PatchPilot, a self-healing QA agent. It automatically finds bugs, fixes them, and verifies the fixes - all without human intervention."
+> "This is QAgent, a self-healing QA agent. It automatically finds bugs, fixes them, and verifies the fixes - all without human intervention."
 
 **[Click the Checkout button - nothing happens]**
 
-> "See this checkout button? It's broken - nothing happens when you click it. Let's watch PatchPilot fix it automatically."
+> "See this checkout button? It's broken - nothing happens when you click it. Let's watch QAgent fix it automatically."
 
 ---
 
@@ -38,7 +38,7 @@
 pnpm run demo
 ```
 
-> "I'm starting PatchPilot. It uses **Browserbase** and **Stagehand** - AI-powered browser automation in the cloud."
+> "I'm starting QAgent. It uses **Browserbase** and **Stagehand** - AI-powered browser automation in the cloud."
 
 **[Show: Tester Agent output as it runs tests]**
 
@@ -102,7 +102,7 @@ pnpm run demo
 
 **[Show: Dashboard with all metrics]**
 
-> "PatchPilot integrates six sponsor technologies today and plans Google ADK integration:
+> "QAgent integrates six sponsor technologies today and plans Google ADK integration:
 > - **Browserbase** and **Stagehand** for cloud browser testing
 > - **Redis** for learning from past bugs
 > - **Vercel** for instant deployments
@@ -128,11 +128,11 @@ pnpm run demo
 
 - **Custom Orchestrator (ADK/A2A-compatible)**: "Our agents coordinate through a custom orchestrator today, designed to map cleanly to Google ADK/A2A in a future integration. It sequences Tester → Triage → Fixer → Verifier."
 
-- **Marimo**: "The dashboard is a reactive Python notebook. Charts update in real-time as PatchPilot finds and fixes bugs."
+- **Marimo**: "The dashboard is a reactive Python notebook. Charts update in real-time as QAgent finds and fixes bugs."
 
 ### If asked about the approach:
 
-> "PatchPilot follows the 5-step agentic patching pattern from our research:
+> "QAgent follows the 5-step agentic patching pattern from our research:
 > 1. **Test** - Run E2E tests to find failures
 > 2. **Diagnose** - Analyze the error, find the root cause
 > 3. **Fix** - Generate a patch using LLM + past patterns
@@ -181,7 +181,7 @@ pnpm run demo
 
 ## Visual Checklist
 
-- [ ] PatchPilot banner visible at start
+- [ ] QAgent banner visible at start
 - [ ] Bug clearly shown (button doesn't work)
 - [ ] Agent output visible and readable
 - [ ] Patch diff shown
@@ -197,7 +197,7 @@ pnpm run demo
 # Start demo app
 pnpm dev
 
-# Run PatchPilot demo
+# Run QAgent demo
 pnpm run demo
 
 # Dry run (for practice)

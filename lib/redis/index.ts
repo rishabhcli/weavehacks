@@ -2,7 +2,7 @@
  * Knowledge Base
  *
  * Redis-backed knowledge base for storing and retrieving failure traces
- * and fix patterns. Enables PatchPilot to learn from past bugs.
+ * and fix patterns. Enables QAgent to learn from past bugs.
  */
 
 import { v4 as uuidv4 } from 'uuid';

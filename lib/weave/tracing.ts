@@ -1,7 +1,7 @@
 /**
  * Weave Tracing Utilities
  *
- * Provides tracing wrappers for PatchPilot agents.
+ * Provides tracing wrappers for QAgent agents.
  * Each agent method is wrapped to track inputs, outputs, and duration.
  */
 

@@ -1,5 +1,5 @@
 /**
- * Google ADK Workflow for PatchPilot
+ * Google ADK Workflow for QAgent
  * Declarative workflow definition using ADK primitives
  */
 

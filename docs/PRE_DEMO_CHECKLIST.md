@@ -1,6 +1,6 @@
 # Pre-Demo Checklist
 
-Use this checklist before running the PatchPilot demo to ensure everything is ready.
+Use this checklist before running the QAgent demo to ensure everything is ready.
 
 ---
 
@@ -174,7 +174,7 @@ If using live Weave data:
 
 ### Screenshots
 - [ ] Screenshot of buggy app (checkout button not working)
-- [ ] Screenshot of PatchPilot running
+- [ ] Screenshot of QAgent running
 - [ ] Screenshot of fix being applied
 - [ ] Screenshot of working app
 - [ ] Screenshot of dashboard with metrics

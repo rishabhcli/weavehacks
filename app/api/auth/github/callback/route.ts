@@ -3,7 +3,7 @@ import { exchangeCodeForToken, getGitHubUser } from '@/lib/auth/github';
 import { encrypt } from '@/lib/auth/session';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-const SESSION_COOKIE = 'patchpilot_session';
+const SESSION_COOKIE = 'qagent_session';
 const MOBILE_REDIRECT_COOKIE = 'github_oauth_redirect';
 
 function getMobileRedirect(request: NextRequest): URL | null {
@@ -11,7 +11,7 @@ function getMobileRedirect(request: NextRequest): URL | null {
   if (!rawRedirect) return null;
   try {
     const redirectUrl = new URL(rawRedirect);
-    if (redirectUrl.protocol !== 'patchpilot:') return null;
+    if (redirectUrl.protocol !== 'qagent:') return null;
     return redirectUrl;
   } catch {
     return null;

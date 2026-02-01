@@ -1,7 +1,7 @@
 /**
  * FailureAnalyzer
  *
- * Analyzes traces from PatchPilot runs to identify failure patterns,
+ * Analyzes traces from QAgent runs to identify failure patterns,
  * categorize errors, and generate corrective actions.
  */
 

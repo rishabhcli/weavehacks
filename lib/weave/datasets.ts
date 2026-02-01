@@ -1,5 +1,5 @@
 /**
- * Weave Datasets for PatchPilot
+ * Weave Datasets for QAgent
  *
  * Stores historical run data as Weave Datasets for:
  * - Training evaluations
@@ -11,7 +11,7 @@ import { weave, isWeaveEnabled, getWeaveClient } from './core';
 import type { TestSpec, FailureReport, Patch, DiagnosisReport } from '@/lib/types';
 
 /**
- * Row in the PatchPilot runs dataset
+ * Row in the QAgent runs dataset
  */
 export interface RunDatasetRow {
   id: string;
@@ -54,7 +54,7 @@ export const storeRunInDataset = isWeaveEnabled()
         // Log the row with attributes for dataset tracking
         weave.withAttributes(
           {
-            dataset_type: 'patchpilot_runs',
+            dataset_type: 'qagent_runs',
             run_id: row.id,
             test_id: row.testSpec.id,
             success: row.success,
@@ -98,7 +98,7 @@ export const createEvaluationDataset = isWeaveEnabled()
 
         weave.withAttributes(
           {
-            dataset_type: 'patchpilot_evaluation',
+            dataset_type: 'qagent_evaluation',
             dataset_size: dataset.length,
             success_rate:
               dataset.filter((r) => r.expected.shouldPass).length / dataset.length,
