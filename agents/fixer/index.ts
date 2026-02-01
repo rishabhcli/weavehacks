@@ -70,7 +70,7 @@ export class FixerAgent implements IFixerAgent {
         };
       }
 
-      // 2. Get similar fixes from knowledge base (placeholder)
+      // 2. Get similar fixes from Redis knowledge base
       const similarFixes = await this.getSimilarFixes(diagnosis);
 
       // 3. Generate patch with LLM
