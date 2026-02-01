@@ -7,7 +7,7 @@ const SESSION_COOKIE = 'patchpilot_session';
 
 export async function GET(request: NextRequest) {
   console.log('=== GitHub OAuth Callback ===');
-  
+
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   const state = searchParams.get('state');
@@ -43,39 +43,26 @@ export async function GET(request: NextRequest) {
     const sessionToken = await encrypt({ accessToken, user, expiresAt });
     console.log('Session token created, length:', sessionToken.length);
 
-    // Build Set-Cookie header manually
-    const sessionCookie = `${SESSION_COOKIE}=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}`;
-    const clearStateCookie = `github_oauth_state=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-    
-    console.log('Session cookie length:', sessionCookie.length);
+    const redirectUrl = new URL('/dashboard?connected=true', APP_URL);
+    const response = NextResponse.redirect(redirectUrl);
 
-    // Use HTML response with meta redirect
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta http-equiv="refresh" content="0;url=${APP_URL}/dashboard?connected=true" />
-          <title>Redirecting...</title>
-        </head>
-        <body>
-          <p>Authenticating... please wait.</p>
-        </body>
-      </html>
-    `;
-
-    const response = new Response(html, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html',
-        'Set-Cookie': sessionCookie,
-      },
+    response.cookies.set(SESSION_COOKIE, sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      expires: expiresAt,
+      path: '/',
     });
-    
-    // Add second cookie header
-    response.headers.append('Set-Cookie', clearStateCookie);
 
-    console.log('SUCCESS - serving HTML redirect page');
-    console.log('Set-Cookie headers:', response.headers.getSetCookie());
+    response.cookies.set('github_oauth_state', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      expires: new Date(0),
+      path: '/',
+    });
+
+    console.log('SUCCESS - redirecting with session cookie set');
     return response;
   } catch (error) {
     console.error('GitHub OAuth error:', error);
