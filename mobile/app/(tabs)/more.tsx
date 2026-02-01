@@ -19,7 +19,7 @@ export default function MoreScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>More</Text>
-      <Text style={styles.subtitle}>All PatchPilot sections</Text>
+      <Text style={styles.subtitle}>All QAgent sections</Text>
 
       <View style={styles.list}>
         {sections.map((section) => (

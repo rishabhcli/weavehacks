@@ -367,7 +367,7 @@ export function NoRunsEmptyState({ onCreateRun }: { onCreateRun: () => void }) {
     <EmptyState
       variant="default"
       title="No runs yet"
-      description="Start your first run to see PatchPilot in action. Our AI agents will test your app, find bugs, and auto-generate fixes."
+      description="Start your first run to see QAgent in action. Our AI agents will test your app, find bugs, and auto-generate fixes."
       action={{ label: 'Start First Run', onClick: onCreateRun }}
     />
   );

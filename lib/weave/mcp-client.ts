@@ -1,6 +1,6 @@
 /**
  * Weave MCP Client
- * Enables PatchPilot to query its own traces for self-improvement
+ * Enables QAgent to query its own traces for self-improvement
  */
 
 import { Client } from '@modelcontextprotocol/sdk/client';
@@ -20,7 +20,7 @@ export async function createWeaveMCPClient(): Promise<Client> {
     },
   });
   const client = new Client(
-    { name: 'patchpilot-weave', version: '0.1.0' },
+    { name: 'qagent-weave', version: '0.1.0' },
     { capabilities: {} }
   );
   await client.connect(transport);
@@ -45,7 +45,7 @@ function parseToolResult(result: { content?: Array<{ type: string; text?: string
 }
 
 export async function queryRecentFailures(
-  projectName: string = 'patchpilot'
+  projectName: string = 'qagent'
 ): Promise<TraceSummary[]> {
   const client = await createWeaveMCPClient();
   try {
@@ -79,7 +79,7 @@ export async function getTraceDetails(traceId: string): Promise<unknown> {
 }
 
 export async function analyzeFailurePatterns(
-  projectName: string = 'patchpilot'
+  projectName: string = 'qagent'
 ): Promise<unknown> {
   const client = await createWeaveMCPClient();
   try {

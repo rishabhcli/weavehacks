@@ -1,5 +1,5 @@
 {
-  "name": "patchpilot",
+  "name": "qagent",
   "version": "0.1.0",
   "private": true,
   "description": "Self-Healing QA Agent - Automatically tests, identifies bugs, applies fixes, and verifies",

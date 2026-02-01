@@ -45,7 +45,7 @@ export default function TestsScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Test Specs</Text>
-          <Text style={styles.subtitle}>E2E tests PatchPilot runs</Text>
+          <Text style={styles.subtitle}>E2E tests QAgent runs</Text>
         </View>
         <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
           <Ionicons name="refresh" size={18} color={colors.dark.primary} />

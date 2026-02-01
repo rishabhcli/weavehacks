@@ -1,5 +1,5 @@
 /**
- * Weave Feedback for PatchPilot
+ * Weave Feedback for QAgent
  *
  * Captures user feedback on agent runs for quality tracking
  * and self-improvement. Feedback is attached to traces.
@@ -8,7 +8,7 @@
 import { weave, isWeaveEnabled } from './core';
 
 /**
- * Feedback types for PatchPilot
+ * Feedback types for QAgent
  */
 export type FeedbackType =
   | 'patch_quality'

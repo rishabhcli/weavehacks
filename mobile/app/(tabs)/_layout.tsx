@@ -43,7 +43,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="grid-outline" size={size} color={color} />
           ),
-          headerTitle: 'PatchPilot',
+          headerTitle: 'QAgent',
         }}
       />
       <Tabs.Screen

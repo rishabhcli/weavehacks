@@ -1,4 +1,4 @@
-# TASKS.md - PatchPilot
+# TASKS.md - QAgent
 
 This file tracks all project tasks organized by phase. Update this file as work progresses.
 
@@ -77,7 +77,7 @@ This file tracks all project tasks organized by phase. Update this file as work 
   - Verify Test 3 detects Bug 3 (null reference)
   - Dependencies: P1-004 + API credentials
 
-### Phase 2: Core PatchPilot Loop
+### Phase 2: Core QAgent Loop
 
 - [x] **P2-001**: Implement Triage Agent
   - Parse error messages and stack traces ✅
@@ -293,7 +293,7 @@ This file tracks all project tasks organized by phase. Update this file as work 
 | - | Project scaffold created | 2024 | Initial structure |
 | P0-* | Phase 0: Planning & Setup | 2024 | Core foundation |
 | P1-* | Phase 1: Test Environment | 2024 | Browserbase + Stagehand |
-| P2-* | Phase 2: Core PatchPilot Loop | 2024 | All agents implemented |
+| P2-* | Phase 2: Core QAgent Loop | 2024 | All agents implemented |
 | P3-* | Phase 3: Knowledge Base | 2024 | Redis vector search |
 | P4-* | Phase 4: Logging & Dashboard | 2024 | W&B Weave + Marimo |
 | P5-* | Phase 5: TraceTriage | 2024 | Self-improvement system |

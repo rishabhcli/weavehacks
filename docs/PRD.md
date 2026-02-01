@@ -1,6 +1,6 @@
 # Product Requirements Document (PRD)
 
-## Project: PatchPilot - Self-Healing QA Agent
+## Project: QAgent - Self-Healing QA Agent
 
 **Version:** 1.0
 **Status:** Approved
@@ -22,7 +22,7 @@ Every team ships buggy applications, and manually writing tests and patches is t
 
 ### 1.2 Solution
 
-PatchPilot is a **self-healing QA agent** that automatically:
+QAgent is a **self-healing QA agent** that automatically:
 
 1. **Tests** web applications using real browser interactions
 2. **Identifies** bugs through failure detection and analysis
@@ -226,7 +226,7 @@ The system operates in a closed-loop: deploy app → test → find bugs → fix 
 
 - [ ] **TraceTriage**: Auto-diagnose and fix agent failures using trace analysis
 - [ ] **RedTeam Suite**: Adversarial testing with fuzzing and security checks
-- [ ] **Multi-App Support**: Target multiple applications from single PatchPilot instance
+- [ ] **Multi-App Support**: Target multiple applications from single QAgent instance
 - [ ] **PR Creation**: Automatically create pull requests instead of direct commits
 - [ ] **Human-in-the-Loop**: Optional approval step before deploying fixes
 - [ ] **Slack/Discord Integration**: Notify team of bugs found and fixed
@@ -240,7 +240,7 @@ The system operates in a closed-loop: deploy app → test → find bugs → fix 
 
 ```
 1. Developer deploys web app to Vercel
-2. Developer triggers PatchPilot agent
+2. Developer triggers QAgent agent
 3. Tester Agent runs E2E tests
 4. Test fails on "checkout" button (no onClick handler)
 5. Triage Agent:
@@ -355,7 +355,7 @@ The system operates in a closed-loop: deploy app → test → find bugs → fix 
 |-------|-------|----------|
 | Phase 0 | Planning & Setup | Day 1 |
 | Phase 1 | Test Environment (Browserbase + Stagehand) | Day 1-2 |
-| Phase 2 | Core PatchPilot Loop | Day 2-3 |
+| Phase 2 | Core QAgent Loop | Day 2-3 |
 | Phase 3 | Knowledge Base (Redis) | Day 3 |
 | Phase 4 | Logging & Dashboard (Weave + Marimo) | Day 3-4 |
 | Phase 5 | TraceTriage (if time) | Day 4 |
@@ -380,7 +380,7 @@ The system operates in a closed-loop: deploy app → test → find bugs → fix 
 
 | Term | Definition |
 |------|------------|
-| **PatchPilot** | The self-healing QA agent system |
+| **QAgent** | The self-healing QA agent system |
 | **Tester Agent** | Component that runs E2E tests |
 | **Triage Agent** | Component that diagnoses failures |
 | **Fixer Agent** | Component that generates patches |
@@ -391,7 +391,7 @@ The system operates in a closed-loop: deploy app → test → find bugs → fix 
 
 ### B. References
 
-- [PatchPilot Paper](https://arxiv.org/html/2502.02747v1) - Agentic patching framework research
+- [QAgent Paper](https://arxiv.org/html/2502.02747v1) - Agentic patching framework research
 - [Stagehand](https://www.stagehand.dev/) - AI browser automation
 - [Browserbase](https://browserbase.com/) - Cloud browser infrastructure
 - [Panto AI](https://www.getpanto.ai/) - Self-healing test automation concept

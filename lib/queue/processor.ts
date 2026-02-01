@@ -1,7 +1,7 @@
 /**
  * Queue Processor
  *
- * Processes queued runs by executing the PatchPilot orchestrator.
+ * Processes queued runs by executing the QAgent orchestrator.
  */
 
 import { completeQueuedRun } from '@/lib/redis/queue';

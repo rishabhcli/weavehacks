@@ -256,7 +256,7 @@ Phase 1 is complete when:
 
 ## Next Phase
 
-Upon completion, proceed to **Phase 2: Core PatchPilot Loop** where we implement the Triage, Fixer, and Verifier agents.
+Upon completion, proceed to **Phase 2: Core QAgent Loop** where we implement the Triage, Fixer, and Verifier agents.
 
 ---
 

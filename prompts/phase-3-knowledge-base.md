@@ -8,7 +8,7 @@
 
 ## Overview
 
-Phase 3 adds the learning capability to PatchPilot by integrating Redis with vector search. This enables the system to remember past failures and their fixes, making it faster at fixing similar bugs in the future. The Triage and Fixer agents will query this knowledge base to improve their accuracy.
+Phase 3 adds the learning capability to QAgent by integrating Redis with vector search. This enables the system to remember past failures and their fixes, making it faster at fixing similar bugs in the future. The Triage and Fixer agents will query this knowledge base to improve their accuracy.
 
 ---
 

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "PatchPilot",
-    "slug": "patchpilot",
+    "name": "QAgent",
+    "slug": "qagent",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "patchpilot",
+    "scheme": "qagent",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
@@ -17,10 +17,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.patchpilot.app",
+      "bundleIdentifier": "com.qagent.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "PatchPilot uses the camera for profile photos.",
-        "NSMicrophoneUsageDescription": "PatchPilot uses the microphone for voice commands."
+        "NSCameraUsageDescription": "QAgent uses the camera for profile photos.",
+        "NSMicrophoneUsageDescription": "QAgent uses the microphone for voice commands."
       }
     },
     "android": {
@@ -28,7 +28,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0a0b0d"
       },
-      "package": "com.patchpilot.app",
+      "package": "com.qagent.app",
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
-const SESSION_COOKIE = 'patchpilot_session';
+const SESSION_COOKIE = 'qagent_session';
 const SECRET_KEY = process.env.SESSION_SECRET || 'default-dev-secret-do-not-use-in-prod';
 const key = new TextEncoder().encode(SECRET_KEY);
 

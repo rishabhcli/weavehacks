@@ -219,7 +219,7 @@ export default function DashboardPage() {
                 </div>
                 <LearningIndicator variant="compact" />
               </div>
-              <h1 className="text-2xl lg:text-3xl font-bold mb-2">Welcome to PatchPilot</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2">Welcome to QAgent</h1>
               <p className="text-muted-foreground max-w-xl">
                 Your unified dashboard for automated testing, bug detection, and self-healing fixes.
               </p>
@@ -312,7 +312,7 @@ export default function DashboardPage() {
                   <EmptyState
                     variant="default"
                     title="No runs yet"
-                    description="Start your first run to see PatchPilot in action"
+                    description="Start your first run to see QAgent in action"
                     action={{ label: 'Start First Run', onClick: () => document.querySelector<HTMLButtonElement>('[data-new-run-trigger]')?.click() }}
                     compact
                   />

@@ -5,6 +5,16 @@ const nextConfig = {
     // Force new build ID each time
     return `build-${Date.now()}`;
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;

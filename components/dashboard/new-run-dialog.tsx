@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { TestSpec } from '@/lib/types';
+import { useSession } from '@/lib/hooks/use-session';
 
 interface NewRunDialogProps {
   onRunCreated?: (runId: string) => void;
@@ -41,7 +42,7 @@ function getConnectedRepos(): ConnectedRepo[] {
   if (typeof window === 'undefined') return [];
 
   try {
-    const stored = sessionStorage.getItem('patchpilot_repos');
+    const stored = sessionStorage.getItem('qagent_repos');
     if (stored) {
       const repos = JSON.parse(stored);
       return repos.filter((r: ConnectedRepo) => r.active);
@@ -53,11 +54,12 @@ function getConnectedRepos(): ConnectedRepo[] {
   return [];
 }
 
-// Updated: cache bust v2
+// Updated: cache bust v3 - now uses useSession as fallback
 export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedRepo, setSelectedRepo] = useState<string>('');
   const [repos, setRepos] = useState<ConnectedRepo[]>([]);
+  const { repos: sessionRepos, isAuthenticated } = useSession();
 
   // Quick Start state
   const [quickStartUrl, setQuickStartUrl] = useState('');
@@ -67,12 +69,31 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
   const [generatedTests, setGeneratedTests] = useState<TestSpec[]>([]);
 
   useEffect(() => {
-    const connectedRepos = getConnectedRepos();
+    // First try sessionStorage (set by Settings page)
+    let connectedRepos = getConnectedRepos();
+    
+    // Fallback to useSession hook if sessionStorage is empty
+    if (connectedRepos.length === 0 && isAuthenticated && sessionRepos.length > 0) {
+      connectedRepos = sessionRepos.map((r) => ({
+        id: String(r.id),
+        name: r.name,
+        fullName: r.fullName,
+        url: r.url,
+        active: true,
+      }));
+      // Also store in sessionStorage for future use
+      try {
+        sessionStorage.setItem('qagent_repos', JSON.stringify(connectedRepos));
+      } catch {
+        // Ignore storage errors
+      }
+    }
+    
     setRepos(connectedRepos);
     if (connectedRepos.length > 0 && !selectedRepo) {
       setSelectedRepo(connectedRepos[0].fullName);
     }
-  }, [open, selectedRepo]);
+  }, [open, selectedRepo, sessionRepos, isAuthenticated]);
 
   const handleQuickStart = async () => {
     if (!selectedRepo) return;
@@ -180,7 +201,7 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-yellow-500" />
-            Start New PatchPilot Run
+            Start New QAgent Run
           </DialogTitle>
           <DialogDescription>
             Choose Quick Start to auto-generate tests, or Advanced mode to select existing tests.
@@ -194,7 +215,7 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
               <div className="text-sm">
                 <span className="font-medium text-neon-cyan">Auto-Generate & Run</span>
                 <span className="text-muted-foreground ml-1">
-                  — PatchPilot will crawl your app and create tests
+                  — QAgent will crawl your app and create tests
                 </span>
               </div>
             </div>

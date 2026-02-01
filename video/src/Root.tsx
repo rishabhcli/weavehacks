@@ -1,12 +1,12 @@
 import { Composition } from 'remotion';
-import { PatchPilotDemo } from './PatchPilotDemo';
+import { QAgentDemo } from './QAgentDemo';
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
       <Composition
-        id="PatchPilotDemo"
-        component={PatchPilotDemo}
+        id="QAgentDemo"
+        component={QAgentDemo}
         durationInFrames={450} // 15 seconds at 30fps
         fps={30}
         width={1920}

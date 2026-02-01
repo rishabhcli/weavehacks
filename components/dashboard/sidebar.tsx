@@ -44,7 +44,7 @@ function getStoredRepoName(): string | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    const stored = sessionStorage.getItem('patchpilot_repos');
+    const stored = sessionStorage.getItem('qagent_repos');
     if (!stored) return null;
     const repos = JSON.parse(stored) as StoredRepo[];
     const activeRepo = repos.find((repo) => repo.active) ?? repos[0];
@@ -178,7 +178,7 @@ export function Sidebar() {
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  PatchPilot
+                  QAgent
                 </motion.span>
               )}
             </AnimatePresence>

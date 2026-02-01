@@ -191,7 +191,7 @@ describe('Session Management', () => {
       });
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
-        'patchpilot_session',
+        'qagent_session',
         'mock-jwt-token',
         expect.objectContaining({
           httpOnly: true,
@@ -227,7 +227,7 @@ describe('Session Management', () => {
     it('should delete session cookie', async () => {
       await destroySession();
 
-      expect(mockCookieStore.delete).toHaveBeenCalledWith('patchpilot_session');
+      expect(mockCookieStore.delete).toHaveBeenCalledWith('qagent_session');
     });
   });
 

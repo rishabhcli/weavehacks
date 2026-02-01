@@ -40,7 +40,7 @@ export default function LandingPage() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Zap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-lg">PatchPilot</span>
+            <span className="font-semibold text-lg">QAgent</span>
           </div>
           <a
             href="https://github.com/rishabhcli/weavehacks"
@@ -77,7 +77,7 @@ export default function LandingPage() {
 
             {/* Description */}
             <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto leading-relaxed">
-              PatchPilot automatically tests your web application, detects bugs, 
+              QAgent automatically tests your web application, detects bugs, 
               generates fixes, and deploys them—all without writing a single test.
             </p>
 
@@ -141,7 +141,7 @@ export default function LandingPage() {
       <section className="py-20 px-6 bg-muted/30">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-2xl font-semibold mb-3">The PatchPilot Loop</h2>
+            <h2 className="text-2xl font-semibold mb-3">The QAgent Loop</h2>
             <p className="text-muted-foreground">A continuous cycle of testing, fixing, and learning</p>
           </div>
 

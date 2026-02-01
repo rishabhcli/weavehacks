@@ -10,8 +10,8 @@ import { API_URL } from '@/lib/api/client';
 WebBrowser.maybeCompleteAuthSession();
 
 const GITHUB_CLIENT_ID = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID || '';
-const TOKEN_KEY = 'patchpilot_access_token';
-const USER_KEY = 'patchpilot_user';
+const TOKEN_KEY = 'qagent_access_token';
+const USER_KEY = 'qagent_user';
 
 // GitHub OAuth discovery document
 const discovery = {
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Generate OAuth redirect URI
   const redirectUri = AuthSession.makeRedirectUri({
-    scheme: 'patchpilot',
+    scheme: 'qagent',
     path: 'auth/callback',
   });
 

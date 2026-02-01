@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/lib/providers/theme-provider';
 import { CommandPalette } from '@/components/ui/command-palette';
 
 export const metadata: Metadata = {
-  title: 'PatchPilot',
+  title: 'QAgent',
   description: 'Self-Healing QA Agent',
 };
 

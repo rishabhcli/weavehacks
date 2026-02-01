@@ -68,7 +68,7 @@ export default function LearningScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Self-Improvement</Text>
-          <Text style={styles.subtitle}>How PatchPilot evolves over time</Text>
+          <Text style={styles.subtitle}>How QAgent evolves over time</Text>
         </View>
         <View style={styles.improvementBadge}>
           <Ionicons name="sparkles-outline" size={16} color={colors.dark.success} />

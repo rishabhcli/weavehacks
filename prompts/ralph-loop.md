@@ -1,6 +1,6 @@
-# Ralph Loop Prompts - PatchPilot
+# Ralph Loop Prompts - QAgent
 
-This file contains prompt templates for the Ralph Loop iterative development cycle specific to PatchPilot.
+This file contains prompt templates for the Ralph Loop iterative development cycle specific to QAgent.
 
 ---
 
@@ -99,7 +99,7 @@ Focus: Browser automation and test execution
 - [ ] Failure reports are structured and complete
 ```
 
-### Phase 2: Core PatchPilot Loop
+### Phase 2: Core QAgent Loop
 
 ```
 ## Phase 2 Ralph Loop - Core Loop
@@ -107,7 +107,7 @@ Focus: Browser automation and test execution
 Focus: Triage, Fixer, Verifier agents and orchestration
 
 ### Skills to Load
-- patchpilot-agents/
+- qagent-agents/
 - vercel-deployment/
 
 ### Tasks
@@ -191,7 +191,7 @@ Focus: Agent learns from its own failures
 
 ### Skills to Load
 - wandb-weave/
-- patchpilot-agents/
+- qagent-agents/
 
 ### Tasks
 - [ ] Implement trace analysis
@@ -216,7 +216,7 @@ Focus: Agent learns from its own failures
 Focus: Security and edge case handling
 
 ### Skills to Load
-- patchpilot-agents/
+- qagent-agents/
 
 ### Tasks
 - [ ] Create adversarial input suite
@@ -264,7 +264,7 @@ Focus: Polish and presentation
 ### Start of Session
 
 ```
-Starting session for PatchPilot.
+Starting session for QAgent.
 
 1. Read CLAUDE.md for full context
 2. Check TASKS.md for current phase and tasks
@@ -275,7 +275,7 @@ Starting session for PatchPilot.
 ### Before Commit
 
 ```
-Pre-commit checklist for PatchPilot:
+Pre-commit checklist for QAgent:
 - [ ] TypeScript compiles without errors
 - [ ] pnpm lint passes
 - [ ] pnpm test passes
@@ -288,7 +288,7 @@ Pre-commit checklist for PatchPilot:
 ### End of Session
 
 ```
-Session wrap-up for PatchPilot:
+Session wrap-up for QAgent:
 - [ ] Update TASKS.md with progress
 - [ ] Commit all working code
 - [ ] Note any blockers in task comments
@@ -399,13 +399,13 @@ Implementing Verifier Agent:
 ## 3-Minute Demo Script
 
 ### 0:00-0:20 - Introduction
-"This is PatchPilot, a self-healing QA agent. Watch as it
+"This is QAgent, a self-healing QA agent. Watch as it
 automatically finds a bug, fixes it, and verifies the fix."
 
 [Show buggy app - click checkout button, nothing happens]
 
 ### 0:20-1:10 - Bug Detection
-"PatchPilot is now running E2E tests using Browserbase and Stagehand."
+"QAgent is now running E2E tests using Browserbase and Stagehand."
 
 [Show Tester Agent running in terminal]
 [Show failure report with screenshot]
@@ -437,7 +437,7 @@ Redis knowledge base for similar past fixes."
 [Show dashboard with pass rate going from 67% to 100%]
 
 ### 2:40-3:00 - Conclusion
-"PatchPilot used:
+"QAgent used:
 - Browserbase + Stagehand for testing
 - Redis for learning from past bugs
 - Vercel for instant deployment

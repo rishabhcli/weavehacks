@@ -193,7 +193,7 @@ export default function SettingsScreen() {
       {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          PatchPilot Mobile v1.0.0
+          QAgent Mobile v1.0.0
         </Text>
         <Text style={styles.footerText}>
           Built for WeaveHacks 2026

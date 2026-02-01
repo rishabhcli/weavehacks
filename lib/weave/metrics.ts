@@ -1,7 +1,7 @@
 /**
  * Weave Metrics Logging
  *
- * Logs key metrics after each PatchPilot run.
+ * Logs key metrics after each QAgent run.
  * Since Weave doesn't have a direct log() function, metrics are tracked
  * through traced operations and console output for local analysis.
  */
@@ -9,7 +9,7 @@
 import { isWeaveEnabled, weave } from './index';
 
 /**
- * Metrics logged after each PatchPilot run
+ * Metrics logged after each QAgent run
  */
 export interface RunMetrics {
   // Test metrics
@@ -49,7 +49,7 @@ export interface OperationMetrics {
 }
 
 /**
- * Log metrics for a completed PatchPilot run
+ * Log metrics for a completed QAgent run
  * Uses withAttributes to attach metrics to the current trace context
  */
 export function logRunMetrics(metrics: RunMetrics): void {
@@ -162,5 +162,5 @@ export const tracedLogMetrics = weave.op(
   async function logMetricsOp(metrics: RunMetrics): Promise<void> {
     logRunMetrics(metrics);
   },
-  { name: 'PatchPilot.logMetrics' }
+  { name: 'QAgent.logMetrics' }
 );

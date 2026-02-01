@@ -8,7 +8,7 @@
 
 ## Overview
 
-Phase 0 establishes the foundation for PatchPilot development. This includes completing all documentation, setting up the development environment, and creating the Next.js demo application with intentional bugs that the system will later fix.
+Phase 0 establishes the foundation for QAgent development. This includes completing all documentation, setting up the development environment, and creating the Next.js demo application with intentional bugs that the system will later fix.
 
 ---
 

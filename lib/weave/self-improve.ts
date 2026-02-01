@@ -38,7 +38,7 @@ function mapSummaryToTraceData(summary: TraceSummary): TraceData {
 }
 
 export const selfImprove = op(
-  async function selfImprove(projectName: string = 'patchpilot') {
+  async function selfImprove(projectName: string = 'qagent') {
     console.log('Starting self-improvement cycle...');
 
     const failures = await queryRecentFailures(projectName);
@@ -73,5 +73,5 @@ export const selfImprove = op(
       improvements,
     };
   },
-  { name: 'PatchPilot.selfImprove' }
+  { name: 'QAgent.selfImprove' }
 );

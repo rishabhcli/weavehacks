@@ -1,7 +1,7 @@
 /**
  * RedTeam - Adversarial Testing Suite
  *
- * Provides security testing and hardening for PatchPilot.
+ * Provides security testing and hardening for QAgent.
  * Includes input sanitization, output validation, and adversarial test cases.
  *
  * Main exports:

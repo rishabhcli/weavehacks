@@ -1,5 +1,5 @@
 /**
- * Weave Evaluations for PatchPilot
+ * Weave Evaluations for QAgent
  *
  * Comprehensive evaluation framework using Weave ops and scorers.
  * Measures agent quality across multiple dimensions:
@@ -299,7 +299,7 @@ async function _runEvaluationInternal(
   if (isWeaveEnabled()) {
     weave.withAttributes(
       {
-        evaluation_name: evaluationName || 'patchpilot_eval',
+        evaluation_name: evaluationName || 'qagent_eval',
         evaluation_size: dataset.length,
         weighted_score: weightedScore,
         pass_rate: dataset.length > 0 ? passCount / dataset.length : 0,
@@ -437,7 +437,7 @@ export const logEvaluationComparison = isWeaveEnabled()
  */
 export function generateEvaluationReport(result: EvaluationResult): string {
   const lines: string[] = [
-    '# PatchPilot Evaluation Report',
+    '# QAgent Evaluation Report',
     '',
     '## Summary',
     `- Total Examples: ${result.summary.totalExamples}`,

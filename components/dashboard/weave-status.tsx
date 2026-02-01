@@ -45,7 +45,7 @@ interface EvaluationResultData {
 /**
  * Comprehensive Weave Status Display
  *
- * Shows all Weave features being used in PatchPilot:
+ * Shows all Weave features being used in QAgent:
  * - Tracing (op wrapper)
  * - Evaluations (custom scorers)
  * - Datasets (run history)

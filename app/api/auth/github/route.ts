@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   if (redirectParam) {
     try {
       const redirectUrl = new URL(redirectParam);
-      if (redirectUrl.protocol === 'patchpilot:') {
+      if (redirectUrl.protocol === 'qagent:') {
         response.cookies.set(MOBILE_REDIRECT_COOKIE, redirectParam, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',

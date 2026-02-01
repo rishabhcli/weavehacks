@@ -155,7 +155,7 @@ export default function RunsPage() {
                   <div className="text-center py-12">
                     <div className="text-muted-foreground mb-4">
                       {filter === 'all' 
-                        ? 'No runs yet. Start your first run to see PatchPilot in action!'
+                        ? 'No runs yet. Start your first run to see QAgent in action!'
                         : 'No runs found matching the current filter.'}
                     </div>
                     {filter === 'all' && (

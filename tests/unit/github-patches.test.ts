@@ -323,7 +323,7 @@ export default x;`;
       expect(result).toHaveProperty('commitSha');
       expect(result).toHaveProperty('prUrl');
       expect(result).toHaveProperty('prNumber');
-      expect(result.branchName).toContain('patchpilot');
+      expect(result.branchName).toContain('qagent');
     });
 
     it('should handle errors at any step', async () => {

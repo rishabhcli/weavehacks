@@ -1,7 +1,7 @@
 /**
  * W&B Weave Integration
  *
- * Comprehensive observability and tracing for PatchPilot agents.
+ * Comprehensive observability and tracing for QAgent agents.
  *
  * Features:
  * - Traces all agent method calls with inputs/outputs
@@ -22,13 +22,13 @@ import type { WeaveClient } from 'weave';
 let initialized = false;
 let weaveEnabled = true;
 let weaveClient: WeaveClient | null = null;
-let projectName = 'patchpilot';
+let projectName = 'qagent';
 
 /**
- * Initialize Weave with the PatchPilot project.
+ * Initialize Weave with the QAgent project.
  * Enhanced with project metadata for WeaveHacks observability.
  */
-export async function initWeave(project: string = 'patchpilot'): Promise<void> {
+export async function initWeave(project: string = 'qagent'): Promise<void> {
   if (initialized) {
     return;
   }

@@ -21,7 +21,7 @@ export async function POST(_request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: `patchpilot-${Date.now()}`,
+        name: `qagent-${Date.now()}`,
         properties: {
           enable_chat: false,
           enable_screenshare: false,

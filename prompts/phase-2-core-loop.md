@@ -1,4 +1,4 @@
-# Phase 2: Core PatchPilot Loop
+# Phase 2: Core QAgent Loop
 
 **Focus:** Triage, Fixer, Verifier agents and end-to-end orchestration
 
@@ -8,14 +8,14 @@
 
 ## Overview
 
-Phase 2 implements the heart of PatchPilot: the three remaining agents (Triage, Fixer, Verifier) and the orchestration logic that connects them. By the end of this phase, PatchPilot should be able to detect a bug, diagnose it, generate a patch, deploy it, and verify the fix.
+Phase 2 implements the heart of QAgent: the three remaining agents (Triage, Fixer, Verifier) and the orchestration logic that connects them. By the end of this phase, QAgent should be able to detect a bug, diagnose it, generate a patch, deploy it, and verify the fix.
 
 ---
 
 ## Skills to Load
 
 ```
-.claude/skills/patchpilot-agents/
+.claude/skills/qagent-agents/
 ├── SKILL.md      # Agent specifications and data flow
 └── reference.md  # Full agent implementations
 
@@ -34,7 +34,7 @@ Phase 2 implements the heart of PatchPilot: the three remaining agents (Triage, 
 ### 1. READ
 - [ ] Load CLAUDE.md for project context
 - [ ] Check TASKS.md for Phase 2 tasks
-- [ ] Load patchpilot-agents skill
+- [ ] Load qagent-agents skill
 - [ ] Load vercel-deployment skill
 - [ ] Review agent interfaces in DESIGN.md
 
@@ -93,7 +93,7 @@ Increments for this iteration:
 - [ ] Integrate TesterAgent for re-test
 
 ### P2.4: Orchestration Script
-- [ ] Create PatchPilotOrchestrator class
+- [ ] Create QAgentOrchestrator class
 - [ ] Wire agents in sequence
 - [ ] Add iteration tracking
 - [ ] Implement max iteration limit
@@ -208,7 +208,7 @@ interface VerificationResult {
 
 ### Orchestrator
 ```typescript
-interface PatchPilotOrchestrator {
+interface QAgentOrchestrator {
   run(config: {
     testSpec: TestSpec;
     appUrl: string;
@@ -321,8 +321,8 @@ Upon completion, proceed to **Phase 3: Knowledge Base** where we add Redis vecto
 
 ## References
 
-- [.claude/skills/patchpilot-agents/SKILL.md](../.claude/skills/patchpilot-agents/SKILL.md)
-- [.claude/skills/patchpilot-agents/reference.md](../.claude/skills/patchpilot-agents/reference.md)
+- [.claude/skills/qagent-agents/SKILL.md](../.claude/skills/qagent-agents/SKILL.md)
+- [.claude/skills/qagent-agents/reference.md](../.claude/skills/qagent-agents/reference.md)
 - [.claude/skills/vercel-deployment/SKILL.md](../.claude/skills/vercel-deployment/SKILL.md)
 - [.claude/skills/vercel-deployment/reference.md](../.claude/skills/vercel-deployment/reference.md)
 - [docs/DESIGN.md](../docs/DESIGN.md) - Agent specifications

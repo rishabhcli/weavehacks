@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
 import type { Session, GitHubUser, GitHubRepo } from '@/lib/types';
 
-const SESSION_COOKIE = 'patchpilot_session';
+const SESSION_COOKIE = 'qagent_session';
 const SECRET_KEY = process.env.SESSION_SECRET || 'default-dev-secret-do-not-use-in-prod';
 const key = new TextEncoder().encode(SECRET_KEY);
 

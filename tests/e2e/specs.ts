@@ -1,5 +1,5 @@
 /**
- * Test Specifications for PatchPilot
+ * Test Specifications for QAgent
  *
  * Define your E2E test specs here.
  * Each spec represents a user flow to be tested by the Tester Agent.
@@ -19,7 +19,7 @@ export const exampleTest: TestSpec = {
   steps: [
     {
       action: 'Verify the page loads',
-      expected: 'I see the PatchPilot landing page',
+      expected: 'I see the QAgent landing page',
     },
   ],
   timeout: 30000,

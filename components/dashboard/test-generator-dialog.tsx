@@ -233,7 +233,7 @@ export function TestGeneratorDialog({
                 Auto-Generate Tests
               </DialogTitle>
               <DialogDescription>
-                Enter a URL and PatchPilot will crawl your app to discover user flows
+                Enter a URL and QAgent will crawl your app to discover user flows
                 and automatically generate test specifications.
               </DialogDescription>
             </DialogHeader>
@@ -253,7 +253,7 @@ export function TestGeneratorDialog({
                   className="font-mono"
                 />
                 <p className="text-xs text-muted-foreground">
-                  PatchPilot will navigate your app and discover testable user flows
+                  QAgent will navigate your app and discover testable user flows
                 </p>
               </div>
 
@@ -290,7 +290,7 @@ export function TestGeneratorDialog({
                 Discovering Flows
               </DialogTitle>
               <DialogDescription>
-                PatchPilot is crawling your application to discover user flows...
+                QAgent is crawling your application to discover user flows...
               </DialogDescription>
             </DialogHeader>
 

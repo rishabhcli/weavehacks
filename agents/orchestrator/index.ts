@@ -1,7 +1,7 @@
 /**
  * Orchestrator
  *
- * Coordinates the PatchPilot loop:
+ * Coordinates the QAgent loop:
  * Tester → Triage → Fixer → Verifier → (repeat if needed)
  *
  * Implements the core self-healing QA agent workflow.
@@ -56,7 +56,7 @@ export class Orchestrator implements IOrchestrator {
   }
 
   /**
-   * Run the complete PatchPilot loop
+   * Run the complete QAgent loop
    * Traced by W&B Weave for observability
    */
   run = isWeaveEnabled()
@@ -84,7 +84,7 @@ export class Orchestrator implements IOrchestrator {
       );
     }
 
-    console.log('\n🚀 PatchPilot Starting\n');
+    console.log('\n🚀 QAgent Starting\n');
     console.log(`📋 Tests to run: ${config.testSpecs.length}`);
     console.log(`🔄 Max iterations: ${config.maxIterations}`);
     console.log(`🎯 Target: ${config.targetUrl}\n`);
@@ -348,7 +348,7 @@ async function main() {
   const maxIterations = parseInt(process.env.MAX_ITERATIONS || '5', 10);
 
   // Initialize Weave for observability
-  await initWeave('patchpilot');
+  await initWeave('qagent');
 
   // Import test specs
   const { allTestSpecs } = await import('@/tests/e2e/specs');

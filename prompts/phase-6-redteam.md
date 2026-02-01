@@ -8,14 +8,14 @@
 
 ## Overview
 
-Phase 6 implements RedTeam-in-a-Box, an adversarial testing suite that stress-tests PatchPilot with edge cases, malformed inputs, and potential security issues. This ensures the system is robust enough for production use and can handle unexpected scenarios gracefully.
+Phase 6 implements RedTeam-in-a-Box, an adversarial testing suite that stress-tests QAgent with edge cases, malformed inputs, and potential security issues. This ensures the system is robust enough for production use and can handle unexpected scenarios gracefully.
 
 ---
 
 ## Skills to Load
 
 ```
-.claude/skills/patchpilot-agents/
+.claude/skills/qagent-agents/
 ├── SKILL.md      # Agent behavior understanding
 └── reference.md  # Agent interfaces for testing
 ```

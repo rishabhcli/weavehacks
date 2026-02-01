@@ -1,8 +1,8 @@
-# PatchPilot Context for Gemini CLI
+# QAgent Context for Gemini CLI
 
 ## Project Overview
 
-**PatchPilot** is a self-healing QA agent system designed to automatically test web applications, identify bugs, apply fixes, and verify them without human intervention. It leverages a multi-agent architecture to create a closed-loop system for continuous quality assurance.
+**QAgent** is a self-healing QA agent system designed to automatically test web applications, identify bugs, apply fixes, and verify them without human intervention. It leverages a multi-agent architecture to create a closed-loop system for continuous quality assurance.
 
 **Key Technologies:**
 *   **Frontend/Demo App:** Next.js, Tailwind CSS, Vercel
@@ -42,7 +42,7 @@ The system operates in a loop:
 
 ### Running the System
 *   **Demo App:** `pnpm dev` (Starts Next.js at localhost:3000)
-*   **Agent Orchestrator:** `pnpm run agent` (Starts the PatchPilot agent loop)
+*   **Agent Orchestrator:** `pnpm run agent` (Starts the QAgent agent loop)
 *   **Dashboard:** `pnpm run dashboard` (Starts Marimo dashboard at localhost:2718)
 *   **Full Demo:** `pnpm run demo` (Runs the scripted demo flow)
 

@@ -1,12 +1,12 @@
 {
-  "name": "patchpilot-video",
+  "name": "qagent-video",
   "version": "1.0.0",
-  "description": "PatchPilot Demo Video",
+  "description": "QAgent Demo Video",
   "scripts": {
     "dev": "remotion studio",
     "build": "remotion bundle",
-    "render": "remotion render PatchPilotDemo out/demo.mp4",
-    "render-gif": "remotion render PatchPilotDemo out/demo.gif"
+    "render": "remotion render QAgentDemo out/demo.mp4",
+    "render-gif": "remotion render QAgentDemo out/demo.gif"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.0",

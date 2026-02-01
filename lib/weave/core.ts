@@ -9,7 +9,7 @@ let initialized = false;
 let weaveEnabled = true;
 let weaveClient: WeaveClient | null = null;
 
-export async function initWeave(projectName: string = 'patchpilot'): Promise<void> {
+export async function initWeave(projectName: string = 'qagent'): Promise<void> {
   if (initialized) return;
   const name = process.env.WEAVE_PROJECT || projectName;
   if (!process.env.WANDB_API_KEY) {

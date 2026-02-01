@@ -84,7 +84,19 @@ function SettingsPageContent() {
       const data = await res.json();
       setSession(data);
       if (data.repos?.length > 0) {
-        setSelectedRepos(new Set([data.repos[0].id]));
+        // Auto-select first repo
+        const firstRepoId = data.repos[0].id;
+        setSelectedRepos(new Set([firstRepoId]));
+        
+        // Auto-save to sessionStorage so NewRunDialog can access repos
+        const selectedReposList = [{
+          id: String(firstRepoId),
+          name: data.repos[0].name,
+          fullName: data.repos[0].fullName,
+          url: data.repos[0].url,
+          active: true,
+        }];
+        sessionStorage.setItem('qagent_repos', JSON.stringify(selectedReposList));
       }
     } catch {
       setSession({ authenticated: false });
@@ -122,9 +134,10 @@ function SettingsPageContent() {
         id: String(r.id),
         name: r.name,
         fullName: r.fullName,
+        url: r.url,
         active: true,
       }));
-      sessionStorage.setItem('patchpilot_repos', JSON.stringify(selectedReposList));
+      sessionStorage.setItem('qagent_repos', JSON.stringify(selectedReposList));
     }
   };
 
@@ -290,7 +303,7 @@ function SettingsPageContent() {
               Target Application
             </CardTitle>
             <CardDescription>
-              The URL where PatchPilot will run tests
+              The URL where QAgent will run tests
             </CardDescription>
           </CardHeader>
           <CardContent>
