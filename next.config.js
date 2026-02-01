@@ -15,6 +15,10 @@ const nextConfig = {
       },
     ],
   },
+  // Exclude Stagehand from webpack bundling - it needs native Node.js resolution
+  experimental: {
+    serverComponentsExternalPackages: ['@browserbasehq/stagehand', 'playwright', 'playwright-core'],
+  },
 };
 
 module.exports = nextConfig;

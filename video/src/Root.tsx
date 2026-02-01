@@ -1,5 +1,5 @@
 import { Composition } from 'remotion';
-import { QAgentDemo } from './PatchPilotDemo';
+import { QAgentDemo } from './QAgentDemo';
 import { QAgentWalkthrough } from './QAgentWalkthrough';
 
 export const RemotionRoot: React.FC = () => {

@@ -323,7 +323,7 @@ export class Orchestrator implements IOrchestrator {
     passCount: number;
   }): void {
     console.log('\n' + '='.repeat(60));
-    console.log('📊 PATCHPILOT SUMMARY');
+    console.log('📊 QAGENT SUMMARY');
     console.log('='.repeat(60));
     console.log(`Status: ${stats.success ? '✅ ALL TESTS PASSING' : '❌ SOME TESTS FAILING'}`);
     console.log(`Tests: ${stats.passCount}/${stats.testCount} passing`);

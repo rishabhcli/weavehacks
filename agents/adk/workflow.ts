@@ -37,7 +37,7 @@ const agents = {
   VerifierAgent: verifierADKAgent,
 };
 
-export const patchPilotWorkflow: WorkflowStep[] = [
+export const qAgentWorkflow: WorkflowStep[] = [
   {
     name: 'run_test',
     agent: 'TesterAgent',
@@ -102,7 +102,7 @@ export async function executeADKWorkflow(
   };
 
   while (context.currentIteration < maxIterations && !context.success) {
-    for (const step of patchPilotWorkflow) {
+    for (const step of qAgentWorkflow) {
       if (step.condition && !step.condition(context)) {
         continue;
       }
