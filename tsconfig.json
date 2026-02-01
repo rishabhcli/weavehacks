@@ -19,7 +19,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@modelcontextprotocol/sdk/client/streamableHttp": [
+        "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts"
+      ]
     },
     "baseUrl": "."
   },

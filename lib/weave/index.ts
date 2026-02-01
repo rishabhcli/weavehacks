@@ -7,6 +7,32 @@
  * - Enables debugging and evaluation
  */
 
+<<<<<<< Current (Your changes)
+export {
+  initWeave,
+  isWeaveEnabled,
+  getWeaveClient,
+  tracedOp,
+  weave,
+  op,
+} from './core';
+
+// Re-export Weave modules for deep integration
+export { weaveInference, weaveInferenceWithJson } from './inference';
+export type { InferenceOptions } from './inference';
+export { queryRecentFailures, getTraceDetails, analyzeFailurePatterns } from './mcp-client';
+export type { TraceSummary } from './mcp-client';
+export { selfImprove } from './self-improve';
+export {
+  runEvaluation,
+  createDatasetFromRuns,
+  fixSuccessScorer,
+  efficiencyScorer,
+  knowledgeReuseScorer,
+  timeToFixScorer,
+} from './evaluations';
+export type { ScorerFn, EvalRow } from './evaluations';
+=======
 import * as weave from 'weave';
 import type { WeaveClient } from 'weave';
 
@@ -16,13 +42,13 @@ let weaveClient: WeaveClient | null = null;
 
 /**
  * Initialize Weave with the PatchPilot project
+ * Enhanced with project metadata for WeaveHacks observability
  */
 export async function initWeave(projectName: string = 'patchpilot'): Promise<void> {
   if (initialized) {
     return;
   }
 
-  // Check if API key is available
   if (!process.env.WANDB_API_KEY) {
     console.warn('⚠️ WANDB_API_KEY not set - Weave tracing disabled');
     weaveEnabled = false;
@@ -30,8 +56,17 @@ export async function initWeave(projectName: string = 'patchpilot'): Promise<voi
   }
 
   try {
-    // Weave init takes project name as string
-    weaveClient = await weave.init(projectName);
+    const initOptions = {
+      project: projectName,
+      metadata: {
+        version: process.env.npm_package_version || '1.0.0',
+        environment: process.env.NODE_ENV || 'development',
+        sponsors: ['wandb', 'redis', 'browserbase', 'vercel', 'daily', 'google-adk'],
+      },
+    };
+    weaveClient = await (weave.init as (arg: string | typeof initOptions) => Promise<WeaveClient>)(
+      initOptions
+    );
     initialized = true;
     weaveEnabled = true;
     console.log(`✅ Weave initialized for project: ${projectName}`);
@@ -78,3 +113,4 @@ export { weave };
 
 // Re-export common weave functions
 export const op = weave.op;
+>>>>>>> Incoming (Background Agent changes)

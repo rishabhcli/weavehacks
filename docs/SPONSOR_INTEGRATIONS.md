@@ -493,6 +493,22 @@ weave>=0.11.0
 
 ---
 
+## Environment Variables (WeaveHacks Additions)
+
+Add these to `.env.local` for full WeaveHacks demo:
+
+```bash
+# Weave project (explicit)
+WEAVE_PROJECT=patchpilot
+
+# Daily/Pipecat Voice Integration
+DAILY_API_KEY=
+DEEPGRAM_API_KEY=
+ELEVENLABS_API_KEY=
+```
+
+---
+
 ## Sponsor Credits
 
 Built with:

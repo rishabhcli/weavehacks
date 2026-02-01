@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NewRunDialog } from '@/components/dashboard/new-run-dialog';
 import { LearningIndicator } from '@/components/dashboard/learning-indicator';
+import { VoiceAssistant } from '@/components/voice/voice-assistant';
 
 interface RunStats {
   totalRuns: number;
@@ -394,6 +395,11 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+<<<<<<< Current (Your changes)
+=======
+
+>>>>>>> Incoming (Background Agent changes)
+      <VoiceAssistant />
     </div>
   );
 }

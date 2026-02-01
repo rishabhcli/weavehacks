@@ -7,8 +7,6 @@
  * Instrumented with W&B Weave for observability.
  */
 
-import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,7 +17,7 @@ import type {
   FixerAgent as IFixerAgent,
 } from '@/lib/types';
 import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
-import { op, isWeaveEnabled } from '@/lib/weave';
+import { op, isWeaveEnabled, weaveInference } from '@/lib/weave';
 import { extractJSON } from '@/lib/utils/json-repair';
 
 interface LLMPatchResponse {
@@ -31,49 +29,26 @@ interface LLMPatchResponse {
 }
 
 export class FixerAgent implements IFixerAgent {
-  private openai: OpenAI | null = null;
-  private gemini: GoogleGenerativeAI | null = null;
-  private useGemini: boolean;
   private projectRoot: string;
   private useRedis: boolean = true;
 
   constructor(projectRoot: string = process.cwd(), useRedis: boolean = true) {
-    // Prefer Gemini if GOOGLE_API_KEY is set
-    const googleApiKey = process.env.GOOGLE_API_KEY;
-    const openaiApiKey = process.env.OPENAI_API_KEY;
-
-    this.useGemini = !!googleApiKey;
-
-    if (googleApiKey) {
-      this.gemini = new GoogleGenerativeAI(googleApiKey);
-    } else if (openaiApiKey) {
-      this.openai = new OpenAI({ apiKey: openaiApiKey });
-    } else {
+    if (!process.env.GOOGLE_API_KEY && !process.env.OPENAI_API_KEY) {
       throw new Error('Either GOOGLE_API_KEY or OPENAI_API_KEY environment variable is required');
     }
-
     this.projectRoot = projectRoot;
     this.useRedis = useRedis;
   }
 
   /**
-   * Call LLM for patch generation
+   * Call LLM via Weave Inference for tracing and cost tracking
    */
   private async callLLM(prompt: string): Promise<string> {
-    if (this.useGemini && this.gemini) {
-      const model = this.gemini.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const result = await model.generateContent(prompt);
-      return result.response.text();
-    } else if (this.openai) {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-        max_tokens: 1000,
-      });
-      return response.choices[0].message.content || '';
-    }
-    throw new Error('No LLM configured');
+    return weaveInference(prompt, undefined, {
+      model: process.env.GOOGLE_API_KEY ? 'gemini-2.0-flash' : 'gpt-4o',
+      maxTokens: 1000,
+      jsonMode: true,
+    });
   }
 
   /**
@@ -133,8 +108,8 @@ export class FixerAgent implements IFixerAgent {
         metadata: {
           linesAdded: llmPatch.newCode.split('\n').length,
           linesRemoved: llmPatch.endLine - llmPatch.startLine + 1,
-          llmModel: this.useGemini ? 'gemini-2.0-flash' : 'gpt-4o',
-          promptTokens: 0, // Would track from API response
+          llmModel: process.env.GOOGLE_API_KEY ? 'gemini-2.0-flash' : 'gpt-4o',
+          promptTokens: 0,
         },
       };
 

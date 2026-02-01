@@ -8,8 +8,6 @@
  * Instrumented with W&B Weave for observability.
  */
 
-import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as fs from 'fs';
 import * as path from 'path';
 import type {
@@ -20,69 +18,37 @@ import type {
   TriageAgent as ITriageAgent,
 } from '@/lib/types';
 import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
-import { op, isWeaveEnabled } from '@/lib/weave';
+import { op, isWeaveEnabled, weaveInference, weaveInferenceWithJson } from '@/lib/weave';
 import { extractJSON } from '@/lib/utils/json-repair';
 
 export class TriageAgent implements ITriageAgent {
-  private openai: OpenAI | null = null;
-  private gemini: GoogleGenerativeAI | null = null;
-  private useGemini: boolean;
   private projectRoot: string;
   private useRedis: boolean = true;
 
   constructor(projectRoot: string = process.cwd(), useRedis: boolean = true) {
-    // Prefer Gemini if GOOGLE_API_KEY is set
-    const googleApiKey = process.env.GOOGLE_API_KEY;
-    const openaiApiKey = process.env.OPENAI_API_KEY;
-
-    this.useGemini = !!googleApiKey;
-
-    if (googleApiKey) {
-      this.gemini = new GoogleGenerativeAI(googleApiKey);
-    } else if (openaiApiKey) {
-      this.openai = new OpenAI({ apiKey: openaiApiKey });
-    } else {
+    if (!process.env.GOOGLE_API_KEY && !process.env.OPENAI_API_KEY) {
       throw new Error('Either GOOGLE_API_KEY or OPENAI_API_KEY environment variable is required');
     }
-
     this.projectRoot = projectRoot;
     this.useRedis = useRedis;
   }
 
   /**
-   * Call LLM (Gemini or OpenAI) for text generation
+   * Call LLM via Weave Inference for tracing and cost tracking
    */
   private async callLLM(prompt: string, jsonMode: boolean = false): Promise<string> {
-    if (this.useGemini && this.gemini) {
-      const model = this.gemini.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const result = await model.generateContent(prompt);
-      return result.response.text();
-    } else if (this.openai) {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: jsonMode ? { type: 'json_object' } : undefined,
-        max_tokens: 500,
-      });
-      return response.choices[0].message.content || '';
-    }
-    throw new Error('No LLM configured');
+    return weaveInference(prompt, undefined, {
+      model: process.env.GOOGLE_API_KEY ? 'gemini-2.0-flash' : 'gpt-4o',
+      maxTokens: 500,
+      jsonMode,
+    });
   }
 
   private async callLLMShort(prompt: string): Promise<string> {
-    if (this.useGemini && this.gemini) {
-      const model = this.gemini.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const result = await model.generateContent(prompt);
-      return result.response.text();
-    } else if (this.openai) {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 10,
-      });
-      return response.choices[0].message.content || '';
-    }
-    throw new Error('No LLM configured');
+    return weaveInference(prompt, undefined, {
+      model: process.env.GOOGLE_API_KEY ? 'gemini-2.0-flash' : 'gpt-4o-mini',
+      maxTokens: 10,
+    });
   }
 
   /**

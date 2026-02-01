@@ -116,7 +116,8 @@ describe('Session Management', () => {
     it('should verify and return payload', async () => {
       mockJwtVerify.mockResolvedValueOnce({
         payload: { user: mockUser, accessToken: 'token', repos: [] },
-      });
+        protectedHeader: { alg: 'HS256' },
+      } as never);
 
       const result = await decrypt('valid-token');
 
