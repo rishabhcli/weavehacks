@@ -25,10 +25,12 @@
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 262 83% 58%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
     --sidebar: 0 0% 98%;
     --sidebar-foreground: 222 47% 11%;
     --sidebar-border: 214 32% 91%;
@@ -37,20 +39,20 @@
   }
 
   .dark {
-    /* Dark mode - Linear/Vercel inspired */
-    --background: 220 13% 5%;
+    /* Dark mode - Enhanced with better contrast */
+    --background: 220 20% 4%;
     --foreground: 210 20% 98%;
-    --card: 220 13% 8%;
+    --card: 220 17% 8%;
     --card-foreground: 210 20% 98%;
-    --popover: 220 13% 8%;
+    --popover: 220 17% 8%;
     --popover-foreground: 210 20% 98%;
-    --primary: 262 83% 58%;
+    --primary: 262 85% 65%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 215 19% 14%;
+    --secondary: 215 20% 16%;
     --secondary-foreground: 210 20% 98%;
-    --muted: 215 19% 14%;
-    --muted-foreground: 215 16% 56%;
-    --accent: 215 19% 18%;
+    --muted: 215 20% 18%;
+    --muted-foreground: 215 16% 64%;
+    --accent: 215 20% 20%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -58,13 +60,15 @@
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    --border: 215 19% 16%;
-    --input: 215 19% 16%;
-    --ring: 262 83% 58%;
-    --sidebar: 220 13% 6%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+    --border: 215 20% 18%;
+    --input: 215 20% 18%;
+    --ring: 262 85% 65%;
+    --sidebar: 220 20% 6%;
     --sidebar-foreground: 210 20% 98%;
-    --sidebar-border: 215 19% 14%;
-    --sidebar-accent: 215 19% 12%;
+    --sidebar-border: 215 20% 14%;
+    --sidebar-accent: 215 20% 14%;
     --sidebar-accent-foreground: 210 20% 98%;
   }
 }
@@ -88,59 +92,92 @@
     scroll-behavior: smooth;
   }
 
-  /* Custom scrollbar for dark mode */
-  .dark ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  /* Focus visible styles for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 
-  .dark ::-webkit-scrollbar-track {
-    background: hsl(var(--background));
-  }
-
-  .dark ::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted));
-    border-radius: 4px;
-  }
-
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground));
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-@layer utilities {
-  /* Text gradient utility */
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400;
-  }
-
-  /* Glass effect for cards */
+@layer components {
+  /* Glassmorphism Card Base */
   .glass {
-    @apply backdrop-blur-md bg-card/80 border border-border/50;
+    @apply backdrop-blur-xl bg-card/40 border border-white/10 rounded-2xl;
   }
 
-  /* Premium glassmorphism */
   .glass-premium {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    @apply backdrop-blur-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl;
   }
 
-  /* Glow effect */
+  .glass-subtle {
+    @apply backdrop-blur-md bg-card/30 border border-white/5 rounded-2xl;
+  }
+
+  .glass-elevated {
+    @apply backdrop-blur-xl bg-card/50 border border-white/10 rounded-2xl shadow-2xl shadow-black/20;
+  }
+
+  /* Hover states for glass cards */
+  .glass-hover {
+    @apply transition-all duration-300 hover:border-white/20 hover:bg-card/50;
+  }
+
+  /* Status badges */
+  .badge-glass {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm;
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-pink-400;
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-premium {
+    @apply bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600;
+  }
+
+  .bg-gradient-success {
+    @apply bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500;
+  }
+
+  .bg-gradient-warning {
+    @apply bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500;
+  }
+
+  .bg-gradient-destructive {
+    @apply bg-gradient-to-br from-red-500 via-rose-500 to-pink-500;
+  }
+
+  /* Glow effects */
   .glow {
     box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
   }
 
+  .glow-lg {
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.4);
+  }
+
   .glow-on-hover {
-    transition: box-shadow 0.3s ease;
+    @apply transition-shadow duration-300;
   }
 
   .glow-on-hover:hover {
     box-shadow: 0 0 30px hsl(var(--primary) / 0.4);
   }
 
-  /* Status indicator animations */
+  /* Status indicators */
   .status-pulse {
     @apply relative;
   }
@@ -151,139 +188,156 @@
     background: inherit;
   }
 
-  /* Skeleton loading */
+  /* Loading skeleton */
   .skeleton {
-    @apply animate-pulse bg-muted rounded;
+    @apply animate-pulse bg-muted rounded-lg;
   }
 
-  /* Gradient animations */
+  /* Shimmer effect */
+  .shimmer {
+    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.1) 50%, hsl(var(--muted)) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Page container */
+  .page-container {
+    @apply min-h-screen p-6 space-y-6;
+  }
+
+  /* Section spacing */
+  .section-gap {
+    @apply space-y-6;
+  }
+
+  /* Grid layouts */
+  .grid-stats {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+  }
+
+  .grid-cards {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+}
+
+@layer utilities {
+  /* Tabular numbers for stats */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Animation utilities */
   .animate-gradient {
     background-size: 200% 200%;
     animation: gradient 8s ease infinite;
   }
 
-  @keyframes gradient {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-
-  /* Float animation */
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
 
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
+  /* Custom scrollbar for dark mode */
+  .dark ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
   }
 
-  /* Shimmer effect for loading states */
-  .shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-background rounded-full;
   }
 
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
   }
 
-  /* Count-up number styling */
-  .tabular-nums {
-    font-variant-numeric: tabular-nums;
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
   }
 
-  /* Agent pipeline connector line */
-  .agent-connector {
-    @apply relative;
+  /* Firefox scrollbar */
+  .dark * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) hsl(var(--background));
   }
 
-  .agent-connector::after {
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Backdrop blur utilities */
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+
+  /* Gradient border */
+  .gradient-border {
+    position: relative;
+    background: hsl(var(--card));
+    border-radius: var(--radius);
+  }
+
+  .gradient-border::before {
     content: '';
-    @apply absolute top-1/2 left-full w-8 h-0.5 bg-border;
-    transform: translateY(-50%);
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.5), hsl(var(--primary) / 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
   }
+}
 
-  .agent-connector.active::after {
-    @apply bg-primary animate-pulse;
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
-/* Legacy demo app styles - for compatibility with demo routes */
-.demo-app * {
-  box-sizing: border-box;
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-.demo-app {
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
-  margin: 0;
-  padding: 20px;
-  background: #fafafa;
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
-.demo-app button {
-  background: #0070f3;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.demo-app button:hover {
-  background: #0051a8;
-}
-
-.demo-app input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-  width: 100%;
-  max-width: 300px;
-}
-
-.demo-app .card {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.demo-app .error {
-  color: #e00;
-  background: #fee;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 10px;
-}
-
-.demo-app .success {
-  color: #080;
-  background: #efe;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 10px;
-}
+/* Demo app uses the main design system */

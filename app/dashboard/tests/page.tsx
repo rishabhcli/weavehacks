@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, TestTube2, Edit, Trash2, Play, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, TestTube2, Edit, Trash2, Play, Loader2, RefreshCw, Sparkles, FileCode2, BookOpen, HelpCircle } from 'lucide-react';
 import { Header } from '@/components/dashboard/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface TestSpec {
   id: string;
@@ -139,23 +140,43 @@ export default function TestsPage() {
           </div>
         ) : (
           /* Empty State */
-          <Card className="p-12">
-            <div className="text-center">
-              <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                <TestTube2 className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">No test specs yet</h3>
-              <p className="text-muted-foreground mb-4">
-                Create your first test spec to start automated testing.
-              </p>
+          <EmptyState
+            icon={TestTube2}
+            title="No test specs yet"
+            description="Create test specifications that PatchPilot will use to automatically test your application and find bugs."
+            action={
               <Link href="/dashboard/tests/new">
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
                   Create Test Spec
                 </Button>
               </Link>
-            </div>
-          </Card>
+            }
+            gradient="from-emerald-500/20 to-teal-600/20"
+            suggestions={[
+              {
+                icon: Sparkles,
+                title: 'Use AI to Generate Tests',
+                description: 'Describe what to test in natural language',
+              },
+              {
+                icon: FileCode2,
+                title: 'Import from Playwright',
+                description: 'Convert existing Playwright tests',
+              },
+              {
+                icon: BookOpen,
+                title: 'Browse Templates',
+                description: 'Start with common test patterns',
+              },
+              {
+                icon: HelpCircle,
+                title: 'Read the Docs',
+                description: 'Learn how to write effective tests',
+              },
+            ]}
+            tip="Start with simple user flows like login or checkout for best results."
+          />
         )}
       </div>
     </div>
