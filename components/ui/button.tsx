@@ -67,6 +67,21 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const showSuccess = success && !loading;
     const showContent = !showLoading && !showSuccess;
 
+    // When asChild is true, Slot expects exactly one child element
+    // Don't wrap children in fragments or add extra elements
+    if (asChild) {
+      return (
+        <Comp
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          disabled={disabled || loading}
+          {...props}
+        >
+          {children}
+        </Comp>
+      );
+    }
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}

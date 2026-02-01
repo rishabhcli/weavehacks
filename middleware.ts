@@ -15,7 +15,6 @@ export async function middleware(request: NextRequest) {
     '/api/auth',
     '/static',
     '/favicon.ico',
-    '/demo',
   ];
 
   // Allow public paths

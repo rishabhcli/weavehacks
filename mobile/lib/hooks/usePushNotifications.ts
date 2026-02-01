@@ -1,18 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { api } from '@/lib/api/client';
 
-// Configure notification handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+type NotificationsModule = typeof import('expo-notifications');
 
 interface UsePushNotificationsReturn {
   expoPushToken: string | null;
@@ -26,46 +18,70 @@ interface UsePushNotificationsReturn {
 
 export function usePushNotifications(): UsePushNotificationsReturn {
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
-  const [notification, setNotification] = useState<Notifications.Notification | null>(null);
+  const [notification, setNotification] = useState<import('expo-notifications').Notification | null>(null);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const notificationListener = useRef<Notifications.Subscription>();
-  const responseListener = useRef<Notifications.Subscription>();
+  const notificationListener = useRef<import('expo-notifications').Subscription>();
+  const responseListener = useRef<import('expo-notifications').Subscription>();
 
   useEffect(() => {
-    // Check current permission status
-    checkPermissionStatus();
+    if (Platform.OS === 'web') {
+      setIsLoading(false);
+      return;
+    }
 
-    // Set up notification listeners
-    notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
-      setNotification(notification);
-    });
+    let notifications: NotificationsModule | null = null;
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-      // Handle notification tap - could navigate to specific run
-      const data = response.notification.request.content.data;
-      console.log('Notification tapped:', data);
-    });
+    async function initialize() {
+      notifications = await import('expo-notifications');
+
+      // Configure notification handler
+      notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+        }),
+      });
+
+      // Check current permission status
+      checkPermissionStatus(notifications);
+
+      // Set up notification listeners
+      notificationListener.current = notifications.addNotificationReceivedListener((incoming) => {
+        setNotification(incoming);
+      });
+
+      responseListener.current = notifications.addNotificationResponseReceivedListener((response) => {
+        // Handle notification tap - could navigate to specific run
+        const data = response.notification.request.content.data;
+        console.log('Notification tapped:', data);
+      });
+    }
+
+    initialize();
 
     return () => {
+      if (!notifications) return;
       if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
+        notifications.removeNotificationSubscription(notificationListener.current);
       }
       if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
+        notifications.removeNotificationSubscription(responseListener.current);
       }
     };
   }, []);
 
-  const checkPermissionStatus = async () => {
+  const checkPermissionStatus = async (notifications?: NotificationsModule) => {
     try {
-      const { status } = await Notifications.getPermissionsAsync();
+      const module = notifications ?? (await import('expo-notifications'));
+      const { status } = await module.getPermissionsAsync();
       setIsEnabled(status === 'granted');
 
       if (status === 'granted') {
-        const token = await registerForPushNotifications();
+        const token = await registerForPushNotifications(module);
         setExpoPushToken(token);
       }
     } catch (err) {
@@ -75,13 +91,16 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     }
   };
 
-  const registerForPushNotifications = async (): Promise<string | null> => {
+  const registerForPushNotifications = async (
+    notifications?: NotificationsModule
+  ): Promise<string | null> => {
     if (!Device.isDevice) {
       setError('Push notifications require a physical device');
       return null;
     }
 
     try {
+      const module = notifications ?? (await import('expo-notifications'));
       // Get the project ID from expo-constants
       const projectId = Constants.expoConfig?.extra?.eas?.projectId;
 
@@ -89,7 +108,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         console.warn('No EAS project ID found, using default');
       }
 
-      const { data: token } = await Notifications.getExpoPushTokenAsync({
+      const { data: token } = await module.getExpoPushTokenAsync({
         projectId: projectId || undefined,
       });
 
@@ -98,9 +117,9 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
       // Configure Android channel
       if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
+        await module.setNotificationChannelAsync('default', {
           name: 'Default',
-          importance: Notifications.AndroidImportance.MAX,
+          importance: module.AndroidImportance.MAX,
           vibrationPattern: [0, 250, 250, 250],
           lightColor: '#7c3aed',
         });
@@ -119,11 +138,12 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       setIsLoading(true);
       setError(null);
 
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      const notifications = await import('expo-notifications');
+      const { status: existingStatus } = await notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
+        const { status } = await notifications.requestPermissionsAsync();
         finalStatus = status;
       }
 
@@ -133,7 +153,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         return false;
       }
 
-      const token = await registerForPushNotifications();
+      const token = await registerForPushNotifications(notifications);
       setExpoPushToken(token);
       setIsEnabled(true);
       return true;
@@ -175,7 +195,8 @@ export async function scheduleLocalNotification(
   body: string,
   data?: Record<string, unknown>
 ) {
-  await Notifications.scheduleNotificationAsync({
+  const notifications = await import('expo-notifications');
+  await notifications.scheduleNotificationAsync({
     content: {
       title,
       body,

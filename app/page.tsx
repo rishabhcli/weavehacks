@@ -90,13 +90,6 @@ export default function LandingPage() {
                 <Github className="h-5 w-5" />
                 Connect with GitHub
               </a>
-              <a
-                href="/demo"
-                className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg font-medium border hover:bg-accent transition-colors w-full sm:w-auto"
-              >
-                View Demo
-                <ArrowRight className="h-4 w-4" />
-              </a>
             </div>
 
             {/* Trust badges */}

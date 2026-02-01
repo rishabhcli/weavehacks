@@ -13,8 +13,6 @@
     "test": "vitest",
     "test:e2e": "tsx tests/e2e/runner.ts",
     "agent": "tsx agents/orchestrator/index.ts",
-    "demo": "tsx scripts/run-demo.ts",
-    "demo:dry": "tsx scripts/run-demo.ts --dry-run",
     "dashboard": "marimo run dashboard/app.py",
     "redis:init": "tsx scripts/init-redis.ts"
   },
