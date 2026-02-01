@@ -280,27 +280,62 @@ weavehacks/
 │   ├── triage/
 │   ├── fixer/
 │   ├── verifier/
-│   └── orchestrator/
-├── app/                    # Next.js demo app (target for testing)
+│   ├── orchestrator/
+│   └── adk/                # ADK workflow & agents
+├── app/
+│   ├── api/                # Next.js API routes
+│   │   ├── auth/           # GitHub OAuth endpoints
+│   │   ├── runs/           # Pipeline run endpoints
+│   │   ├── patches/        # Patch management
+│   │   ├── monitoring/     # Monitoring configs
+│   │   ├── learning/       # Learning metrics
+│   │   ├── webhooks/       # GitHub webhooks
+│   │   └── cron/           # Scheduled tasks
+│   ├── dashboard/          # Dashboard UI pages
+│   └── demo/               # Demo app (target for testing)
+├── components/
+│   ├── dashboard/          # Dashboard components
+│   ├── diagnostics/        # Diagnostic views
+│   ├── monitoring/         # Monitoring components
+│   ├── patches/            # Patch management UI
+│   ├── runs/               # Run tracking components
+│   ├── ui/                 # Shared UI components
+│   └── voice/              # Voice interface
 ├── dashboard/              # Marimo analytics dashboard
 ├── docs/
 │   ├── PRD.md
 │   ├── DESIGN.md
-│   └── ARCHITECTURE.md
+│   ├── ARCHITECTURE.md
+│   ├── DEMO_SCRIPT.md
+│   ├── PRE_DEMO_CHECKLIST.md
+│   └── SPONSOR_INTEGRATIONS.md
 ├── lib/
-│   ├── browserbase/
-│   ├── redis/
-│   ├── vercel/
-│   ├── weave/
-│   └── llm/
-├── prompts/
-│   └── ralph-loop.md
+│   ├── auth/               # Authentication utilities
+│   ├── browserbase/        # Browser automation
+│   ├── dashboard/          # Dashboard data helpers
+│   ├── github/             # GitHub API integration
+│   ├── hooks/              # React hooks
+│   ├── llm/                # LLM providers
+│   ├── queue/              # Job queue
+│   ├── redis/              # Redis vector store
+│   ├── redteam/            # Adversarial testing
+│   ├── tracetriage/        # Trace analysis
+│   ├── utils/              # Shared utilities
+│   ├── vercel/             # Vercel deployment
+│   ├── voice/              # Voice processing
+│   └── weave/              # W&B Weave logging
+├── mobile/                 # React Native mobile app
+├── prompts/                # Agent prompts
+├── scripts/                # Build/deploy scripts
 ├── tests/
 │   ├── e2e/
 │   └── unit/
+├── AGENTS.md
 ├── CLAUDE.md
+├── GEMINI.md
 ├── TASKS.md
 ├── README.md
+├── middleware.ts           # Next.js auth middleware
 └── .env.example
 ```
 
@@ -308,8 +343,8 @@ weavehacks/
 
 ## Current Focus
 
-**Active Phase:** Complete - All phases implemented
-**Current Task:** Maintenance and improvements
+**Active Phase:** Production Ready
+**Current Task:** Maintenance, mobile app development, and improvements
 **Blockers:** None
 
 ---
@@ -338,4 +373,4 @@ weavehacks/
 
 ---
 
-*Last updated: January 2026*
+*Last updated: February 2026*
