@@ -205,6 +205,66 @@ export function emitDeployActivity(runId: string, status: string, url?: string):
 }
 
 // ============================================================================
+// Enhanced Event Emitters for Live Viewing
+// ============================================================================
+
+export function emitAgentThinking(runId: string, agent: AgentType, thought: string): void {
+  emitActivity(runId, agent, 'llm_call', thought);
+}
+
+export function emitStepProgress(
+  runId: string,
+  stepIndex: number,
+  totalSteps: number,
+  description?: string
+): void {
+  const message = description
+    ? `Step ${stepIndex + 1}/${totalSteps}: ${description}`
+    : `Executing step ${stepIndex + 1} of ${totalSteps}`;
+  emitActivity(runId, 'tester', 'test_step', message, {
+    testStep: { step: stepIndex + 1, action: description || '' },
+  });
+}
+
+export function emitBrowserAction(
+  runId: string,
+  action: 'click' | 'type' | 'navigate' | 'wait' | 'observe',
+  element?: string,
+  value?: string
+): void {
+  let message = '';
+  switch (action) {
+    case 'click':
+      message = `Clicking ${element || 'element'}`;
+      break;
+    case 'type':
+      message = `Typing ${value ? `"${value}"` : ''} into ${element || 'input'}`;
+      break;
+    case 'navigate':
+      message = `Navigating to ${element || 'page'}`;
+      break;
+    case 'wait':
+      message = `Waiting for ${element || 'condition'}`;
+      break;
+    case 'observe':
+      message = `Observing ${element || 'page state'}`;
+      break;
+    default:
+      message = `Performing ${action}`;
+  }
+  emitActivity(runId, 'tester', 'navigation', message, { url: element });
+}
+
+export function emitSessionStarted(runId: string, sessionId: string): void {
+  sseEmitter.emit({
+    type: 'status',
+    timestamp: new Date(),
+    runId,
+    data: { sessionId, message: 'Browser session started' },
+  });
+}
+
+// ============================================================================
 // Diagnostics Emitters
 // ============================================================================
 

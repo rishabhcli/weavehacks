@@ -144,7 +144,9 @@ export function Sidebar() {
 
         <motion.aside
           className={cn(
-            'fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-200 ease-in-out',
+            'fixed inset-y-0 left-0 z-50 flex flex-col transition-all duration-200 ease-in-out',
+            'bg-sidebar/80 backdrop-blur-xl border-r border-neon-cyan/20',
+            'shadow-[inset_-1px_0_20px_hsl(var(--neon-cyan)/0.05),0_0_30px_hsl(var(--neon-cyan)/0.05)]',
             isOpen ? 'translate-x-0' : '-translate-x-full',
             'lg:translate-x-0'
           )}
@@ -153,16 +155,16 @@ export function Sidebar() {
         >
           {/* Logo */}
           <div className={cn(
-            "flex h-16 items-center gap-2 border-b border-sidebar-border",
+            "flex h-16 items-center gap-2 border-b border-neon-cyan/20",
             isCollapsed ? "justify-center px-2" : "px-6"
           )}>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary flex-shrink-0">
-              <Zap className="h-4 w-4 text-primary-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-neon-cyan to-neon-magenta flex-shrink-0 shadow-[0_0_15px_hsl(var(--neon-cyan)/0.4)]">
+              <Zap className="h-4 w-4 text-white" />
             </div>
             <AnimatePresence>
               {!isCollapsed && (
-                <motion.span 
-                  className="text-lg font-semibold text-sidebar-foreground whitespace-nowrap overflow-hidden"
+                <motion.span
+                  className="text-lg font-semibold bg-gradient-to-r from-neon-cyan via-neon-magenta to-neon-pink bg-clip-text text-transparent whitespace-nowrap overflow-hidden"
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
@@ -182,21 +184,24 @@ export function Sidebar() {
             {navigation.map((item) => {
               const isActive = pathname === item.href ||
                 (item.href !== '/dashboard' && pathname.startsWith(item.href));
-              
+
               const navItem = (
                 <Link
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors',
+                    'flex items-center gap-3 rounded-lg py-2 text-sm font-medium transition-all duration-200 relative',
                     isCollapsed ? 'justify-center px-2' : 'px-3',
                     isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                      ? 'bg-neon-cyan/10 text-neon-cyan border-l-2 border-neon-cyan shadow-[inset_0_0_20px_hsl(var(--neon-cyan)/0.1)]'
+                      : 'text-sidebar-foreground/70 hover:bg-neon-cyan/5 hover:text-neon-cyan/90 border-l-2 border-transparent'
                   )}
                 >
-                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  <item.icon className={cn(
+                    "h-4 w-4 flex-shrink-0 transition-all duration-200",
+                    isActive && "drop-shadow-[0_0_6px_hsl(var(--neon-cyan)/0.8)]"
+                  )} />
                   <AnimatePresence>
                     {!isCollapsed && (
                       <motion.span
@@ -231,10 +236,10 @@ export function Sidebar() {
           </nav>
 
           {/* Collapse Toggle */}
-          <div className="hidden lg:flex justify-center py-2 border-t border-sidebar-border">
+          <div className="hidden lg:flex justify-center py-2 border-t border-neon-cyan/20">
             <button
               onClick={toggleCollapsed}
-              className="p-2 rounded-lg text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
+              className="p-2 rounded-lg text-muted-foreground hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all duration-200"
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isCollapsed ? (
@@ -248,23 +253,23 @@ export function Sidebar() {
           {/* Footer */}
           <AnimatePresence>
             {!isCollapsed && (
-              <motion.div 
-                className="border-t border-sidebar-border p-4"
+              <motion.div
+                className="border-t border-neon-cyan/20 p-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                <div className="flex items-start gap-3 rounded-lg bg-sidebar-accent/50 px-3 py-2">
-                  <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-md bg-background/40 flex-shrink-0">
+                <div className="flex items-start gap-3 rounded-lg bg-neon-cyan/5 border border-neon-cyan/10 px-3 py-2">
+                  <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-md bg-neon-cyan/10 flex-shrink-0">
                     {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
                     ) : (
-                      <Github className="h-4 w-4 text-muted-foreground" />
+                      <Github className="h-4 w-4 text-neon-cyan" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0 space-y-0.5">
-                    <p className="text-xs font-medium text-sidebar-foreground truncate">
+                    <p className="text-xs font-medium text-neon-cyan truncate">
                       {connectionStatus}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
@@ -283,12 +288,12 @@ export function Sidebar() {
           {isCollapsed && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-center p-4 border-t border-sidebar-border">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-sidebar-accent/50">
+                <div className="flex justify-center p-4 border-t border-neon-cyan/20">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-neon-cyan/10 border border-neon-cyan/20">
                     {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
                     ) : (
-                      <Github className="h-4 w-4 text-muted-foreground" />
+                      <Github className="h-4 w-4 text-neon-cyan" />
                     )}
                   </div>
                 </div>

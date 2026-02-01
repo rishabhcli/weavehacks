@@ -14,6 +14,7 @@ import { op, isWeaveEnabled } from '@/lib/weave';
 export class TesterAgent {
   private stagehand: Stagehand | null = null;
   private consoleLogs: ConsoleLog[] = [];
+  private sessionId: string | null = null;
 
   /**
    * Initialize Stagehand with Browserbase
@@ -46,6 +47,17 @@ export class TesterAgent {
     });
 
     await this.stagehand.init();
+
+    // Capture the Browserbase session ID for live viewing
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.sessionId = (this.stagehand as any).browserbaseSessionID || null;
+  }
+
+  /**
+   * Get the current Browserbase session ID for live debugging
+   */
+  getSessionId(): string | null {
+    return this.sessionId;
   }
 
   /**

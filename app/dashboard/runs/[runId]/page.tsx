@@ -23,6 +23,8 @@ import { cn } from '@/lib/utils/cn';
 import { EnhancedAgentPipeline } from '@/components/runs/enhanced-agent-pipeline';
 import { ActivityLog } from '@/components/runs/activity-log';
 import { DiagnosticsPanel } from '@/components/diagnostics';
+import { LiveBrowserViewer } from '@/components/runs/live-browser-viewer';
+import { AgentTerminal } from '@/components/runs/agent-terminal';
 import type {
   TestResult,
   Patch,
@@ -429,7 +431,7 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
 
   const fetchRun = useCallback(async () => {
     try {
-      const res = await fetch(`/api/runs/${runId}`);
+      const res = await fetch(`/api/runs/${runId}`, { credentials: 'include' });
       if (!res.ok) {
         if (res.status === 404) {
           setError('Run not found');
@@ -474,7 +476,7 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
 
   const handleCancel = async () => {
     try {
-      const res = await fetch(`/api/runs/${runId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/runs/${runId}`, { method: 'DELETE', credentials: 'include' });
       if (res.ok) {
         fetchRun();
       }
@@ -635,6 +637,24 @@ export default function RunDetailPage({ params }: { params: Promise<{ runId: str
           status={run.status}
           agentStates={agentStates}
         />
+
+        {/* Live Browser Viewer & Agent Terminal */}
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            <LiveBrowserViewer
+              runId={run.id}
+              isRunning={run.status === 'running'}
+              className="h-full"
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <AgentTerminal
+              entries={activityLog}
+              isLive={run.status === 'running'}
+              className="h-full"
+            />
+          </div>
+        </div>
 
         {/* Activity Log & Diagnostics Tabs */}
         <Tabs defaultValue="activity" className="space-y-4">

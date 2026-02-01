@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, TestTube2, Edit, Trash2, Play, Loader2, RefreshCw, Sparkles, FileCode2, BookOpen, HelpCircle } from 'lucide-react';
+import { Plus, TestTube2, Edit, Trash2, Play, Loader2, RefreshCw, Sparkles, FileCode2, BookOpen, HelpCircle, Wand2 } from 'lucide-react';
 import { Header } from '@/components/dashboard/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { TestGeneratorDialog } from '@/components/dashboard/test-generator-dialog';
 
 interface TestSpec {
   id: string;
@@ -23,7 +24,7 @@ export default function TestsPage() {
 
   const fetchTestSpecs = useCallback(async () => {
     try {
-      const res = await fetch('/api/tests');
+      const res = await fetch('/api/tests', { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setTestSpecs(data.testSpecs || []);
@@ -48,7 +49,7 @@ export default function TestsPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/tests/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/tests/${id}`, { method: 'DELETE', credentials: 'include' });
       if (res.ok) {
         fetchTestSpecs();
       }
@@ -84,6 +85,15 @@ export default function TestsPage() {
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
+            <TestGeneratorDialog
+              onTestsGenerated={() => fetchTestSpecs()}
+              triggerButton={
+                <Button variant="outline">
+                  <Wand2 className="mr-2 h-4 w-4" />
+                  Auto-Generate
+                </Button>
+              }
+            />
             <Link href="/dashboard/tests/new">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />

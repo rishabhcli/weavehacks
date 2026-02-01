@@ -211,6 +211,7 @@ export interface Run {
   testResults: TestResult[];
   startedAt: Date;
   completedAt?: Date;
+  sessionId?: string; // Browserbase session ID for live viewing
 }
 
 export type RunEventType =

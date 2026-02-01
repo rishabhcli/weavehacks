@@ -36,6 +36,14 @@
     --sidebar-border: 214 32% 91%;
     --sidebar-accent: 210 40% 96%;
     --sidebar-accent-foreground: 222 47% 11%;
+
+    /* Neon Colors */
+    --neon-cyan: 180 100% 50%;
+    --neon-magenta: 300 100% 50%;
+    --neon-pink: 330 100% 60%;
+    --neon-green: 150 100% 45%;
+    --neon-orange: 25 100% 55%;
+    --neon-yellow: 50 100% 50%;
   }
 
   .dark {
@@ -70,6 +78,14 @@
     --sidebar-border: 215 20% 14%;
     --sidebar-accent: 215 20% 14%;
     --sidebar-accent-foreground: 210 20% 98%;
+
+    /* Neon Colors - Brighter in dark mode */
+    --neon-cyan: 180 100% 50%;
+    --neon-magenta: 300 100% 55%;
+    --neon-pink: 330 100% 65%;
+    --neon-green: 150 100% 50%;
+    --neon-orange: 25 100% 60%;
+    --neon-yellow: 50 100% 55%;
   }
 }
 
@@ -218,6 +234,215 @@
   .grid-cards {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
   }
+
+  /* === NEON CYBERPUNK GLASSMORPHISM === */
+
+  /* Glass Neon - Cyan */
+  .glass-neon {
+    @apply backdrop-blur-xl bg-card/30 border rounded-2xl;
+    border-color: hsl(var(--neon-cyan) / 0.3);
+    box-shadow:
+      0 0 15px hsl(var(--neon-cyan) / 0.15),
+      inset 0 0 20px hsl(var(--neon-cyan) / 0.05);
+  }
+
+  .glass-neon:hover {
+    border-color: hsl(var(--neon-cyan) / 0.5);
+    box-shadow:
+      0 0 25px hsl(var(--neon-cyan) / 0.25),
+      inset 0 0 30px hsl(var(--neon-cyan) / 0.08);
+  }
+
+  /* Glass Neon - Magenta */
+  .glass-neon-magenta {
+    @apply backdrop-blur-xl bg-card/30 border rounded-2xl;
+    border-color: hsl(var(--neon-magenta) / 0.3);
+    box-shadow:
+      0 0 15px hsl(var(--neon-magenta) / 0.15),
+      inset 0 0 20px hsl(var(--neon-magenta) / 0.05);
+  }
+
+  .glass-neon-magenta:hover {
+    border-color: hsl(var(--neon-magenta) / 0.5);
+    box-shadow:
+      0 0 25px hsl(var(--neon-magenta) / 0.25),
+      inset 0 0 30px hsl(var(--neon-magenta) / 0.08);
+  }
+
+  /* Glass Neon - Pink */
+  .glass-neon-pink {
+    @apply backdrop-blur-xl bg-card/30 border rounded-2xl;
+    border-color: hsl(var(--neon-pink) / 0.3);
+    box-shadow:
+      0 0 15px hsl(var(--neon-pink) / 0.15),
+      inset 0 0 20px hsl(var(--neon-pink) / 0.05);
+  }
+
+  .glass-neon-pink:hover {
+    border-color: hsl(var(--neon-pink) / 0.5);
+    box-shadow:
+      0 0 25px hsl(var(--neon-pink) / 0.25),
+      inset 0 0 30px hsl(var(--neon-pink) / 0.08);
+  }
+
+  /* Animated Neon Border - Used as standalone element with background */
+  .neon-border-animated {
+    position: relative;
+    background: hsl(var(--card));
+    border-radius: var(--radius);
+  }
+
+  .neon-border-animated::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--neon-cyan)),
+      hsl(var(--neon-magenta)),
+      hsl(var(--neon-pink)),
+      hsl(var(--neon-cyan))
+    );
+    background-size: 300% 100%;
+    animation: neon-flow 4s linear infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Animated Neon Border - Overlay variant without background (for use on dialogs) */
+  .neon-border-overlay {
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--neon-cyan)),
+      hsl(var(--neon-magenta)),
+      hsl(var(--neon-pink)),
+      hsl(var(--neon-cyan))
+    );
+    background-size: 300% 100%;
+    animation: neon-flow 4s linear infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Cyber Grid Background */
+  .cyber-grid {
+    background-image:
+      linear-gradient(hsl(var(--neon-cyan) / 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--neon-cyan) / 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* CRT Scanlines Overlay */
+  .scanlines {
+    position: relative;
+  }
+
+  .scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(0 0% 0% / 0.03) 2px,
+      hsl(0 0% 0% / 0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* Neon Text */
+  .text-neon-cyan {
+    color: hsl(var(--neon-cyan));
+    text-shadow:
+      0 0 5px hsl(var(--neon-cyan) / 0.5),
+      0 0 10px hsl(var(--neon-cyan) / 0.3),
+      0 0 20px hsl(var(--neon-cyan) / 0.2);
+  }
+
+  .text-neon-magenta {
+    color: hsl(var(--neon-magenta));
+    text-shadow:
+      0 0 5px hsl(var(--neon-magenta) / 0.5),
+      0 0 10px hsl(var(--neon-magenta) / 0.3),
+      0 0 20px hsl(var(--neon-magenta) / 0.2);
+  }
+
+  .text-neon-pink {
+    color: hsl(var(--neon-pink));
+    text-shadow:
+      0 0 5px hsl(var(--neon-pink) / 0.5),
+      0 0 10px hsl(var(--neon-pink) / 0.3),
+      0 0 20px hsl(var(--neon-pink) / 0.2);
+  }
+
+  /* Neon Gradient Text */
+  .text-neon-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      90deg,
+      hsl(var(--neon-cyan)),
+      hsl(var(--neon-magenta)),
+      hsl(var(--neon-pink))
+    );
+  }
+
+  /* Glow Effects */
+  .glow-cyan {
+    box-shadow:
+      0 0 10px hsl(var(--neon-cyan) / 0.3),
+      0 0 20px hsl(var(--neon-cyan) / 0.2),
+      0 0 40px hsl(var(--neon-cyan) / 0.1);
+  }
+
+  .glow-magenta {
+    box-shadow:
+      0 0 10px hsl(var(--neon-magenta) / 0.3),
+      0 0 20px hsl(var(--neon-magenta) / 0.2),
+      0 0 40px hsl(var(--neon-magenta) / 0.1);
+  }
+
+  .glow-pink {
+    box-shadow:
+      0 0 10px hsl(var(--neon-pink) / 0.3),
+      0 0 20px hsl(var(--neon-pink) / 0.2),
+      0 0 40px hsl(var(--neon-pink) / 0.1);
+  }
+
+  /* Cyberpunk Glass Card */
+  .glass-cyberpunk {
+    @apply backdrop-blur-xl bg-gradient-to-br from-card/40 to-card/20 border rounded-2xl;
+    border-color: hsl(var(--neon-cyan) / 0.2);
+    box-shadow:
+      0 0 20px hsl(var(--neon-magenta) / 0.1),
+      inset 0 0 40px hsl(var(--neon-cyan) / 0.03);
+  }
+
+  .glass-cyberpunk::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--neon-cyan) / 0.05) 0%,
+      transparent 50%,
+      hsl(var(--neon-magenta) / 0.05) 100%
+    );
+    border-radius: inherit;
+    pointer-events: none;
+  }
 }
 
 @layer utilities {
@@ -337,6 +562,96 @@
   }
   100% {
     background-position: -200% 0;
+  }
+}
+
+/* === NEON CYBERPUNK ANIMATIONS === */
+
+@keyframes neon-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
+}
+
+@keyframes neon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow:
+      0 0 5px hsl(var(--neon-cyan) / 0.5),
+      0 0 10px hsl(var(--neon-cyan) / 0.3),
+      0 0 20px hsl(var(--neon-cyan) / 0.2);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow:
+      0 0 10px hsl(var(--neon-cyan) / 0.7),
+      0 0 20px hsl(var(--neon-cyan) / 0.5),
+      0 0 40px hsl(var(--neon-cyan) / 0.3);
+  }
+}
+
+@keyframes glitch {
+  0%,
+  100% {
+    transform: translate(0);
+    filter: none;
+  }
+  20% {
+    transform: translate(-2px, 2px);
+    filter: hue-rotate(90deg);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+    filter: hue-rotate(-90deg);
+  }
+  60% {
+    transform: translate(2px, 2px);
+    filter: hue-rotate(180deg);
+  }
+  80% {
+    transform: translate(2px, -2px);
+    filter: hue-rotate(-180deg);
+  }
+}
+
+@keyframes flicker {
+  0%,
+  19.999%,
+  22%,
+  62.999%,
+  64%,
+  64.999%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  21.999%,
+  63%,
+  63.999%,
+  65%,
+  69.999% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes orb-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(10px, -10px) scale(1.05);
+  }
+  50% {
+    transform: translate(0, -20px) scale(1);
+  }
+  75% {
+    transform: translate(-10px, -10px) scale(0.95);
   }
 }
 

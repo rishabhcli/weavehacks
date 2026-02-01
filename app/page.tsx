@@ -82,7 +82,7 @@ export default function LandingPage() {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 pt-8 pb-16">
         <motion.div
           className="max-w-4xl w-full space-y-12 text-center"
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
@@ -106,7 +106,7 @@ export default function LandingPage() {
           {/* Feature Cards */}
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4"
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
@@ -114,7 +114,7 @@ export default function LandingPage() {
               <motion.div
                 key={feature.title}
                 className="p-6 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-violet-500/50 transition-colors"
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
                 whileHover={{ y: -2 }}
@@ -131,7 +131,7 @@ export default function LandingPage() {
           {/* CTA Card */}
           <motion.div
             className="bg-card/80 backdrop-blur-md border border-border/50 rounded-2xl p-8 shadow-xl max-w-md mx-auto"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={false}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
@@ -163,7 +163,7 @@ export default function LandingPage() {
           {/* Sponsors Section */}
           <motion.div
             className="pt-8"
-            initial={{ opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
@@ -175,7 +175,7 @@ export default function LandingPage() {
                 <motion.div
                   key={sponsor.name}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card/30 border border-border/30 hover:border-border transition-colors"
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={false}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.7 + index * 0.05 }}
                   whileHover={{ scale: 1.05 }}
@@ -195,7 +195,7 @@ export default function LandingPage() {
         {/* Footer */}
         <motion.footer
           className="absolute bottom-4 text-center"
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.8 }}
         >

@@ -5,9 +5,11 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils/cn';
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'premium' | 'subtle' | 'elevated';
+  variant?: 'default' | 'premium' | 'subtle' | 'elevated' | 'neon-cyan' | 'neon-magenta' | 'neon-pink' | 'cyberpunk';
   hover?: boolean;
   animate?: boolean;
+  glowOnHover?: boolean;
+  animatedBorder?: boolean;
   children: React.ReactNode;
 }
 
@@ -16,15 +18,42 @@ const variantStyles = {
   premium: 'bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border-white/20',
   subtle: 'bg-card/30 backdrop-blur-md border-white/5',
   elevated: 'bg-card/50 backdrop-blur-xl border-white/10 shadow-2xl shadow-black/20',
+  'neon-cyan': 'bg-card/30 backdrop-blur-xl border-neon-cyan/30 shadow-[0_0_15px_hsl(var(--neon-cyan)/0.15),inset_0_0_20px_hsl(var(--neon-cyan)/0.05)]',
+  'neon-magenta': 'bg-card/30 backdrop-blur-xl border-neon-magenta/30 shadow-[0_0_15px_hsl(var(--neon-magenta)/0.15),inset_0_0_20px_hsl(var(--neon-magenta)/0.05)]',
+  'neon-pink': 'bg-card/30 backdrop-blur-xl border-neon-pink/30 shadow-[0_0_15px_hsl(var(--neon-pink)/0.15),inset_0_0_20px_hsl(var(--neon-pink)/0.05)]',
+  'cyberpunk': 'bg-gradient-to-br from-card/40 to-card/20 backdrop-blur-xl border-neon-cyan/20 shadow-[0_0_20px_hsl(var(--neon-magenta)/0.1),inset_0_0_40px_hsl(var(--neon-cyan)/0.03)]',
+};
+
+const hoverStyles = {
+  'neon-cyan': 'hover:border-neon-cyan/50 hover:shadow-[0_0_25px_hsl(var(--neon-cyan)/0.25),inset_0_0_30px_hsl(var(--neon-cyan)/0.08)]',
+  'neon-magenta': 'hover:border-neon-magenta/50 hover:shadow-[0_0_25px_hsl(var(--neon-magenta)/0.25),inset_0_0_30px_hsl(var(--neon-magenta)/0.08)]',
+  'neon-pink': 'hover:border-neon-pink/50 hover:shadow-[0_0_25px_hsl(var(--neon-pink)/0.25),inset_0_0_30px_hsl(var(--neon-pink)/0.08)]',
+  'cyberpunk': 'hover:border-neon-cyan/40 hover:shadow-[0_0_30px_hsl(var(--neon-magenta)/0.2),inset_0_0_50px_hsl(var(--neon-cyan)/0.05)]',
 };
 
 const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
-  ({ className, variant = 'default', hover = false, animate = false, children, ...props }, ref) => {
+  ({ className, variant = 'default', hover = false, animate = false, glowOnHover = false, animatedBorder = false, children, ...props }, ref) => {
+    const isNeonVariant = variant.startsWith('neon-') || variant === 'cyberpunk';
+    const neonHoverStyle = isNeonVariant ? hoverStyles[variant as keyof typeof hoverStyles] : '';
+
     const baseStyles = cn(
-      'rounded-2xl border',
+      'rounded-2xl border relative',
       variantStyles[variant],
-      hover && 'transition-all duration-300 hover:border-white/20 hover:bg-card/50',
+      hover && !isNeonVariant && 'transition-all duration-300 hover:border-white/20 hover:bg-card/50',
+      isNeonVariant && 'transition-all duration-300',
+      glowOnHover && neonHoverStyle,
+      animatedBorder && 'neon-border-animated',
       className
+    );
+
+    const content = (
+      <>
+        {/* Cyber grid overlay for cyberpunk variant */}
+        {variant === 'cyberpunk' && (
+          <div className="absolute inset-0 rounded-2xl cyber-grid opacity-50 pointer-events-none" />
+        )}
+        {children}
+      </>
     );
 
     if (animate) {
@@ -37,14 +66,14 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
           transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
           {...(props as any)}
         >
-          {children}
+          {content}
         </motion.div>
       );
     }
 
     return (
       <div ref={ref} className={baseStyles} {...props}>
-        {children}
+        {content}
       </div>
     );
   }

@@ -48,7 +48,7 @@ export default function RunsPage() {
 
   const fetchRuns = useCallback(async () => {
     try {
-      const response = await fetch('/api/runs');
+      const response = await fetch('/api/runs', { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         setRuns(data.runs || []);

@@ -58,6 +58,14 @@ module.exports = {
           accent: 'hsl(var(--sidebar-accent))',
           'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
         },
+        neon: {
+          cyan: 'hsl(var(--neon-cyan))',
+          magenta: 'hsl(var(--neon-magenta))',
+          pink: 'hsl(var(--neon-pink))',
+          green: 'hsl(var(--neon-green))',
+          orange: 'hsl(var(--neon-orange))',
+          yellow: 'hsl(var(--neon-yellow))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -85,6 +93,37 @@ module.exports = {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.5' },
         },
+        'neon-flow': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '300% 50%' },
+        },
+        'neon-pulse': {
+          '0%, 100%': {
+            opacity: '1',
+            boxShadow: '0 0 5px hsl(var(--neon-cyan) / 0.5), 0 0 10px hsl(var(--neon-cyan) / 0.3), 0 0 20px hsl(var(--neon-cyan) / 0.2)',
+          },
+          '50%': {
+            opacity: '0.8',
+            boxShadow: '0 0 10px hsl(var(--neon-cyan) / 0.7), 0 0 20px hsl(var(--neon-cyan) / 0.5), 0 0 40px hsl(var(--neon-cyan) / 0.3)',
+          },
+        },
+        glitch: {
+          '0%, 100%': { transform: 'translate(0)', filter: 'none' },
+          '20%': { transform: 'translate(-2px, 2px)', filter: 'hue-rotate(90deg)' },
+          '40%': { transform: 'translate(-2px, -2px)', filter: 'hue-rotate(-90deg)' },
+          '60%': { transform: 'translate(2px, 2px)', filter: 'hue-rotate(180deg)' },
+          '80%': { transform: 'translate(2px, -2px)', filter: 'hue-rotate(-180deg)' },
+        },
+        flicker: {
+          '0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100%': { opacity: '1' },
+          '20%, 21.999%, 63%, 63.999%, 65%, 69.999%': { opacity: '0.8' },
+        },
+        'orb-float': {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '25%': { transform: 'translate(10px, -10px) scale(1.05)' },
+          '50%': { transform: 'translate(0, -20px) scale(1)' },
+          '75%': { transform: 'translate(-10px, -10px) scale(0.95)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -92,6 +131,11 @@ module.exports = {
         'fade-in': 'fade-in 0.3s ease-out',
         'slide-in': 'slide-in-from-left 0.3s ease-out',
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'neon-flow': 'neon-flow 4s linear infinite',
+        'neon-pulse': 'neon-pulse 2s ease-in-out infinite',
+        glitch: 'glitch 0.3s ease-in-out',
+        flicker: 'flicker 3s linear infinite',
+        'orb-float': 'orb-float 8s ease-in-out infinite',
       },
       fontFamily: {
         sans: [

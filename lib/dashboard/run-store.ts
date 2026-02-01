@@ -54,6 +54,13 @@ export function updateRunAgent(runId: string, agent: AgentType | null): void {
   }
 }
 
+export function updateRunSession(runId: string, sessionId: string): void {
+  const run = runs.get(runId);
+  if (run) {
+    run.sessionId = sessionId;
+  }
+}
+
 export function incrementRunIteration(runId: string): void {
   const run = runs.get(runId);
   if (run) {

@@ -20,8 +20,9 @@ import { TesterAgent } from '@/agents/tester';
 import { TriageAgent } from '@/agents/triage';
 import { FixerAgent } from '@/agents/fixer';
 import { VerifierAgent } from '@/agents/verifier';
-import { initWeave, op, isWeaveEnabled } from '@/lib/weave';
+import { initWeave, op, isWeaveEnabled, getWeaveProjectUrl, weave } from '@/lib/weave';
 import { logRunMetrics, type RunMetrics } from '@/lib/weave/metrics';
+import { storeRunInDataset, type RunDatasetRow } from '@/lib/weave/datasets';
 
 // Callback for when patches are generated (used in cloud mode to create PRs)
 export type PatchGeneratedCallback = (patch: Patch, diagnosis: DiagnosisReport) => Promise<void>;
@@ -64,13 +65,32 @@ export class Orchestrator implements IOrchestrator {
 
   private async _run(config: OrchestratorConfig): Promise<OrchestratorResult> {
     const startTime = Date.now();
+    const runId = `run-${Date.now()}`;
     const allPatches: Patch[] = [];
     let totalIterations = 0;
+
+    // Log run configuration to Weave
+    if (isWeaveEnabled()) {
+      weave.withAttributes(
+        {
+          run_id: runId,
+          target_url: config.targetUrl,
+          max_iterations: config.maxIterations,
+          test_count: config.testSpecs.length,
+          test_ids: config.testSpecs.map((t) => t.id).join(','),
+          started_at: new Date().toISOString(),
+        },
+        () => {}
+      );
+    }
 
     console.log('\n🚀 PatchPilot Starting\n');
     console.log(`📋 Tests to run: ${config.testSpecs.length}`);
     console.log(`🔄 Max iterations: ${config.maxIterations}`);
     console.log(`🎯 Target: ${config.targetUrl}\n`);
+    if (isWeaveEnabled()) {
+      console.log(`📊 Weave run ID: ${runId}\n`);
+    }
 
     try {
       // Initialize tester agent
@@ -142,6 +162,30 @@ export class Orchestrator implements IOrchestrator {
         success: allPassed,
       };
       logRunMetrics(metrics);
+
+      // Store each test result in Weave dataset for future evaluations
+      for (const testSpec of config.testSpecs) {
+        const testResult = finalResults.find((r) => r.testId === testSpec.id);
+        const testPatches = allPatches.filter((p) => p.diagnosisId === testSpec.id);
+
+        const datasetRow: RunDatasetRow = {
+          id: `run-${Date.now()}-${testSpec.id}`,
+          timestamp: new Date().toISOString(),
+          testSpec,
+          passed: testResult?.passed ?? false,
+          patch: testPatches[0],
+          iterations: totalIterations,
+          durationMs: testResult?.duration ?? 0,
+          success: testResult?.passed ?? false,
+        };
+
+        await storeRunInDataset(datasetRow);
+      }
+
+      // Log Weave project URL
+      if (isWeaveEnabled()) {
+        console.log(`\n📊 View traces at: ${getWeaveProjectUrl()}`);
+      }
 
       // Convert last result to TestResult format
       const lastResult = finalResults[finalResults.length - 1];
