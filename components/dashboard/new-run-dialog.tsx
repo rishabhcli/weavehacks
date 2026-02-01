@@ -390,163 +390,18 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
 
           {/* Advanced Tab */}
           <TabsContent value="advanced" className="space-y-4 pt-4">
-            {/* Cloud Mode Banner */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20">
-              <Cloud className="h-5 w-5 text-violet-400" />
-              <div className="text-sm">
-                <span className="font-medium text-violet-400">Cloud Mode</span>
-                <span className="text-muted-foreground ml-1">
-                  — Tests run on Browserbase, patches create GitHub PRs
-                </span>
-              </div>
-            </div>
-
-            {/* Repository Selection */}
-            <div className="grid gap-2">
-              <Label htmlFor="repo" className="flex items-center gap-2">
-                <GitBranch className="h-4 w-4" />
-                GitHub Repository
-              </Label>
-              {hasConnectedRepos ? (
-                <Select value={selectedRepo} onValueChange={setSelectedRepo}>
-                  <SelectTrigger id="repo">
-                    <SelectValue placeholder="Select a repository" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {repos.map((repo) => (
-                      <SelectItem key={repo.id} value={repo.fullName}>
-                        {repo.fullName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="p-4 rounded-lg border border-dashed border-yellow-500/30 bg-yellow-500/5 text-center">
-                  <p className="text-sm text-yellow-400 mb-2">
-                    No repositories connected
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setOpen(false);
-                      window.location.href = '/dashboard/settings';
-                    }}
-                  >
-                    Connect GitHub
-                  </Button>
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                PatchPilot will deploy this repo and run tests against it
+            <div className="p-4 text-center">
+              <p className="text-muted-foreground mb-4">
+                Advanced mode requires test specs. Create tests first or use Quick Start.
               </p>
-            </div>
-
-            {/* Max Iterations */}
-            <div className="grid gap-2">
-              <Label htmlFor="iterations">Max Fix Iterations</Label>
-              <select
-                id="iterations"
-                value={maxIterations}
-                onChange={(e) => setMaxIterations(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="1">1 iteration</option>
-                <option value="3">3 iterations</option>
-                <option value="5">5 iterations (recommended)</option>
-                <option value="10">10 iterations</option>
-              </select>
-              <p className="text-xs text-muted-foreground">
-                How many times to retry fixing each failing test
-              </p>
-            </div>
-
-            {/* Test Selection */}
-            <div className="grid gap-2">
-              <Label>Tests to Run</Label>
-              {loadingTests ? (
-                <div className="flex items-center justify-center p-8 border rounded-lg">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : hasExistingTests ? (
-                <div className="border rounded-lg p-3 space-y-2 max-h-[200px] overflow-y-auto">
-                  {availableTests.map((test) => (
-                    <label
-                      key={test.id}
-                      className="flex items-center gap-3 p-2 rounded hover:bg-secondary/50 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedTests.includes(test.id)}
-                        onChange={() => toggleTest(test.id)}
-                        className="h-4 w-4 rounded border-gray-300"
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{test.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {test.steps.length} step{test.steps.length !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-4 rounded-lg border border-dashed text-center">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    No test specs found
-                  </p>
-                  <div className="flex items-center justify-center gap-2">
-                    <Link 
-                      href="/dashboard/tests/new"
-                      onClick={() => setOpen(false)}
-                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
-                    >
-                      <Plus className="mr-2 h-3 w-3" />
-                      Create Test
-                    </Link>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setActiveTab('quick')}
-                    >
-                      <Wand2 className="mr-2 h-3 w-3" />
-                      Auto-Generate
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Deployment Progress */}
-            {deploymentStep && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50 animate-pulse">
-                <Loader2 className="h-4 w-4 animate-spin text-violet-400" />
-                <span className="text-sm">{deploymentStep}</span>
-              </div>
-            )}
-
-            <DialogFooter className="pt-4">
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
               <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting || selectedTests.length === 0 || !selectedRepo}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                variant="outline"
+                onClick={() => setActiveTab('quick')}
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Starting...
-                  </>
-                ) : (
-                  <>
-                    <Play className="mr-2 h-4 w-4" />
-                    Run {selectedTests.length} Test{selectedTests.length !== 1 ? 's' : ''}
-                  </>
-                )}
+                <Wand2 className="mr-2 h-4 w-4" />
+                Use Quick Start Instead
               </Button>
-            </DialogFooter>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
