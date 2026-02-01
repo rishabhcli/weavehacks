@@ -26,20 +26,20 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
 }
 
 interface RecentRunItemProps {
-  id: string;
-  targetUrl: string;
+  repoName: string;
   status: string;
-  bugsFound: number;
-  createdAt: string;
+  failedTests: number;
+  startedAt: string;
   onPress: () => void;
 }
 
-function RecentRunItem({ id, targetUrl, status, bugsFound, createdAt, onPress }: RecentRunItemProps) {
+function RecentRunItem({ repoName, status, failedTests, startedAt, onPress }: RecentRunItemProps) {
   const statusColors: Record<string, string> = {
     completed: colors.dark.success,
     running: colors.dark.primary,
     failed: colors.dark.destructive,
     pending: colors.dark.warning,
+    cancelled: colors.dark.mutedForeground,
   };
 
   const statusIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -47,6 +47,7 @@ function RecentRunItem({ id, targetUrl, status, bugsFound, createdAt, onPress }:
     running: 'sync',
     failed: 'close-circle',
     pending: 'time',
+    cancelled: 'ban',
   };
 
   return (
@@ -58,9 +59,9 @@ function RecentRunItem({ id, targetUrl, status, bugsFound, createdAt, onPress }:
           color={statusColors[status] || colors.dark.mutedForeground}
         />
         <View style={styles.runItemInfo}>
-          <Text style={styles.runItemUrl} numberOfLines={1}>{targetUrl}</Text>
+          <Text style={styles.runItemUrl} numberOfLines={1}>{repoName}</Text>
           <Text style={styles.runItemMeta}>
-            {new Date(createdAt).toLocaleDateString()} • {bugsFound} bugs found
+            {new Date(startedAt).toLocaleDateString()} • {failedTests} failed tests
           </Text>
         </View>
       </View>
@@ -71,8 +72,8 @@ function RecentRunItem({ id, targetUrl, status, bugsFound, createdAt, onPress }:
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { user, isAuthenticated } = useSession();
-  const { runs, total, isLoading, mutate } = useRuns({ limit: 5 });
+  const { user } = useSession();
+  const { runs, stats, total, mutate } = useRuns({ limit: 5 });
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -82,13 +83,21 @@ export default function DashboardScreen() {
   }, [mutate]);
 
   // Calculate stats
-  const stats = {
+  const getTestsTotal = (run: typeof runs[number]) =>
+    run.testsTotal ?? run.testSpecs?.length ?? 0;
+  const getTestsPassed = (run: typeof runs[number]) =>
+    run.testsPassed ?? run.testResults?.filter((result) => result.passed).length ?? 0;
+  const getFailedTests = (run: typeof runs[number]) =>
+    Math.max(0, getTestsTotal(run) - getTestsPassed(run));
+
+  const summaryStats = {
     totalRuns: total,
-    bugsFound: runs.reduce((acc, run) => acc + run.bugsFound, 0),
-    patchesApplied: runs.reduce((acc, run) => acc + run.patchesApplied, 0),
-    successRate: total > 0
-      ? Math.round((runs.filter(r => r.status === 'completed').length / total) * 100)
-      : 0,
+    failedTests: runs.reduce((acc, run) => acc + getFailedTests(run), 0),
+    patchesApplied: runs.reduce(
+      (acc, run) => acc + (run.patchesApplied ?? run.patches?.length ?? 0),
+      0
+    ),
+    successRate: total > 0 ? Math.round(stats.passRate ?? 0) : 0,
   };
 
   return (
@@ -123,25 +132,25 @@ export default function DashboardScreen() {
       <View style={styles.statsGrid}>
         <StatCard
           title="Total Runs"
-          value={stats.totalRuns}
+          value={summaryStats.totalRuns}
           icon="play-circle-outline"
           color={colors.dark.primary}
         />
         <StatCard
-          title="Bugs Found"
-          value={stats.bugsFound}
+          title="Failed Tests"
+          value={summaryStats.failedTests}
           icon="bug-outline"
           color={colors.dark.destructive}
         />
         <StatCard
           title="Patches Applied"
-          value={stats.patchesApplied}
+          value={summaryStats.patchesApplied}
           icon="git-branch-outline"
           color={colors.dark.success}
         />
         <StatCard
           title="Success Rate"
-          value={`${stats.successRate}%`}
+          value={`${summaryStats.successRate}%`}
           icon="trending-up-outline"
           color={colors.dark.warning}
         />
@@ -169,12 +178,11 @@ export default function DashboardScreen() {
             {runs.map((run) => (
               <RecentRunItem
                 key={run.id}
-                id={run.id}
-                targetUrl={run.targetUrl}
+                repoName={run.repoName}
                 status={run.status}
-                bugsFound={run.bugsFound}
-                createdAt={run.createdAt}
-                onPress={() => router.push(`/run/${run.id}`)}
+                failedTests={getFailedTests(run)}
+                startedAt={run.startedAt}
+                onPress={() => router.push(`/runs/${run.id}`)}
               />
             ))}
           </View>
@@ -185,18 +193,23 @@ export default function DashboardScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="play" size={24} color={colors.dark.primary} />
-            <Text style={styles.actionText}>New Run</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="mic" size={24} color={colors.dark.primary} />
-            <Text style={styles.actionText}>Voice Command</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="analytics" size={24} color={colors.dark.primary} />
-            <Text style={styles.actionText}>Analytics</Text>
-          </TouchableOpacity>
+          {[
+            { label: 'New Run', icon: 'play', route: '/runs' },
+            { label: 'Patches', icon: 'git-branch-outline', route: '/patches' },
+            { label: 'Monitoring', icon: 'radio-outline', route: '/monitoring' },
+            { label: 'Learning', icon: 'school-outline', route: '/learning' },
+            { label: 'Tests', icon: 'flask-outline', route: '/tests' },
+            { label: 'Settings', icon: 'settings-outline', route: '/settings' },
+          ].map((action) => (
+            <TouchableOpacity
+              key={action.label}
+              style={styles.actionCard}
+              onPress={() => router.push(action.route)}
+            >
+              <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={24} color={colors.dark.primary} />
+              <Text style={styles.actionText}>{action.label}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
     </ScrollView>
@@ -348,10 +361,12 @@ const styles = StyleSheet.create({
   },
   quickActions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing[3],
   },
   actionCard: {
-    flex: 1,
+    flexBasis: '48%',
+    flexGrow: 1,
     backgroundColor: colors.dark.card,
     borderRadius: borderRadius.xl,
     padding: spacing[4],

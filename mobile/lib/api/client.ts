@@ -46,6 +46,18 @@ export async function apiClient<T>(
   return response.json();
 }
 
+export async function setStoredToken(token: string | null) {
+  if (token) {
+    await SecureStore.setItemAsync(TOKEN_KEY, token);
+  } else {
+    await SecureStore.deleteItemAsync(TOKEN_KEY);
+  }
+}
+
+export async function getStoredToken() {
+  return SecureStore.getItemAsync(TOKEN_KEY);
+}
+
 /**
  * Fetcher function for SWR
  */
@@ -57,6 +69,21 @@ export const swrFetcher = async <T>(url: string): Promise<T> => {
  * API methods for common operations
  */
 export const api = {
+  initialize: async () => {
+    await getStoredToken();
+  },
+  setToken: async (token: string | null) => {
+    await setStoredToken(token);
+  },
+  clearToken: async () => {
+    await setStoredToken(null);
+  },
+  post: async <T>(endpoint: string, body: Record<string, unknown>, authenticated = true) =>
+    apiClient<T>(endpoint, {
+      method: 'POST',
+      authenticated,
+      body: JSON.stringify(body),
+    }),
   // Runs
   getRuns: () => apiClient<{ runs: any[]; stats: any }>('/api/runs'),
   getRun: (id: string) => apiClient<{ run: any }>(`/api/runs/${id}`),
@@ -78,7 +105,7 @@ export const api = {
   getPatch: (id: string) => apiClient<{ patch: any }>(`/api/patches/${id}`),
 
   // Tests
-  getTests: () => apiClient<{ tests: any[] }>('/api/tests'),
+  getTests: () => apiClient<{ testSpecs: any[] }>('/api/tests'),
 
   // Notifications
   registerPushToken: (token: string, platform: string) =>

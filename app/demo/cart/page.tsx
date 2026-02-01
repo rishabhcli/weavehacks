@@ -210,7 +210,6 @@ export default function CartPage() {
 
               {/* Checkout Button */}
               <Button
-                onClick={handleCheckout}
                 id="checkout-button"
                 disabled={isCheckingOut}
                 className="w-full mt-4 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"

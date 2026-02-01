@@ -14,17 +14,23 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography, shadows } from '@/lib/theme/colors';
-import { useRuns, triggerRun, type Run } from '@/lib/hooks/useRuns';
+import { useRuns, triggerRun } from '@/lib/hooks/useRuns';
+import type { Run } from '@/lib/types';
 
 const statusConfig: Record<string, { color: string; icon: keyof typeof Ionicons.glyphMap }> = {
   completed: { color: colors.dark.success, icon: 'checkmark-circle' },
   running: { color: colors.dark.primary, icon: 'sync' },
   failed: { color: colors.dark.destructive, icon: 'close-circle' },
   pending: { color: colors.dark.warning, icon: 'time' },
+  cancelled: { color: colors.dark.mutedForeground, icon: 'ban' },
 };
 
 function RunCard({ run, onPress }: { run: Run; onPress: () => void }) {
   const config = statusConfig[run.status] || statusConfig.pending;
+  const testsTotal = run.testsTotal ?? run.testSpecs?.length ?? 0;
+  const testsPassed =
+    run.testsPassed ?? run.testResults?.filter((result) => result.passed).length ?? 0;
+  const failedTests = Math.max(0, testsTotal - testsPassed);
   
   return (
     <TouchableOpacity style={styles.runCard} onPress={onPress}>
@@ -36,31 +42,26 @@ function RunCard({ run, onPress }: { run: Run; onPress: () => void }) {
           </Text>
         </View>
         <Text style={styles.runDate}>
-          {new Date(run.createdAt).toLocaleDateString()}
+          {new Date(run.startedAt).toLocaleDateString()}
         </Text>
       </View>
       
-      <Text style={styles.runUrl} numberOfLines={1}>{run.targetUrl}</Text>
-      
-      {run.repoFullName && (
-        <View style={styles.repoContainer}>
-          <Ionicons name="git-branch-outline" size={12} color={colors.dark.mutedForeground} />
-          <Text style={styles.repoText}>{run.repoFullName}</Text>
-        </View>
-      )}
+      <Text style={styles.runUrl} numberOfLines={1}>{run.repoName}</Text>
       
       <View style={styles.runStats}>
         <View style={styles.statItem}>
           <Ionicons name="bug-outline" size={14} color={colors.dark.destructive} />
-          <Text style={styles.statItemText}>{run.bugsFound} bugs</Text>
+          <Text style={styles.statItemText}>{failedTests} failed</Text>
         </View>
         <View style={styles.statItem}>
           <Ionicons name="code-slash-outline" size={14} color={colors.dark.success} />
-          <Text style={styles.statItemText}>{run.patchesApplied} patches</Text>
+          <Text style={styles.statItemText}>{run.patchesApplied ?? 0} patches</Text>
         </View>
         <View style={styles.statItem}>
-          <Ionicons name="git-pull-request-outline" size={14} color={colors.dark.primary} />
-          <Text style={styles.statItemText}>{run.prsCreated} PRs</Text>
+          <Ionicons name="repeat-outline" size={14} color={colors.dark.primary} />
+          <Text style={styles.statItemText}>
+            Iter {run.iteration}/{run.maxIterations}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -69,7 +70,7 @@ function RunCard({ run, onPress }: { run: Run; onPress: () => void }) {
 
 export default function RunsScreen() {
   const router = useRouter();
-  const { runs, isLoading, mutate } = useRuns();
+  const { runs, mutate } = useRuns();
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [newRunUrl, setNewRunUrl] = useState('');
@@ -107,9 +108,11 @@ export default function RunsScreen() {
 
   const filterOptions = [
     { label: 'All', value: null },
+    { label: 'Pending', value: 'pending' },
     { label: 'Running', value: 'running' },
     { label: 'Completed', value: 'completed' },
     { label: 'Failed', value: 'failed' },
+    { label: 'Cancelled', value: 'cancelled' },
   ];
 
   return (
@@ -144,7 +147,7 @@ export default function RunsScreen() {
         renderItem={({ item }) => (
           <RunCard
             run={item}
-            onPress={() => router.push(`/run/${item.id}`)}
+            onPress={() => router.push(`/runs/${item.id}`)}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -295,17 +298,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: colors.dark.foreground,
     marginBottom: spacing[2],
-  },
-  repoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[1],
-    marginBottom: spacing[3],
-  },
-  repoText: {
-    fontSize: typography.sizes.xs,
-    color: colors.dark.mutedForeground,
-    fontFamily: 'Inter-Regular',
   },
   runStats: {
     flexDirection: 'row',

@@ -1,7 +1,7 @@
 // Colors matching the web app's HSL theme converted to RGB for React Native
 // Based on the dark theme from globals.css
 
-export const colors = {
+const palette = {
   // Base colors
   background: '#0a0a0a',        // hsl(0 0% 3.9%)
   foreground: '#fafafa',        // hsl(0 0% 98%)
@@ -57,6 +57,63 @@ export const colors = {
   transparent: 'transparent',
 };
 
+export const colors = {
+  ...palette,
+  dark: palette,
+  light: palette,
+};
+
+export const spacing: Record<number, number> = {
+  0: 0,
+  0.5: 2,
+  1: 4,
+  1.5: 6,
+  2: 8,
+  2.5: 10,
+  3: 12,
+  3.5: 14,
+  4: 16,
+  5: 20,
+  6: 24,
+  7: 28,
+  8: 32,
+  9: 36,
+  10: 40,
+  12: 48,
+  14: 56,
+  16: 64,
+  20: 80,
+  24: 96,
+  32: 128,
+};
+
+export const borderRadius = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  '2xl': 24,
+  full: 999,
+};
+
+export const typography = {
+  sizes: {
+    xs: 12,
+    sm: 14,
+    base: 16,
+    lg: 18,
+    xl: 20,
+    '2xl': 24,
+    '3xl': 30,
+  },
+  lineHeights: {
+    tight: 1.1,
+    snug: 1.25,
+    normal: 1.4,
+    relaxed: 1.6,
+  },
+};
+
 // Run status colors
 export const statusColors = {
   pending: colors.mutedForeground,
@@ -88,5 +145,12 @@ export const shadows = {
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
+  },
+  primary: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
   },
 };

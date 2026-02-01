@@ -39,7 +39,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
+          title: 'Overview',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="grid-outline" size={size} color={color} />
           ),
@@ -56,19 +56,58 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="run/[id]"
+        name="patches"
         options={{
-          href: null, // Hide from tab bar
-          title: 'Run Details',
+          title: 'Patches',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="git-branch-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="monitoring"
+        options={{
+          title: 'Monitoring',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="radio-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: 'More',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="menu-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="learning"
+        options={{
+          href: null,
+          title: 'Learning',
+        }}
+      />
+      <Tabs.Screen
+        name="tests"
+        options={{
+          href: null,
+          title: 'Tests',
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
+          href: null,
           title: 'Settings',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
-          ),
+        }}
+      />
+      <Tabs.Screen
+        name="runs/[id]"
+        options={{
+          href: null, // Hide from tab bar
+          title: 'Run Details',
         }}
       />
     </Tabs>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Github, ShieldCheck, Zap, Bug, Sparkles, RefreshCw } from 'lucide-react';
+import { Github, ShieldCheck, Zap, Bug, Sparkles, RefreshCw, ArrowRight, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const features = [
@@ -22,188 +22,223 @@ const features = [
 ];
 
 const sponsors = [
-  { name: 'W&B Weave', logo: '/logos/weave.svg', fallback: 'W&B' },
-  { name: 'Redis', logo: '/logos/redis.svg', fallback: 'Redis' },
-  { name: 'Browserbase', logo: '/logos/browserbase.svg', fallback: 'BB' },
-  { name: 'Vercel', logo: '/logos/vercel.svg', fallback: 'Vercel' },
-  { name: 'Daily.co', logo: '/logos/daily.svg', fallback: 'Daily' },
-  { name: 'Google ADK', logo: '/logos/google.svg', fallback: 'ADK' },
+  { name: 'W&B Weave', fallback: 'WB' },
+  { name: 'Redis', fallback: 'RD' },
+  { name: 'Browserbase', fallback: 'BB' },
+  { name: 'Vercel', fallback: 'VC' },
+  { name: 'Daily.co', fallback: 'DL' },
+  { name: 'Google ADK', fallback: 'AD' },
 ];
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -inset-[10px] opacity-50">
-          <motion.div
-            className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-600/30 rounded-full blur-3xl"
-            animate={{
-              scale: [1, 1.2, 1],
-              x: [0, 50, 0],
-              y: [0, 30, 0],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-          <motion.div
-            className="absolute top-1/3 right-1/4 w-96 h-96 bg-indigo-600/30 rounded-full blur-3xl"
-            animate={{
-              scale: [1.2, 1, 1.2],
-              x: [0, -30, 0],
-              y: [0, 50, 0],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-          <motion.div
-            className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl"
-            animate={{
-              scale: [1, 1.15, 1],
-              x: [0, 40, 0],
-              y: [0, -30, 0],
-            }}
-            transition={{
-              duration: 12,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 pt-8 pb-16">
-        <motion.div
-          className="max-w-4xl w-full space-y-12 text-center"
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Hero */}
-          <div className="flex flex-col items-center gap-4">
-            <motion.div
-              className="h-16 w-16 bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/25"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-            >
-              <Zap className="h-8 w-8 text-white" />
-            </motion.div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent">
-              PatchPilot
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-md">
-              Self-healing QA agent that tests, detects bugs, and auto-fixes your codebase
-            </p>
+    <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <Zap className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="font-semibold text-lg">PatchPilot</span>
           </div>
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Github className="h-4 w-4" />
+            <span className="hidden sm:inline">View on GitHub</span>
+          </a>
+        </div>
+      </nav>
 
-          {/* Feature Cards */}
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-6">
+        <div className="max-w-3xl mx-auto text-center">
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4"
-            initial={false}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.5 }}
           >
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                className="p-6 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-violet-500/50 transition-colors"
-                initial={false}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-                whileHover={{ y: -2 }}
-              >
-                <div className="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center mb-4 mx-auto">
-                  <feature.icon className="h-5 w-5 text-violet-400" />
-                </div>
-                <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* CTA Card */}
-          <motion.div
-            className="bg-card/80 backdrop-blur-md border border-border/50 rounded-2xl p-8 shadow-xl max-w-md mx-auto"
-            initial={false}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <div className="space-y-2 mb-6">
-              <h2 className="text-2xl font-semibold">Get Started</h2>
-              <p className="text-sm text-muted-foreground">
-                Connect your GitHub account to access the dashboard and start healing your codebase.
-              </p>
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+              <Sparkles className="h-3.5 w-3.5" />
+              Self-Healing QA Agent
             </div>
 
-            <div className="flex flex-col gap-4">
-              <motion.a
+            {/* Title */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+              Fix bugs before your
+              <br />
+              <span className="text-primary">users find them</span>
+            </h1>
+
+            {/* Description */}
+            <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto leading-relaxed">
+              PatchPilot automatically tests your web application, detects bugs, 
+              generates fixes, and deploys them—all without writing a single test.
+            </p>
+
+            {/* CTA Button */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a
                 href="/api/auth/github"
-                className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl text-sm font-medium bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors w-full sm:w-auto"
               >
                 <Github className="h-5 w-5" />
                 Connect with GitHub
-              </motion.a>
+              </a>
+              <a
+                href="/demo"
+                className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg font-medium border hover:bg-accent transition-colors w-full sm:w-auto"
+              >
+                View Demo
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
 
-              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                <ShieldCheck className="h-3 w-3 text-green-500" />
-                <span>OAuth 2.0 secured • Repo access for PR creation</span>
+            {/* Trust badges */}
+            <div className="mt-8 flex items-center justify-center gap-6 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Check className="h-3.5 w-3.5 text-emerald-500" />
+                <span>Free for open source</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Check className="h-3.5 w-3.5 text-emerald-500" />
+                <span>No credit card required</span>
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
 
-          {/* Sponsors Section */}
+      {/* Features Section */}
+      <section className="py-20 px-6 border-t">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-semibold mb-3">How it works</h2>
+            <p className="text-muted-foreground">Three simple steps to autonomous QA</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                className="group p-6 rounded-xl border bg-card hover:shadow-md transition-shadow"
+              >
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
+                  <feature.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Workflow Section */}
+      <section className="py-20 px-6 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-semibold mb-3">The PatchPilot Loop</h2>
+            <p className="text-muted-foreground">A continuous cycle of testing, fixing, and learning</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { step: '01', title: 'Test', desc: 'AI agents simulate real user flows' },
+              { step: '02', title: 'Detect', desc: 'Bugs captured with full context' },
+              { step: '03', title: 'Fix', desc: 'LLM generates and applies patches' },
+              { step: '04', title: 'Learn', desc: 'Knowledge base improves over time' },
+            ].map((item, index) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
+                className="p-5 rounded-xl border bg-card"
+              >
+                <span className="text-xs font-medium text-primary mb-2 block">{item.step}</span>
+                <h4 className="font-semibold mb-1">{item.title}</h4>
+                <p className="text-sm text-muted-foreground">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-6">
+        <div className="max-w-2xl mx-auto text-center">
           <motion.div
-            className="pt-8"
-            initial={false}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="p-8 sm:p-12 rounded-2xl border bg-card"
           >
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-6">
-              Powered by
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+              Ready to automate your QA?
+            </h2>
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+              Join developers who are shipping with confidence. 
+              Set up in minutes, see results in hours.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-              {sponsors.map((sponsor, index) => (
-                <motion.div
-                  key={sponsor.name}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card/30 border border-border/30 hover:border-border transition-colors"
-                  initial={false}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.7 + index * 0.05 }}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <div className="h-6 w-6 rounded bg-muted/50 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
-                    {sponsor.fallback.slice(0, 2)}
-                  </div>
-                  <span className="text-sm text-muted-foreground font-medium">
-                    {sponsor.name}
-                  </span>
-                </motion.div>
-              ))}
+            <a
+              href="/api/auth/github"
+              className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              <Github className="h-5 w-5" />
+              Get Started Free
+            </a>
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>Secure OAuth • Repo access for PR creation only</span>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
+      </section>
 
-        {/* Footer */}
-        <motion.footer
-          className="absolute bottom-4 text-center"
-          initial={false}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-        >
-          <p className="text-xs text-muted-foreground">
-            Built for WeaveHacks 2026 • Self-healing QA powered by AI agents
+      {/* Sponsors */}
+      <section className="py-12 px-6 border-t">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-center text-xs text-muted-foreground uppercase tracking-wider mb-8">
+            Powered by industry leaders
           </p>
-        </motion.footer>
-      </div>
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+            {sponsors.map((sponsor) => (
+              <div
+                key={sponsor.name}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center text-xs font-semibold">
+                  {sponsor.fallback}
+                </div>
+                <span className="text-sm font-medium hidden sm:inline">{sponsor.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 px-6 border-t">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+          <p>Built for WeaveHacks 2026</p>
+          <div className="flex items-center gap-6">
+            <a href="#" className="hover:text-foreground transition-colors">Documentation</a>
+            <a href="#" className="hover:text-foreground transition-colors">GitHub</a>
+            <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

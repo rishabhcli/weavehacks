@@ -372,7 +372,7 @@ export function DataTable<T>({
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon-sm">
+                              <Button variant="ghost" size="sm">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -409,7 +409,7 @@ export function DataTable<T>({
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                size="icon-sm"
+                size="sm"
                 onClick={goToFirst}
                 disabled={currentPage === 1}
               >
@@ -417,7 +417,7 @@ export function DataTable<T>({
               </Button>
               <Button
                 variant="outline"
-                size="icon-sm"
+                size="sm"
                 onClick={goToPrevious}
                 disabled={currentPage === 1}
               >
@@ -428,7 +428,7 @@ export function DataTable<T>({
               </span>
               <Button
                 variant="outline"
-                size="icon-sm"
+                size="sm"
                 onClick={goToNext}
                 disabled={currentPage === totalPages}
               >
@@ -436,7 +436,7 @@ export function DataTable<T>({
               </Button>
               <Button
                 variant="outline"
-                size="icon-sm"
+                size="sm"
                 onClick={goToLast}
                 disabled={currentPage === totalPages}
               >

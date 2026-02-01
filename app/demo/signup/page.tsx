@@ -59,8 +59,8 @@ export default function SignupPage() {
 
       // BUG 3: This will throw "Cannot read properties of undefined (reading 'newsletter')"
       // because userData.preferences is undefined
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const welcomeMessage = `Welcome ${userData.name}! Newsletter subscription: ${(userData as any).preferences.newsletter ?? false}`;
+      const prefs = (userData as { preferences?: { newsletter?: boolean } }).preferences;
+      const welcomeMessage = `Welcome ${userData.name}! Newsletter subscription: ${prefs!.newsletter ?? false}`;
 
       // eslint-disable-next-line no-console
       console.log(welcomeMessage);
