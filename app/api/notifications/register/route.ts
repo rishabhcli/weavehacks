@@ -1,0 +1,102 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth/session';
+
+// In-memory store for demo - in production, use a database
+const deviceTokens = new Map<string, {
+  token: string;
+  platform: string;
+  deviceName?: string;
+  userId: number;
+  registeredAt: Date;
+}>();
+
+/**
+ * Register a device for push notifications
+ * 
+ * Called by the mobile app to register its Expo push token
+ * with the backend so we can send notifications.
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getSession();
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { token, platform, deviceName } = await request.json();
+
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Missing push token' },
+        { status: 400 }
+      );
+    }
+
+    // Store the device token
+    deviceTokens.set(token, {
+      token,
+      platform: platform || 'unknown',
+      deviceName,
+      userId: session.user.id,
+      registeredAt: new Date(),
+    });
+
+    console.log(`Registered push token for user ${session.user.login}:`, {
+      platform,
+      deviceName,
+      tokenPrefix: token.substring(0, 20) + '...',
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Device registered for push notifications',
+    });
+  } catch (error) {
+    console.error('Push notification registration error:', error);
+    return NextResponse.json(
+      { error: 'Failed to register device' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * Get registered devices for the current user
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getSession();
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const userDevices = Array.from(deviceTokens.values())
+      .filter(device => device.userId === session.user.id)
+      .map(device => ({
+        platform: device.platform,
+        deviceName: device.deviceName,
+        registeredAt: device.registeredAt,
+      }));
+
+    return NextResponse.json({
+      devices: userDevices,
+    });
+  } catch (error) {
+    console.error('Get devices error:', error);
+    return NextResponse.json(
+      { error: 'Failed to get devices' },
+      { status: 500 }
+    );
+  }
+}
+
+// Export for use in send endpoint
+export { deviceTokens };
