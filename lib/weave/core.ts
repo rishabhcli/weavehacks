@@ -42,4 +42,9 @@ export function tracedOp<T extends (...args: unknown[]) => unknown>(fn: T, name?
 }
 
 export { weave };
-export const op = weave.op;
+
+// Export op function - use a getter to avoid initialization order issues
+type AnyFunction = (...args: never[]) => unknown;
+export function op<T extends AnyFunction>(fn: T, options?: { name?: string }): T {
+  return weave.op(fn, options) as T;
+}

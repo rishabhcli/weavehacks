@@ -85,8 +85,11 @@ export function tracedOp<T extends (...args: unknown[]) => unknown>(
  */
 export { weave };
 
-// Re-export common weave functions
-export const op = weave.op;
+// Re-export common weave functions - wrap to avoid initialization order issues
+type AnyFunction = (...args: never[]) => unknown;
+export function op<T extends AnyFunction>(fn: T, options?: { name?: string }): T {
+  return weave.op(fn, options) as T;
+}
 
 // Re-export Weave modules for deep integration
 export { weaveInference, weaveInferenceWithJson } from './inference';

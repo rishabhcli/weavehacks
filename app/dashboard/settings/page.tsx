@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Github, Check, AlertCircle, Link2, Unlink, RefreshCw, Loader2 } from 'lucide-react';
 import { Header } from '@/components/dashboard/header';
@@ -31,6 +31,25 @@ interface SessionData {
 }
 
 export default function SettingsPage() {
+  return (
+    <Suspense fallback={<SettingsPageSkeleton />}>
+      <SettingsPageContent />
+    </Suspense>
+  );
+}
+
+function SettingsPageSkeleton() {
+  return (
+    <div className="min-h-screen">
+      <Header title="Settings" />
+      <div className="p-6 space-y-6 max-w-3xl">
+        <div className="h-64 bg-muted/30 rounded-lg animate-pulse" />
+      </div>
+    </div>
+  );
+}
+
+function SettingsPageContent() {
   const searchParams = useSearchParams();
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
