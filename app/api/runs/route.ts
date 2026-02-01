@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { 
-  createRun, 
-  getAllRuns, 
-  getRunStats, 
-  updateRunStatus, 
-  updateRunAgent, 
-  addRunPatch, 
+import {
+  createRun,
+  getAllRuns,
+  getRunStats,
+  updateRunStatus,
+  updateRunAgent,
+  addRunPatch,
 } from '@/lib/dashboard/run-store';
+
+export const dynamic = 'force-dynamic';
 import { 
   emitRunStarted, 
   emitAgentStarted, 

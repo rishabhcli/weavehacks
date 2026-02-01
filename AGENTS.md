@@ -1,14 +1,14 @@
-# QAgent - AGENTS.md
+# PatchPilot - AGENTS.md
 
-> **AI Agent Guide**: This file is the primary reference for AI coding agents working on QAgent. Read this before starting any work.
+> **AI Agent Guide**: This file is the primary reference for AI coding agents working on PatchPilot. Read this before starting any work.
 
 ---
 
 ## Project Overview
 
-**QAgent** is a self-healing QA agent that automatically tests web applications, identifies bugs, applies fixes, and verifies the fixes – all without human intervention. It creates a closed-loop system that iterates until all tests pass.
+**PatchPilot** is a self-healing QA agent that automatically tests web applications, identifies bugs, applies fixes, and verifies the fixes – all without human intervention. It creates a closed-loop system that iterates until all tests pass.
 
-### The QAgent Loop
+### The PatchPilot Loop
 
 ```
 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
@@ -65,7 +65,7 @@ weavehacks/
 │       ├── wandb-weave/             # Tracing and evaluation
 │       ├── google-adk/              # ADK/A2A integration patterns
 │       ├── marimo-dashboards/       # Reactive notebooks
-│       └── qagent-agents/       # Agent implementations
+│       └── patchpilot-agents/       # Agent implementations
 ├── agents/                   # Agent implementations
 │   ├── tester/              # E2E test execution with Stagehand
 │   ├── triage/              # Failure diagnosis and root cause analysis
@@ -129,7 +129,7 @@ pnpm install
 pnpm dev                    # Starts Next.js dev server on localhost:3000
 
 # Agent workflow
-pnpm run agent              # Start the QAgent orchestrator
+pnpm run agent              # Start the PatchPilot orchestrator
 pnpm run demo               # Run demo script
 pnpm run demo:dry           # Run demo script in dry-run mode
 
@@ -285,7 +285,7 @@ Copy `.env.example` to `.env.local` and fill in required values:
 - Records successful fixes in Redis
 
 ### Orchestrator (`agents/orchestrator/`)
-- Coordinates the full QAgent loop
+- Coordinates the full PatchPilot loop
 - Handles iteration limits and failure recovery
 - Logs metrics to Weave
 - Entry point: `pnpm run agent`
@@ -382,7 +382,7 @@ Follow this iterative workflow for development:
 
 ## References
 
-- [QAgent Paper](https://arxiv.org/html/2502.02747v1) - Five-step agentic patching framework
+- [PatchPilot Paper](https://arxiv.org/html/2502.02747v1) - Five-step agentic patching framework
 - [Stagehand Docs](https://www.stagehand.dev/) - AI-powered browser automation
 - [Browserbase Docs](https://docs.browserbase.com/) - Cloud browser infrastructure
 - [Redis Vector Search](https://redis.io/docs/stack/search/reference/vectors/) - Semantic similarity

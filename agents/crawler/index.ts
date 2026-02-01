@@ -63,22 +63,15 @@ export class CrawlerAgent {
       throw new Error('BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID are required');
     }
 
-    // Use Gemini if GOOGLE_API_KEY is set, otherwise fall back to OpenAI
-    const useGemini = !!process.env.GOOGLE_API_KEY;
-
+    // Use OpenAI by default for better compatibility
     this.stagehand = new Stagehand({
       env: 'BROWSERBASE',
       apiKey,
       projectId,
-      model: useGemini
-        ? {
-            modelName: 'gemini-2.0-flash',
-            apiKey: process.env.GOOGLE_API_KEY,
-          }
-        : {
-            modelName: 'gpt-4o',
-            apiKey: process.env.OPENAI_API_KEY,
-          },
+      modelName: 'gpt-4o',
+      modelClientOptions: {
+        apiKey: process.env.OPENAI_API_KEY,
+      },
       verbose: process.env.DEBUG === 'true' ? 1 : 0,
     });
 
@@ -149,8 +142,8 @@ export class CrawlerAgent {
 
     try {
       await page.goto(url, {
-        waitUntil: 'networkidle',
-        timeoutMs: options.timeout || 30000,
+        waitUntil: 'domcontentloaded',
+        timeout: options.timeout || 30000,
       });
 
       // Discover elements on the page using Stagehand's observe

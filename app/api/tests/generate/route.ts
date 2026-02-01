@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CrawlerAgent } from '@/agents/crawler';
 
+export const dynamic = 'force-dynamic';
 export const maxDuration = 120; // Allow up to 2 minutes for crawling
 
 interface GenerateRequest {
@@ -29,6 +30,21 @@ export async function POST(request: NextRequest) {
       new URL(url);
     } catch {
       return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+    }
+
+    // Check required environment variables
+    if (!process.env.BROWSERBASE_API_KEY || !process.env.BROWSERBASE_PROJECT_ID) {
+      return NextResponse.json(
+        { error: 'Browserbase not configured. Set BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID.' },
+        { status: 500 }
+      );
+    }
+
+    if (!process.env.OPENAI_API_KEY && !process.env.GOOGLE_API_KEY) {
+      return NextResponse.json(
+        { error: 'LLM not configured. Set OPENAI_API_KEY or GOOGLE_API_KEY.' },
+        { status: 500 }
+      );
     }
 
     crawler = new CrawlerAgent();
