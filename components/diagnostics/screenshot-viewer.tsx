@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { X, ZoomIn, ZoomOut, Maximize2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
 
@@ -41,9 +42,11 @@ export function ScreenshotViewer({
         )}
         onClick={() => setIsFullscreen(true)}
       >
-        <img
+        <Image
           src={screenshotUrl}
           alt={alt}
+          width={800}
+          height={600}
           className="w-full h-auto object-cover transition-transform group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">

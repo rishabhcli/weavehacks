@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { Github, Check, AlertCircle, Link2, Unlink, RefreshCw, Loader2 } from 'lucide-react';
 import { Header } from '@/components/dashboard/header';
 import { Button } from '@/components/ui/button';
@@ -206,10 +207,12 @@ function SettingsPageContent() {
                 <div className="flex items-center justify-between p-4 rounded-lg bg-success/10 border border-success/20">
                   <div className="flex items-center gap-3">
                     {session.user?.avatarUrl ? (
-                      <img
+                      <Image
                         src={session.user.avatarUrl}
                         alt={session.user.login}
-                        className="h-10 w-10 rounded-full"
+                        width={40}
+                        height={40}
+                        className="rounded-full"
                       />
                     ) : (
                       <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">

@@ -82,8 +82,6 @@ export async function POST(request: NextRequest) {
 
     const result = await response.json();
 
-    console.log(`Sent ${messages.length} push notifications to user ${payload.userId}`);
-
     return NextResponse.json({
       success: true,
       sent: messages.length,

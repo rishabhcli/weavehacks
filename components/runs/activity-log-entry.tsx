@@ -18,6 +18,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { cn } from '@/lib/utils/cn';
 import { LLMCallViewer } from './llm-call-viewer';
 import type { ActivityLogEntry as ActivityLogEntryType, AgentType, ActivityAction } from '@/lib/types';
@@ -164,9 +165,11 @@ export function ActivityLogEntry({ entry, className }: ActivityLogEntryProps) {
               {/* Screenshot */}
               {entry.details?.screenshot && (
                 <div className="rounded-lg overflow-hidden border">
-                  <img
+                  <Image
                     src={entry.details.screenshot}
                     alt="Screenshot"
+                    width={800}
+                    height={400}
                     className="w-full h-auto max-h-48 object-cover"
                   />
                 </div>

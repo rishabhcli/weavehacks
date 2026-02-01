@@ -31,12 +31,6 @@ export async function POST(request: NextRequest) {
       registeredAt: new Date(),
     });
 
-    console.log(`Registered push token for user ${session.user.login}:`, {
-      platform,
-      deviceName,
-      tokenPrefix: token.substring(0, 20) + '...',
-    });
-
     return NextResponse.json({
       success: true,
       message: 'Device registered for push notifications',

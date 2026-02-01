@@ -34,8 +34,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  console.log('[Cleanup] Starting cleanup job...');
-
   const results = {
     expiredRuns: 0,
     staleProcessing: 0,
@@ -44,11 +42,9 @@ export async function GET(request: NextRequest) {
   try {
     // Clean up expired runs
     results.expiredRuns = await cleanupExpiredRuns();
-    console.log(`[Cleanup] Removed ${results.expiredRuns} expired runs`);
 
     // Clean up stale processing entries
     results.staleProcessing = await cleanupStaleProcessing();
-    console.log(`[Cleanup] Removed ${results.staleProcessing} stale processing entries`);
 
     return NextResponse.json({
       success: true,

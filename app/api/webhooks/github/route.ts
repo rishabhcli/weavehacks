@@ -27,8 +27,6 @@ export async function POST(request: NextRequest) {
   const deliveryId = getWebhookDeliveryId(request.headers);
   const eventType = getWebhookEventType(request.headers);
 
-  console.log(`[Webhook] Received ${eventType} event (delivery: ${deliveryId})`);
-
   // Get raw body for signature verification
   const rawBody = await request.text();
 
@@ -65,7 +63,6 @@ export async function POST(request: NextRequest) {
 
   // Check if this event type triggers runs
   if (!isTriggeringEvent(eventType)) {
-    console.log(`[Webhook] Ignoring non-triggering event: ${eventType}`);
     return NextResponse.json({ message: 'Event ignored', eventType });
   }
 
@@ -81,7 +78,6 @@ export async function POST(request: NextRequest) {
       result = { queued: false, message: 'Unknown event type' };
     }
 
-    console.log(`[Webhook] ${result.message}`);
     return NextResponse.json(result);
   } catch (error) {
     console.error('[Webhook] Error processing event:', error);

@@ -2,6 +2,7 @@
 
 import { Bell, Search, User, LogOut, Settings, UserCircle, Command, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -120,10 +121,12 @@ export function Header({ title }: HeaderProps) {
               aria-label="User menu"
             >
               {isAuthenticated && user?.avatarUrl ? (
-                <img
+                <Image
                   src={user.avatarUrl}
                   alt={`${user.login}'s avatar`}
-                  className="h-8 w-8 rounded-full ring-2 ring-neon-cyan/50 shadow-[0_0_10px_hsl(var(--neon-cyan)/0.3)]"
+                  width={32}
+                  height={32}
+                  className="rounded-full ring-2 ring-neon-cyan/50 shadow-[0_0_10px_hsl(var(--neon-cyan)/0.3)]"
                 />
               ) : (
                 <div className="h-8 w-8 rounded-full bg-neon-cyan/10 flex items-center justify-center ring-2 ring-neon-cyan/30">

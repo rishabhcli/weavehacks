@@ -39,8 +39,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  console.log('[Cron] Starting monitoring check...');
-
   const results = {
     scheduled: 0,
     processed: 0,
@@ -50,7 +48,6 @@ export async function GET(request: NextRequest) {
   try {
     // Step 1: Check for scheduled runs that are due
     const dueConfigs = await getConfigsDueForRun();
-    console.log(`[Cron] Found ${dueConfigs.length} scheduled runs due`);
 
     for (const config of dueConfigs) {
       try {
@@ -64,7 +61,6 @@ export async function GET(request: NextRequest) {
           results.scheduled++;
           // Update the config with next run time
           await recordMonitoringRun(config.repoId);
-          console.log(`[Cron] Scheduled run for ${config.repoFullName}`);
         }
       } catch (error) {
         const message = `Failed to schedule ${config.repoFullName}: ${error}`;
@@ -75,7 +71,6 @@ export async function GET(request: NextRequest) {
 
     // Step 2: Process queued runs
     const queueStatus = await getQueueStatus();
-    console.log(`[Cron] Queue status: ${queueStatus.pending} pending, ${queueStatus.processing} processing`);
 
     // Process up to 3 runs in this cron execution
     const maxProcessPerCron = 3;
@@ -91,15 +86,12 @@ export async function GET(request: NextRequest) {
         await processQueuedRun(queuedRun);
         results.processed++;
         processed++;
-        console.log(`[Cron] Processed run ${queuedRun.id} for ${queuedRun.repoFullName}`);
       } catch (error) {
         const message = `Failed to process ${queuedRun.id}: ${error}`;
         console.error(`[Cron] ${message}`);
         results.errors.push(message);
       }
     }
-
-    console.log(`[Cron] Completed: scheduled=${results.scheduled}, processed=${results.processed}`);
 
     return NextResponse.json({
       success: true,

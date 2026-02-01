@@ -42,18 +42,7 @@ export async function initWeave(project: string = 'patchpilot'): Promise<void> {
   }
 
   try {
-    const initOptions = {
-      project: projectName,
-      metadata: {
-        version: process.env.npm_package_version || '1.0.0',
-        environment: process.env.NODE_ENV || 'development',
-        sponsors: ['wandb', 'redis', 'browserbase', 'vercel', 'daily', 'google-adk'],
-        hackathon: 'weavehacks-2026',
-      },
-    };
-    weaveClient = await (weave.init as (arg: string | typeof initOptions) => Promise<WeaveClient>)(
-      initOptions
-    );
+    weaveClient = await weave.init(projectName);
     initialized = true;
     weaveEnabled = true;
     console.log(`✅ Weave initialized for project: ${projectName}`);
