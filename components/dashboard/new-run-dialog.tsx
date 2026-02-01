@@ -496,17 +496,14 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
                     No test specs found
                   </p>
                   <div className="flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
+                    <Link 
+                      href="/dashboard/tests/new"
                       onClick={() => setOpen(false)}
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
                     >
-                      <Link href="/dashboard/tests/new">
-                        <Plus className="mr-2 h-3 w-3" />
-                        Create Test
-                      </Link>
-                    </Button>
+                      <Plus className="mr-2 h-3 w-3" />
+                      Create Test
+                    </Link>
                     <Button
                       variant="outline"
                       size="sm"

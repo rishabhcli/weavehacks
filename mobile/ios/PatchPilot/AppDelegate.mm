@@ -24,7 +24,10 @@
 - (NSURL *)bundleURL
 {
 #if DEBUG
-  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@".expo/.virtual-metro-entry"];
+  RCTBundleURLProvider *provider = [RCTBundleURLProvider sharedSettings];
+  // Use the Mac's LAN IP so a physical device can reach Metro.
+  provider.jsLocation = @"10.20.2.210:8082";
+  return [provider jsBundleURLForBundleRoot:@".expo/.virtual-metro-entry"];
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
