@@ -213,8 +213,18 @@ export interface Run {
   completedAt?: Date;
 }
 
+export type RunEventType =
+  | 'status'
+  | 'agent'
+  | 'test'
+  | 'patch'
+  | 'complete'
+  | 'error'
+  | 'activity'
+  | 'diagnostics';
+
 export interface RunEvent {
-  type: 'status' | 'agent' | 'test' | 'patch' | 'complete' | 'error';
+  type: RunEventType;
   timestamp: Date;
   runId: string;
   data: unknown;
@@ -239,4 +249,222 @@ export interface Session {
   user: GitHubUser | null;
   accessToken: string | null;
   repos: GitHubRepo[];
+}
+
+// ============================================================================
+// Activity Log Types
+// ============================================================================
+
+export type ActivityAction =
+  | 'started'
+  | 'completed'
+  | 'failed'
+  | 'llm_call'
+  | 'test_step'
+  | 'diagnosis'
+  | 'patch'
+  | 'deploy'
+  | 'screenshot'
+  | 'navigation';
+
+export interface LLMCallDetails {
+  model: string;
+  prompt: string;
+  response: string;
+  tokens: number;
+  duration?: number;
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  timestamp: Date;
+  agent: AgentType;
+  action: ActivityAction;
+  message: string;
+  details?: {
+    llmCall?: LLMCallDetails;
+    error?: { message: string; stack?: string };
+    testStep?: { step: number; action: string; passed?: boolean };
+    screenshot?: string;
+    url?: string;
+  };
+}
+
+// ============================================================================
+// Agent Execution State Types
+// ============================================================================
+
+export interface AgentExecutionState {
+  agent: AgentType;
+  status: AgentStatus;
+  startTime?: Date;
+  endTime?: Date;
+  duration?: number;
+  currentAction?: string;
+  progress?: number;
+  inputs?: unknown;
+  outputs?: unknown;
+  error?: string;
+}
+
+// ============================================================================
+// Diagnostics Types
+// ============================================================================
+
+export interface TestFailureDiagnostics {
+  screenshotUrl?: string;
+  domSnapshot?: string;
+  consoleLogs: ConsoleLog[];
+  errorMessage: string;
+  failedStep?: number;
+  url?: string;
+}
+
+export interface TriageDiagnostics {
+  diagnosis?: DiagnosisReport;
+  reasoning: string;
+  confidenceBreakdown: { category: string; score: number }[];
+  similarIssuesCount: number;
+}
+
+export interface PatchDiagnostics {
+  beforeCode: string;
+  afterCode: string;
+  filePath: string;
+  llmReasoning?: string;
+  linesAdded: number;
+  linesRemoved: number;
+}
+
+export interface VerificationDiagnostics {
+  deploymentUrl?: string;
+  deploymentStatus: 'pending' | 'building' | 'ready' | 'error';
+  buildLogs?: string[];
+  retestPassed?: boolean;
+  retestDuration?: number;
+}
+
+export interface DiagnosticsData {
+  testFailure?: TestFailureDiagnostics;
+  triage?: TriageDiagnostics;
+  patch?: PatchDiagnostics;
+  verification?: VerificationDiagnostics;
+}
+
+// ============================================================================
+// Extended Run Event Types
+// ============================================================================
+
+export interface ActivityEvent extends RunEvent {
+  type: 'activity';
+  data: ActivityLogEntry;
+}
+
+export interface DiagnosticsEvent extends RunEvent {
+  type: 'diagnostics';
+  data: Partial<DiagnosticsData>;
+}
+
+// ============================================================================
+// Monitoring Types
+// ============================================================================
+
+export type MonitoringSchedule = 'hourly' | 'daily' | 'weekly' | 'on_push';
+
+export interface MonitoringConfig {
+  repoId: string;
+  repoFullName: string;
+  enabled: boolean;
+  schedule: MonitoringSchedule;
+  testSpecs: TestSpec[];
+  webhookSecret?: string;
+  webhookId?: number;
+  lastRunAt?: Date;
+  nextRunAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type QueuedRunPriority = 'high' | 'normal' | 'low';
+export type QueuedRunTrigger = 'webhook' | 'cron' | 'manual';
+
+export interface QueuedRun {
+  id: string;
+  repoId: string;
+  repoFullName: string;
+  priority: QueuedRunPriority;
+  trigger: QueuedRunTrigger;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  createdAt: Date;
+  startedAt?: Date;
+  completedAt?: Date;
+  runId?: string; // Reference to the actual run once started
+  metadata?: {
+    commitSha?: string;
+    branch?: string;
+    pusher?: string;
+    prNumber?: number;
+  };
+}
+
+export type MetricsPeriod = 'day' | 'week' | 'month';
+
+export interface ImprovementMetrics {
+  repoId: string;
+  period: MetricsPeriod;
+  periodKey: string; // e.g., "2026-01-31" for day, "2026-W05" for week
+  passRate: number;
+  avgTimeToFix: number; // in milliseconds
+  totalRuns: number;
+  totalPatches: number;
+  successfulPatches: number;
+  failedPatches: number;
+  totalTests: number;
+  passedTests: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ============================================================================
+// GitHub Webhook Types
+// ============================================================================
+
+export interface GitHubPushEvent {
+  ref: string;
+  before: string;
+  after: string;
+  repository: {
+    id: number;
+    full_name: string;
+    default_branch: string;
+  };
+  pusher: {
+    name: string;
+    email: string;
+  };
+  commits: Array<{
+    id: string;
+    message: string;
+    timestamp: string;
+    author: { name: string; email: string };
+  }>;
+}
+
+export interface GitHubPullRequestEvent {
+  action: 'opened' | 'synchronize' | 'reopened' | 'closed';
+  number: number;
+  pull_request: {
+    id: number;
+    number: number;
+    title: string;
+    head: { sha: string; ref: string };
+    base: { sha: string; ref: string };
+  };
+  repository: {
+    id: number;
+    full_name: string;
+  };
+  sender: {
+    login: string;
+  };
 }

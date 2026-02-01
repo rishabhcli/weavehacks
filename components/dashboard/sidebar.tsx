@@ -10,12 +10,14 @@ import {
   Settings,
   Github,
   Zap,
+  Radio,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 const navigation = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Runs', href: '/dashboard/runs', icon: Play },
+  { name: 'Monitoring', href: '/dashboard/monitoring', icon: Radio },
   { name: 'Tests', href: '/dashboard/tests', icon: TestTube2 },
   { name: 'Patches', href: '/dashboard/patches', icon: GitBranch },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
