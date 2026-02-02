@@ -6,10 +6,15 @@
  *
  * Uses Stagehand's observe() method to identify interactive elements
  * and generates test specs based on discovered patterns.
+ *
+ * Features:
+ * - Discovers clickable elements, forms, and inputs
+ * - Generates test flows based on page structure
+ * - Supports multi-page crawling with depth limits
  */
 
 import { Stagehand, type Page } from '@browserbasehq/stagehand';
-import type { TestSpec, TestStep } from '@/lib/types';
+import type { TestSpec } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
 export type FlowType = 'navigation' | 'form' | 'action' | 'auth';
@@ -63,8 +68,12 @@ export class CrawlerAgent {
       throw new Error('BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID are required');
     }
 
+    console.log('[CrawlerAgent] Initializing Stagehand with Browserbase...');
+    console.log(`[CrawlerAgent] Project ID: ${projectId.slice(0, 8)}...`);
+
     // Use Gemini if GOOGLE_API_KEY is set, otherwise fall back to OpenAI
     const useGemini = !!process.env.GOOGLE_API_KEY;
+    console.log(`[CrawlerAgent] Using model: ${useGemini ? 'gemini-2.0-flash' : 'gpt-4o'}`);
 
     this.stagehand = new Stagehand({
       env: 'BROWSERBASE',
@@ -83,10 +92,9 @@ export class CrawlerAgent {
     });
 
     await this.stagehand.init();
+    console.log('[CrawlerAgent] Stagehand initialized successfully');
 
-    // Capture the session ID
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.sessionId = (this.stagehand as any).browserbaseSessionID || null;
+    this.captureSessionId();
   }
 
   /**
@@ -96,14 +104,46 @@ export class CrawlerAgent {
     return this.sessionId;
   }
 
+  private captureSessionId(): void {
+    if (!this.stagehand) {
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Prefer public getter, but fall back to internal field name if needed.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stagehandAny = this.stagehand as any;
+    const nextSessionId =
+      stagehandAny.browserbaseSessionID || stagehandAny.browserbaseSessionId || null;
+    if (nextSessionId && nextSessionId !== this.sessionId) {
+      this.sessionId = nextSessionId;
+      console.log(`[CrawlerAgent] Browserbase session ID: ${this.sessionId}`);
+      console.log(`[CrawlerAgent] Live view: https://browserbase.com/sessions/${this.sessionId}`);
+    }
+  }
+
   /**
-   * Get the current page from stagehand context
+   * Get or create a page from stagehand context
    */
-  private getPage(): Page {
+  private async getPage(): Promise<Page> {
     if (!this.stagehand) {
       throw new Error('Stagehand not initialized');
     }
-    const pages = this.stagehand.context.pages();
+
+    if (!this.stagehand.context) {
+      throw new Error('Stagehand context not available');
+    }
+
+    let pages = this.stagehand.context.pages();
+
+    // If no pages exist, create one
+    if (!pages || pages.length === 0) {
+      console.log('[CrawlerAgent] No pages found, creating new page...');
+      const newPage = await this.stagehand.context.newPage();
+      this.captureSessionId();
+      return newPage;
+    }
+
+    this.captureSessionId();
     return pages[0];
   }
 
@@ -118,14 +158,18 @@ export class CrawlerAgent {
     this.visitedUrls.clear();
     this.discoveredFlows = [];
 
+    console.log(`\n[CrawlerAgent] Starting crawl of ${baseUrl}`);
+    console.log(`[CrawlerAgent] Options: maxPages=${opts.maxPages}, maxDepth=${opts.maxDepth}`);
+
     if (!this.stagehand) {
       await this.init();
     }
 
     try {
       await this.crawlPage(baseUrl, 0, opts);
+      console.log(`\n[CrawlerAgent] Crawl complete. Discovered ${this.discoveredFlows.length} flows.`);
     } catch (error) {
-      console.error('Error during crawl:', error);
+      console.error('[CrawlerAgent] Error during crawl:', error);
     }
 
     return this.discoveredFlows;
@@ -145,7 +189,8 @@ export class CrawlerAgent {
 
     this.visitedUrls.add(url);
 
-    const page = this.getPage();
+    const page = await this.getPage();
+    console.log(`[CrawlerAgent] Crawling: ${url}`);
 
     try {
       await page.goto(url, {
@@ -181,12 +226,14 @@ export class CrawlerAgent {
     const elements: DiscoveredElement[] = [];
 
     try {
+      console.log('[CrawlerAgent] Discovering clickable elements...');
       // Use observe to find clickable elements
       const clickableObservations = await this.stagehand.observe(
         'Find all clickable buttons and links on this page'
       );
+      console.log(`[CrawlerAgent] Found ${clickableObservations?.length || 0} clickable elements`);
 
-      for (const obs of clickableObservations) {
+      for (const obs of clickableObservations || []) {
         elements.push({
           selector: obs.selector,
           type: obs.selector.includes('button') || obs.selector.includes('btn') ? 'button' : 'link',
@@ -194,12 +241,14 @@ export class CrawlerAgent {
         });
       }
 
+      console.log('[CrawlerAgent] Discovering input fields...');
       // Find form inputs
       const inputObservations = await this.stagehand.observe(
         'Find all input fields and text areas on this page'
       );
+      console.log(`[CrawlerAgent] Found ${inputObservations?.length || 0} input fields`);
 
-      for (const obs of inputObservations) {
+      for (const obs of inputObservations || []) {
         elements.push({
           selector: obs.selector,
           type: 'input',
@@ -207,20 +256,24 @@ export class CrawlerAgent {
         });
       }
 
+      console.log('[CrawlerAgent] Discovering forms...');
       // Find forms
       const formObservations = await this.stagehand.observe(
         'Find all forms on this page including login, signup, and contact forms'
       );
+      console.log(`[CrawlerAgent] Found ${formObservations?.length || 0} forms`);
 
-      for (const obs of formObservations) {
+      for (const obs of formObservations || []) {
         elements.push({
           selector: obs.selector,
           type: 'form',
           action: obs.description || undefined,
         });
       }
+
+      console.log(`[CrawlerAgent] Total elements discovered: ${elements.length}`);
     } catch (error) {
-      console.error('Error discovering elements:', error);
+      console.error('[CrawlerAgent] Error discovering elements:', error);
     }
 
     return elements;
@@ -234,7 +287,7 @@ export class CrawlerAgent {
     elements: DiscoveredElement[],
     options: CrawlerOptions
   ): Promise<void> {
-    const page = this.getPage();
+    const page = await this.getPage();
     const pageTitle = await page.evaluate(() => document.title);
 
     // Identify navigation flows (link clicks)
@@ -322,7 +375,7 @@ export class CrawlerAgent {
    * Extract internal links from the current page
    */
   private async extractLinks(baseUrl: string): Promise<string[]> {
-    const page = this.getPage();
+    const page = await this.getPage();
     const baseUrlObj = new URL(baseUrl);
 
     const links = await page.evaluate((hostname) => {
@@ -381,8 +434,15 @@ export class CrawlerAgent {
    */
   async close(): Promise<void> {
     if (this.stagehand) {
-      await this.stagehand.close();
-      this.stagehand = null;
+      console.log('[CrawlerAgent] Closing Browserbase session...');
+      try {
+        await this.stagehand.close();
+        console.log('[CrawlerAgent] Session closed successfully');
+      } catch (error) {
+        console.error('[CrawlerAgent] Error closing session:', error);
+      } finally {
+        this.stagehand = null;
+      }
     }
   }
 }

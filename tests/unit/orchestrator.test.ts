@@ -75,7 +75,7 @@ describe('Orchestrator', () => {
   let orchestrator: Orchestrator;
 
   beforeEach(() => {
-    orchestrator = new Orchestrator('/test/project');
+    orchestrator = new Orchestrator({ projectRoot: '/test/project' });
     vi.clearAllMocks();
 
     // Reset to default successful behavior
@@ -93,12 +93,12 @@ describe('Orchestrator', () => {
 
   describe('Constructor', () => {
     it('should initialize all agents with project root', () => {
-      const orch = new Orchestrator('/custom/path');
+      const orch = new Orchestrator({ projectRoot: '/custom/path' });
       expect(orch).toBeInstanceOf(Orchestrator);
     });
 
     it('should share TesterAgent with VerifierAgent', () => {
-      new Orchestrator('/test');
+      new Orchestrator({ projectRoot: '/test' });
       expect(mockVerifierAgent.setTesterAgent).toHaveBeenCalled();
     });
   });

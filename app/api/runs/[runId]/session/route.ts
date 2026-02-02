@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRun } from '@/lib/dashboard/run-store';
+import { getRunAsync } from '@/lib/dashboard/run-store';
 import Browserbase from '@browserbasehq/sdk';
 
 // GET /api/runs/[runId]/session - Get Browserbase session debug URLs
@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ runId: string }> }
 ) {
   const { runId } = await params;
-  const run = getRun(runId);
+  const run = await getRunAsync(runId);
 
   if (!run) {
     return NextResponse.json({ error: 'Run not found' }, { status: 404 });

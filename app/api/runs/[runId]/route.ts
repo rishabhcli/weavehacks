@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRun, updateRunStatus, deleteRun } from '@/lib/dashboard/run-store';
+import { getRun, getRunAsync, updateRunStatus, deleteRun } from '@/lib/dashboard/run-store';
 import { emitRunError } from '@/lib/dashboard/sse-emitter';
 
 // GET /api/runs/[runId] - Get run details
@@ -8,7 +8,9 @@ export async function GET(
   { params }: { params: Promise<{ runId: string }> }
 ) {
   const { runId } = await params;
-  const run = getRun(runId);
+
+  // Use async version to check Redis fallback
+  const run = await getRunAsync(runId);
 
   if (!run) {
     return NextResponse.json({ error: 'Run not found' }, { status: 404 });
@@ -23,7 +25,7 @@ export async function DELETE(
   { params }: { params: Promise<{ runId: string }> }
 ) {
   const { runId } = await params;
-  const run = getRun(runId);
+  const run = await getRunAsync(runId);
 
   if (!run) {
     return NextResponse.json({ error: 'Run not found' }, { status: 404 });

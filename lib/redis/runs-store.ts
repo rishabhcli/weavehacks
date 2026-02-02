@@ -141,6 +141,13 @@ export async function updateStoredRunAgent(runId: string, agent: AgentType | nul
 }
 
 /**
+ * Update Browserbase session ID for a run
+ */
+export async function updateStoredRunSession(runId: string, sessionId: string): Promise<void> {
+  await updateStoredRun(runId, { sessionId });
+}
+
+/**
  * Increment run iteration
  */
 export async function incrementStoredRunIteration(runId: string): Promise<void> {

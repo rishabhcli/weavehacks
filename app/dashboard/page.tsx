@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -156,17 +156,24 @@ export default function DashboardPage() {
     success('Dashboard refreshed');
   };
 
+  // Track if there's an active run using a ref to avoid re-render loops
+  const hasActiveRunRef = useRef(false);
+  
+  useEffect(() => {
+    hasActiveRunRef.current = runs.some((run) => run.status === 'running' || run.status === 'pending');
+  }, [runs]);
+
   useEffect(() => {
     fetchData();
 
     const interval = setInterval(() => {
-      if (runs.some((run) => run.status === 'running' || run.status === 'pending')) {
+      if (hasActiveRunRef.current) {
         fetchData();
       }
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [fetchData, runs]);
+  }, [fetchData]);
 
   const handleRunCreated = (runId: string) => {
     success('Run created', 'Redirecting to run details...', {

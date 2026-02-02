@@ -29,7 +29,14 @@ const sponsors = [
   { name: 'Daily.co', fallback: 'DL' },
   { name: 'Google ADK', fallback: 'AD' },
 ];
-
+            <a
+              href="/pricing"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Github className="h-4 w-4" />
+              <span className="hidden sm:inline">View on GitHub</span>
+            
+            </a>
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
@@ -43,9 +50,7 @@ export default function LandingPage() {
             <span className="font-semibold text-lg">QAgent</span>
           </div>
           <a
-            href="https://github.com/rishabhcli/weavehacks"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/pricing"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <Github className="h-4 w-4" />
@@ -125,7 +130,7 @@ export default function LandingPage() {
                 className="group p-6 rounded-xl border bg-card hover:shadow-md transition-shadow"
               >
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
-                  <feature.icon className="h-5 w-5 text-primary" />
+{feature.icon && typeof feature.icon === 'function' && <feature.icon className="h-5 w-5 text-primary" />}
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -153,7 +158,7 @@ export default function LandingPage() {
               { step: '04', title: 'Learn', desc: 'Knowledge base improves over time' },
             ].map((item, index) => (
               <motion.div
-                key={item.step}
+                key={item?.step ?? index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}

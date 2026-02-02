@@ -1,7 +1,19 @@
 import type { Run, RunStatus, AgentType, TestSpec, Patch, TestResult } from '@/lib/types';
+import {
+  storeRun as storeRedisRun,
+  getStoredRun,
+  updateStoredRun,
+  getAllStoredRuns,
+} from '@/lib/redis/runs-store';
 
-// In-memory store for runs (replace with Redis in production)
-const runs = new Map<string, Run>();
+// Store runs in globalThis to survive HMR in development
+const globalForRuns = globalThis as unknown as {
+  runsMap: Map<string, Run> | undefined;
+};
+
+// In-memory store for runs with HMR persistence
+const runs = globalForRuns.runsMap ?? new Map<string, Run>();
+globalForRuns.runsMap = runs;
 
 export function createRun(data: {
   repoId: string;
@@ -24,17 +36,82 @@ export function createRun(data: {
   };
 
   runs.set(run.id, run);
+
+  // Also store in Redis for persistence (async, don't wait)
+  storeRedisRun(run).catch((err) => {
+    console.warn('Failed to store run in Redis:', err.message);
+  });
+
   return run;
 }
 
 export function getRun(runId: string): Run | null {
-  return runs.get(runId) || null;
+  // First check in-memory cache
+  const cached = runs.get(runId);
+  if (cached) {
+    return cached;
+  }
+  return null;
+}
+
+// Async version that checks Redis as fallback
+export async function getRunAsync(runId: string): Promise<Run | null> {
+  // First check in-memory cache
+  const cached = runs.get(runId);
+  if (cached) {
+    return cached;
+  }
+
+  // Fall back to Redis
+  try {
+    const stored = await getStoredRun(runId);
+    if (stored) {
+      // Restore to in-memory cache
+      runs.set(runId, stored);
+      return stored;
+    }
+  } catch (err) {
+    console.warn('Failed to get run from Redis:', err);
+  }
+
+  return null;
 }
 
 export function getAllRuns(): Run[] {
   return Array.from(runs.values()).sort(
     (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
   );
+}
+
+// Async version that merges with Redis
+export async function getAllRunsAsync(): Promise<Run[]> {
+  const memoryRuns = Array.from(runs.values());
+
+  try {
+    const storedRuns = await getAllStoredRuns(100);
+
+    // Merge: use in-memory version if exists (more up-to-date), otherwise use Redis
+    const runMap = new Map<string, Run>();
+
+    // Add stored runs first
+    for (const run of storedRuns) {
+      runMap.set(run.id, run);
+    }
+
+    // Overwrite with in-memory runs (more current)
+    for (const run of memoryRuns) {
+      runMap.set(run.id, run);
+    }
+
+    return Array.from(runMap.values()).sort(
+      (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+    );
+  } catch (err) {
+    console.warn('Failed to get runs from Redis:', err);
+    return memoryRuns.sort(
+      (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+    );
+  }
 }
 
 export function updateRunStatus(runId: string, status: RunStatus): void {
@@ -44,6 +121,9 @@ export function updateRunStatus(runId: string, status: RunStatus): void {
     if (status === 'completed' || status === 'failed' || status === 'cancelled') {
       run.completedAt = new Date();
     }
+
+    // Sync to Redis (async, don't wait)
+    storeRedisRun(run).catch(() => {});
   }
 }
 
@@ -51,6 +131,8 @@ export function updateRunAgent(runId: string, agent: AgentType | null): void {
   const run = runs.get(runId);
   if (run) {
     run.currentAgent = agent;
+    // Sync to Redis (async, don't wait)
+    storeRedisRun(run).catch(() => {});
   }
 }
 
@@ -58,6 +140,8 @@ export function updateRunSession(runId: string, sessionId: string): void {
   const run = runs.get(runId);
   if (run) {
     run.sessionId = sessionId;
+    // Sync to Redis (async, don't wait)
+    storeRedisRun(run).catch(() => {});
   }
 }
 
@@ -72,6 +156,8 @@ export function addRunPatch(runId: string, patch: Patch): void {
   const run = runs.get(runId);
   if (run) {
     run.patches.push(patch);
+    // Sync to Redis (async, don't wait)
+    storeRedisRun(run).catch(() => {});
   }
 }
 

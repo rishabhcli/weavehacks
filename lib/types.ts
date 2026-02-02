@@ -469,3 +469,17 @@ export interface GitHubPullRequestEvent {
     login: string;
   };
 }
+
+// ============================================================================
+// Git Clone Types
+// ============================================================================
+
+import type { ChildProcess } from 'child_process';
+
+export interface ClonedRepo {
+  repoPath: string;           // Temp directory with cloned repo
+  devServerPort: number;      // Port dev server runs on
+  devServerUrl: string;       // e.g., http://localhost:3456
+  devServerProcess: ChildProcess;
+  cleanup: () => Promise<void>;
+}

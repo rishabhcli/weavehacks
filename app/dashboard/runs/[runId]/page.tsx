@@ -419,8 +419,10 @@ function generateAgentStates(run: Run): Partial<Record<AgentType, AgentExecution
   return states;
 }
 
-export default function RunDetailPage({ params }: { params: Promise<{ runId: string }> }) {
-  const { runId } = use(params);
+export default function RunDetailPage({ params }: { params: Promise<{ runId: string }> | { runId: string } }) {
+  // Handle both Promise and direct object (client-side navigation)
+  const resolvedParams = params instanceof Promise ? use(params) : params;
+  const { runId } = resolvedParams;
   const [run, setRun] = useState<Run | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

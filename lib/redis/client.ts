@@ -7,8 +7,15 @@
 
 import { createClient, RedisClientType } from 'redis';
 
-let redisClient: RedisClientType | null = null;
-let connectionFailed = false;
+// Store client in globalThis to survive HMR in development
+const globalForRedis = globalThis as unknown as {
+  redisClient: RedisClientType | null;
+  redisConnectionFailed: boolean;
+};
+
+// Use global storage to prevent connection leaks during HMR
+let redisClient: RedisClientType | null = globalForRedis.redisClient ?? null;
+let connectionFailed = globalForRedis.redisConnectionFailed ?? false;
 
 export interface RedisConfig {
   url: string;
@@ -53,6 +60,15 @@ export async function getRedisClient(): Promise<RedisClientType> {
     url,
     socket: {
       connectTimeout: 5000,
+      reconnectStrategy: (retries) => {
+        // Stop retrying after 3 attempts
+        if (retries >= 3) {
+          connectionFailed = true;
+          globalForRedis.redisConnectionFailed = true;
+          return new Error('Max retries reached');
+        }
+        return Math.min(retries * 100, 3000);
+      },
       ...(useTls
         ? {
             tls: true,
@@ -71,10 +87,14 @@ export async function getRedisClient(): Promise<RedisClientType> {
 
   try {
     await redisClient.connect();
+    // Store in global for HMR persistence
+    globalForRedis.redisClient = redisClient;
     return redisClient;
   } catch (err) {
     connectionFailed = true;
+    globalForRedis.redisConnectionFailed = true;
     redisClient = null;
+    globalForRedis.redisClient = null;
     throw err;
   }
 }

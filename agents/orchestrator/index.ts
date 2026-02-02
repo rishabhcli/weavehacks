@@ -27,6 +27,9 @@ import { storeRunInDataset, type RunDatasetRow } from '@/lib/weave/datasets';
 // Callback for when patches are generated (used in cloud mode to create PRs)
 export type PatchGeneratedCallback = (patch: Patch, diagnosis: DiagnosisReport) => Promise<void>;
 
+// Callback for when patches are applied locally
+export type PatchAppliedCallback = (patch: Patch, success: boolean) => void;
+
 interface IterationResult {
   testId: string;
   iteration: number;
@@ -37,22 +40,64 @@ interface IterationResult {
   error?: string;
 }
 
+export interface OrchestratorOptions {
+  projectRoot?: string;
+  targetUrl?: string;
+  autoCommit?: boolean;
+  onSessionStarted?: (sessionId: string) => void;
+}
+
 export class Orchestrator implements IOrchestrator {
+  private projectRoot: string;
+  private targetUrl: string;
   private testerAgent: TesterAgent;
   private triageAgent: TriageAgent;
   private fixerAgent: FixerAgent;
   private verifierAgent: VerifierAgent;
+  private lastSessionId: string | null = null;
 
   // Optional callback for cloud mode - creates PRs when patches are generated
   public onPatchGenerated?: PatchGeneratedCallback;
 
-  constructor(projectRoot: string = process.cwd()) {
+  // Optional callback for local mode - notifies when patches are applied
+  public onPatchApplied?: PatchAppliedCallback;
+
+  // Optional callback when a Browserbase session is available
+  public onSessionStarted?: (sessionId: string) => void;
+
+  constructor(options: OrchestratorOptions = {}) {
+    const projectRoot = options.projectRoot || process.cwd();
+    const targetUrl = options.targetUrl || process.env.TARGET_URL || 'http://localhost:3000';
+    const autoCommit = options.autoCommit ?? false; // Default to false for clone-first mode
+
+    this.projectRoot = projectRoot;
+    this.targetUrl = targetUrl;
+
     this.testerAgent = new TesterAgent();
     this.triageAgent = new TriageAgent(projectRoot);
     this.fixerAgent = new FixerAgent(projectRoot);
-    this.verifierAgent = new VerifierAgent(projectRoot);
+    this.verifierAgent = new VerifierAgent(projectRoot, {
+      targetUrl,
+      autoCommit,
+    });
     // Share tester agent with verifier to avoid concurrent session limits
     this.verifierAgent.setTesterAgent(this.testerAgent);
+
+    this.onSessionStarted = options.onSessionStarted;
+  }
+
+  /**
+   * Get the project root path
+   */
+  getProjectRoot(): string {
+    return this.projectRoot;
+  }
+
+  /**
+   * Get the target URL
+   */
+  getTargetUrl(): string {
+    return this.targetUrl;
   }
 
   /**
@@ -95,6 +140,7 @@ export class Orchestrator implements IOrchestrator {
     try {
       // Initialize tester agent
       await this.testerAgent.init();
+      this.emitSessionIfAvailable();
 
       // Process each test spec
       for (const testSpec of config.testSpecs) {
@@ -227,7 +273,9 @@ export class Orchestrator implements IOrchestrator {
 
       // Step 1: Run test
       console.log('🧪 Running test...');
+      this.emitSessionIfAvailable();
       const testResult = await this.testerAgent.runTest(testSpec);
+      this.emitSessionIfAvailable();
 
       if (testResult.passed) {
         console.log('✅ Test passed!');
@@ -272,6 +320,11 @@ export class Orchestrator implements IOrchestrator {
       this.verifierAgent.setFailureReport(testResult.failureReport);
       const verifyResult = await this.verifierAgent.verify(patchResult.patch, testSpec);
 
+      // Notify about patch application result
+      if (this.onPatchApplied) {
+        this.onPatchApplied(patchResult.patch, verifyResult.success);
+      }
+
       if (verifyResult.success) {
         console.log('✅ Fix verified!');
         return { success: true, iterations: iteration, patches };
@@ -293,12 +346,14 @@ export class Orchestrator implements IOrchestrator {
     const results: Array<{ testId: string; passed: boolean; duration: number }> = [];
 
     for (const spec of testSpecs) {
+      this.emitSessionIfAvailable();
       const testSpec: TestSpec = {
         ...spec,
         url: spec.url.replace(/https?:\/\/[^/]+/, targetUrl),
       };
 
       const result = await this.testerAgent.runTest(testSpec);
+      this.emitSessionIfAvailable();
       results.push({
         testId: spec.id,
         passed: result.passed,
@@ -340,6 +395,18 @@ export class Orchestrator implements IOrchestrator {
 
     console.log('='.repeat(60) + '\n');
   }
+
+  private emitSessionIfAvailable(): void {
+    if (!this.onSessionStarted) {
+      return;
+    }
+
+    const sessionId = this.testerAgent.getSessionId();
+    if (sessionId && sessionId !== this.lastSessionId) {
+      this.onSessionStarted(sessionId);
+      this.lastSessionId = sessionId;
+    }
+  }
 }
 
 // CLI entry point
@@ -353,7 +420,10 @@ async function main() {
   // Import test specs
   const { allTestSpecs } = await import('@/tests/e2e/specs');
 
-  const orchestrator = new Orchestrator();
+  const orchestrator = new Orchestrator({
+    targetUrl,
+    autoCommit: true, // CLI mode uses auto-commit
+  });
 
   const result = await orchestrator.run({
     maxIterations,

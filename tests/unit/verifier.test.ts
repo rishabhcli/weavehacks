@@ -76,7 +76,7 @@ describe('VerifierAgent', () => {
     delete process.env.VERCEL_TOKEN;
     delete process.env.VERCEL_PROJECT_ID;
 
-    verifier = new VerifierAgent('/test/project', false);
+    verifier = new VerifierAgent('/test/project', { useRedis: false });
     vi.clearAllMocks();
 
     // Reset mock implementations
@@ -96,7 +96,7 @@ describe('VerifierAgent', () => {
     });
 
     it('should initialize with custom project root', () => {
-      const agent = new VerifierAgent('/custom/path', false);
+      const agent = new VerifierAgent('/custom/path', { useRedis: false });
       expect(agent).toBeInstanceOf(VerifierAgent);
     });
 
@@ -104,7 +104,7 @@ describe('VerifierAgent', () => {
       process.env.VERCEL_TOKEN = 'test-token';
       process.env.VERCEL_PROJECT_ID = 'test-project';
 
-      const agent = new VerifierAgent('/test', false);
+      const agent = new VerifierAgent('/test', { useRedis: false });
       expect(agent).toBeInstanceOf(VerifierAgent);
     });
   });
@@ -368,7 +368,7 @@ describe('VerifierAgent', () => {
       delete process.env.VERCEL_TOKEN;
       delete process.env.VERCEL_PROJECT_ID;
 
-      const agent = new VerifierAgent('/test', false);
+      const agent = new VerifierAgent('/test', { useRedis: false });
       const patch = createMockPatch({ file: 'src/test.ts' });
       const testSpec = createMockTestSpec();
 
@@ -390,7 +390,7 @@ describe('VerifierAgent', () => {
           }),
       });
 
-      const agent = new VerifierAgent('/test', false);
+      const agent = new VerifierAgent('/test', { useRedis: false });
       const patch = createMockPatch({ file: 'src/test.ts' });
       const testSpec = createMockTestSpec();
 
@@ -415,7 +415,7 @@ describe('VerifierAgent', () => {
         throw new Error('git push failed');
       });
 
-      const agent = new VerifierAgent('/test', false);
+      const agent = new VerifierAgent('/test', { useRedis: false });
       const patch = createMockPatch({ file: 'src/test.ts' });
       const testSpec = createMockTestSpec();
 

@@ -46,6 +46,27 @@ export function LiveBrowserViewer({
   const [retryCount, setRetryCount] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  const buildIframeUrl = (url: string, extraParams?: Record<string, string>): string => {
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.set('navbar', 'false');
+      if (extraParams) {
+        for (const [key, value] of Object.entries(extraParams)) {
+          parsed.searchParams.set(key, value);
+        }
+      }
+      return parsed.toString();
+    } catch {
+      const params = new URLSearchParams({ navbar: 'false', ...extraParams });
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}${params.toString()}`;
+    }
+  };
+
+  const iframeSrc = sessionInfo?.debuggerUrl
+    ? buildIframeUrl(sessionInfo.debuggerUrl)
+    : undefined;
+
   useEffect(() => {
     let isMounted = true;
 
@@ -86,7 +107,7 @@ export function LiveBrowserViewer({
       isMounted = false;
       clearInterval(interval);
     };
-  }, [runId, isRunning]);
+  }, [runId, isRunning, retryCount]);
 
   const handleFullscreen = () => {
     if (sessionInfo?.debuggerFullscreenUrl) {
@@ -104,7 +125,9 @@ export function LiveBrowserViewer({
     setIframeLoaded(false);
     setRetryCount((prev) => prev + 1);
     if (iframeRef.current && sessionInfo?.debuggerUrl) {
-      iframeRef.current.src = sessionInfo.debuggerUrl + '?t=' + Date.now();
+      iframeRef.current.src = buildIframeUrl(sessionInfo.debuggerUrl, {
+        t: String(Date.now()),
+      });
     }
   };
 
@@ -303,16 +326,17 @@ export function LiveBrowserViewer({
                 <iframe
                   ref={iframeRef}
                   key={retryCount}
-                  src={sessionInfo.debuggerUrl}
+                  src={iframeSrc}
                   className="w-full h-full border-0"
                   allow="clipboard-read; clipboard-write"
+                  sandbox="allow-same-origin allow-scripts allow-forms"
                   title="Live Browser Session - Browserbase"
                   onLoad={handleIframeLoad}
                 />
 
                 {/* Live indicator overlay */}
                 {isRunning && (
-                  <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/80 backdrop-blur-md text-neon-green px-3 py-1.5 rounded-full text-xs font-medium border border-neon-green/30 shadow-[0_0_15px_hsl(var(--neon-green)/0.3)]">
+                  <div className="pointer-events-none absolute top-3 left-3 flex items-center gap-2 bg-black/80 backdrop-blur-md text-neon-green px-3 py-1.5 rounded-full text-xs font-medium border border-neon-green/30 shadow-[0_0_15px_hsl(var(--neon-green)/0.3)]">
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-green opacity-75" />
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-green" />
@@ -322,7 +346,7 @@ export function LiveBrowserViewer({
                 )}
 
                 {/* Browserbase branding */}
-                <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2 py-1 rounded text-[10px] text-muted-foreground border border-white/10">
+                <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2 py-1 rounded text-[10px] text-muted-foreground border border-white/10">
                   <div className="w-3 h-3 rounded bg-gradient-to-br from-orange-500 to-red-600" />
                   Browserbase
                 </div>

@@ -6,9 +6,14 @@
 
 import { completeQueuedRun } from '@/lib/redis/queue';
 import { getMonitoringConfig, recordMonitoringRun } from '@/lib/redis/monitoring-config';
-import { createStoredRun, updateStoredRunStatus, addStoredRunPatch } from '@/lib/redis/runs-store';
+import {
+  createStoredRun,
+  updateStoredRunStatus,
+  addStoredRunPatch,
+  updateStoredRunSession,
+} from '@/lib/redis/runs-store';
 import { recordRunMetrics } from '@/lib/redis/metrics-store';
-import { sseEmitter } from '@/lib/dashboard/sse-emitter';
+import { emitSessionStarted, sseEmitter } from '@/lib/dashboard/sse-emitter';
 import { Orchestrator } from '@/agents/orchestrator';
 import type { QueuedRun, Run } from '@/lib/types';
 
@@ -65,7 +70,14 @@ export async function processQueuedRun(queuedRun: QueuedRun): Promise<Run | null
     console.log(`[Processor] Test specs: ${config.testSpecs.length}`);
 
     // Create and run orchestrator
-    const orchestrator = new Orchestrator();
+    const orchestrator = new Orchestrator({
+      onSessionStarted: (sessionId) => {
+        updateStoredRunSession(run.id, sessionId).catch((error) => {
+          console.warn('[Processor] Failed to persist session ID:', error);
+        });
+        emitSessionStarted(run.id, sessionId);
+      },
+    });
     const result = await orchestrator.run({
       maxIterations: run.maxIterations,
       testSpecs: config.testSpecs,

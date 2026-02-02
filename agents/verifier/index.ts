@@ -1,8 +1,10 @@
 /**
  * Verifier Agent
  *
- * Applies patches, deploys to Vercel, and verifies fixes work.
+ * Applies patches to GitHub repositories and verifies fixes work.
  * Re-runs the failing test to confirm the bug is fixed.
+ *
+ * NOTE: Does NOT deploy to Vercel. Fixes are applied directly to the codebase.
  *
  * Instrumented with W&B Weave for observability.
  */
@@ -14,7 +16,6 @@ import type {
   Patch,
   TestSpec,
   VerificationResult,
-  DeploymentStatus,
   FailureReport,
   VerifierAgent as IVerifierAgent,
 } from '@/lib/types';
@@ -22,20 +23,40 @@ import { TesterAgent } from '@/agents/tester';
 import { getKnowledgeBase, isRedisAvailable } from '@/lib/redis';
 import { op, isWeaveEnabled } from '@/lib/weave';
 
+export interface VerifierOptions {
+  useRedis?: boolean;
+  targetUrl?: string;
+  autoCommit?: boolean;
+}
+
 export class VerifierAgent implements IVerifierAgent {
   private projectRoot: string;
   private testerAgent: TesterAgent | null = null;
   private ownsTesterAgent: boolean = false;
-  private vercelToken: string | undefined;
-  private vercelProjectId: string | undefined;
-  private useRedis: boolean = true;
+  private useRedis: boolean;
+  private targetUrl: string;
+  private autoCommit: boolean;
   private currentFailureReport?: FailureReport;
 
-  constructor(projectRoot: string = process.cwd(), useRedis: boolean = true) {
+  constructor(projectRoot: string = process.cwd(), options: VerifierOptions = {}) {
     this.projectRoot = projectRoot;
-    this.vercelToken = process.env.VERCEL_TOKEN;
-    this.vercelProjectId = process.env.VERCEL_PROJECT_ID;
-    this.useRedis = useRedis;
+    this.useRedis = options.useRedis ?? true;
+    this.targetUrl = options.targetUrl || process.env.TARGET_URL || 'http://localhost:3000';
+    this.autoCommit = options.autoCommit ?? true;
+  }
+
+  /**
+   * Get the configured target URL
+   */
+  getTargetUrl(): string {
+    return this.targetUrl;
+  }
+
+  /**
+   * Set the target URL for testing
+   */
+  setTargetUrl(url: string): void {
+    this.targetUrl = url;
   }
 
   /**
@@ -86,24 +107,15 @@ export class VerifierAgent implements IVerifierAgent {
           };
         }
 
-        // 4. Commit and deploy (if Vercel is configured)
-        let deploymentUrl: string | undefined;
-        if (this.vercelToken && this.vercelProjectId) {
-          const deployment = await this.deploy(patch);
-          if (deployment.state === 'ERROR') {
-            await this.restoreFile(patch.file, backupPath);
-            return {
-              success: false,
-              error: `Deployment failed: ${deployment.error}`,
-            };
-          }
-          deploymentUrl = deployment.url;
-        } else {
-          // Use local dev server URL
-          deploymentUrl = process.env.TARGET_URL || 'http://localhost:3000';
+        // 4. Commit the fix to git (if autoCommit is enabled)
+        if (this.autoCommit) {
+          await this.commitFix(patch);
         }
 
-        // 5. Re-run the failing test
+        // 5. Use configured target URL for testing
+        const targetUrl = this.targetUrl;
+
+        // 6. Re-run the failing test
         // Use shared tester if available, otherwise create our own
         const needsOwnTester = !this.testerAgent;
         if (needsOwnTester) {
@@ -116,7 +128,7 @@ export class VerifierAgent implements IVerifierAgent {
           ...testSpec,
           url: testSpec.url.replace(
             /https?:\/\/[^/]+/,
-            deploymentUrl || 'http://localhost:3000'
+            targetUrl
           ),
         });
 
@@ -126,10 +138,7 @@ export class VerifierAgent implements IVerifierAgent {
           this.testerAgent = null;
         }
 
-        // 6. Record fix and return result
-        // IMPORTANT: Don't restore files when tests fail - patches should accumulate
-        // so multiple bugs in the same flow can be fixed together.
-        // The orchestrator will handle final verification.
+        // 7. Record fix and return result
         this.cleanupBackup(backupPath);
 
         if (testResult.passed) {
@@ -138,7 +147,6 @@ export class VerifierAgent implements IVerifierAgent {
 
           return {
             success: true,
-            deploymentUrl,
             testResult,
           };
         } else {
@@ -147,7 +155,6 @@ export class VerifierAgent implements IVerifierAgent {
 
           return {
             success: false,
-            deploymentUrl,
             testResult,
             error: 'Test still fails after applying patch',
           };
@@ -162,6 +169,24 @@ export class VerifierAgent implements IVerifierAgent {
         success: false,
         error: error instanceof Error ? error.message : 'Verification failed',
       };
+    }
+  }
+
+  /**
+   * Commit the fix to git
+   */
+  private async commitFix(patch: Patch): Promise<void> {
+    try {
+      const commitMessage = `fix: ${patch.description}\n\nApplied by QAgent`;
+      execSync(`git add ${patch.file}`, { cwd: this.projectRoot, stdio: 'pipe' });
+      execSync(`git commit -m "${commitMessage}"`, {
+        cwd: this.projectRoot,
+        stdio: 'pipe',
+      });
+      console.log(`[VerifierAgent] Committed fix: ${patch.description}`);
+    } catch (error) {
+      // Git commit may fail if nothing to commit or other issues
+      console.log('[VerifierAgent] Git commit skipped or failed:', error);
     }
   }
 
@@ -313,85 +338,6 @@ export class VerifierAgent implements IVerifierAgent {
       console.error(`Failed to validate syntax for ${filePath}:`, error);
       return false;
     }
-  }
-
-  /**
-   * Deploy to Vercel
-   */
-  private async deploy(patch: Patch): Promise<DeploymentStatus> {
-    if (!this.vercelToken || !this.vercelProjectId) {
-      return {
-        state: 'ERROR',
-        error: 'Vercel credentials not configured',
-      };
-    }
-
-    try {
-      // 1. Commit the change
-      const commitMessage = `fix: ${patch.description}\n\nApplied by QAgent`;
-      execSync(`git add ${patch.file}`, { cwd: this.projectRoot, stdio: 'pipe' });
-      execSync(`git commit -m "${commitMessage}"`, {
-        cwd: this.projectRoot,
-        stdio: 'pipe',
-      });
-
-      // 2. Push to trigger Vercel deployment
-      execSync('git push', { cwd: this.projectRoot, stdio: 'pipe' });
-
-      // 3. Wait for deployment
-      const deploymentUrl = await this.waitForDeployment();
-
-      return {
-        state: 'READY',
-        url: deploymentUrl,
-      };
-    } catch (error) {
-      return {
-        state: 'ERROR',
-        error: error instanceof Error ? error.message : 'Deployment failed',
-      };
-    }
-  }
-
-  /**
-   * Wait for Vercel deployment to complete
-   */
-  private async waitForDeployment(): Promise<string> {
-    const maxAttempts = 60; // 5 minutes max
-    const pollInterval = 5000; // 5 seconds
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      try {
-        const response = await fetch(
-          `https://api.vercel.com/v6/deployments?projectId=${this.vercelProjectId}&limit=1`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.vercelToken}`,
-            },
-          }
-        );
-
-        const data = await response.json();
-        const deployment = data.deployments?.[0];
-
-        if (deployment?.state === 'READY') {
-          return `https://${deployment.url}`;
-        }
-
-        if (deployment?.state === 'ERROR') {
-          throw new Error('Deployment failed');
-        }
-
-        // Wait before next poll
-        await new Promise((resolve) => setTimeout(resolve, pollInterval));
-      } catch (error) {
-        if (attempt === maxAttempts - 1) {
-          throw error;
-        }
-      }
-    }
-
-    throw new Error('Deployment timed out');
   }
 
   /**

@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { TestSpec } from '@/lib/types';
 import { useSession } from '@/lib/hooks/use-session';
 
 interface NewRunDialogProps {
@@ -61,12 +60,11 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
   const [repos, setRepos] = useState<ConnectedRepo[]>([]);
   const { repos: sessionRepos, isAuthenticated } = useSession();
 
-  // Quick Start state
-  const [quickStartUrl, setQuickStartUrl] = useState('');
+  // Run state
+  const [targetUrl, setTargetUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateProgress, setGenerateProgress] = useState(0);
   const [generateStatus, setGenerateStatus] = useState('');
-  const [generatedTests, setGeneratedTests] = useState<TestSpec[]>([]);
 
   useEffect(() => {
     // First try sessionStorage (set by Settings page)
@@ -96,61 +94,47 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
   }, [open, selectedRepo, sessionRepos, isAuthenticated]);
 
   const handleQuickStart = async () => {
-    if (!selectedRepo) return;
+    if (!selectedRepo) return; // Only repo is required, URL is optional
 
     setIsGenerating(true);
-    setGenerateProgress(10);
-    setGenerateStatus('Connecting to browser...');
-    setGeneratedTests([]);
+    setGenerateProgress(5);
+    setGenerateStatus('Cloning repository...');
 
     try {
-      // Get the repo URL or use quickStartUrl
       const repoInfo = repos.find((r) => r.fullName === selectedRepo);
-      const targetUrl = quickStartUrl || repoInfo?.url || `https://${selectedRepo.split('/')[1]}.vercel.app`;
 
-      // Simulate progress updates
+      console.log('[NewRunDialog] CODE-FIRST run for repo:', selectedRepo);
+      if (targetUrl) {
+        console.log('[NewRunDialog] Optional URL:', targetUrl);
+      }
+
+      // Progress updates for CODE-FIRST workflow
       const progressInterval = setInterval(() => {
         setGenerateProgress((p) => {
-          if (p < 30) {
-            setGenerateStatus('Navigating to website...');
-            return p + 2;
-          } else if (p < 50) {
-            setGenerateStatus('Discovering interactive elements...');
+          if (p < 15) {
+            setGenerateStatus('Cloning repository...');
             return p + 1;
-          } else if (p < 70) {
-            setGenerateStatus('Analyzing user flows...');
+          } else if (p < 30) {
+            setGenerateStatus('Installing dependencies...');
             return p + 0.5;
-          } else if (p < 85) {
-            setGenerateStatus('Generating test specifications...');
+          } else if (p < 50) {
+            setGenerateStatus('Analyzing code...');
+            return p + 0.5;
+          } else if (p < 70) {
+            setGenerateStatus('Finding issues...');
             return p + 0.3;
+          } else if (p < 85) {
+            setGenerateStatus('Generating fixes...');
+            return p + 0.2;
+          } else if (p < 95) {
+            setGenerateStatus('Creating PRs...');
+            return p + 0.1;
           }
           return p;
         });
       }, 500);
 
-      // Generate tests
-      const generateRes = await fetch('/api/tests/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          url: targetUrl,
-          options: { maxPages: 3, maxDepth: 2 },
-        }),
-      });
-
-      clearInterval(progressInterval);
-
-      if (!generateRes.ok) {
-        throw new Error('Failed to generate tests');
-      }
-
-      const generateData = await generateRes.json();
-      setGeneratedTests(generateData.testSpecs || []);
-      setGenerateProgress(90);
-      setGenerateStatus('Starting run...');
-
-      // Create and start the run with generated tests
+      // Start CODE-FIRST run - URL is optional
       const response = await fetch('/api/runs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,27 +142,29 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
         body: JSON.stringify({
           repoId: repoInfo?.id || selectedRepo,
           repoName: repoInfo?.fullName || selectedRepo,
-          testSpecs: generateData.testSpecs || [],
+          targetUrl: targetUrl || undefined, // Optional
           maxIterations: 5,
           cloudMode: true,
         }),
       });
 
+      clearInterval(progressInterval);
+
       if (!response.ok) {
-        throw new Error('Failed to create run');
+        throw new Error('Failed to start run');
       }
 
       const data = await response.json();
       setGenerateProgress(100);
-      setGenerateStatus('Complete!');
+      setGenerateStatus('Run started!');
 
       setTimeout(() => {
         setOpen(false);
         onRunCreated?.(data.run.id);
       }, 500);
     } catch (error) {
-      console.error('Quick start failed:', error);
-      setGenerateStatus('Failed to generate tests');
+      console.error('Run failed:', error);
+      setGenerateStatus('Failed to start run');
     } finally {
       setIsGenerating(false);
     }
@@ -204,18 +190,18 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
             Start New QAgent Run
           </DialogTitle>
           <DialogDescription>
-            Choose Quick Start to auto-generate tests, or Advanced mode to select existing tests.
+            QAgent will analyze your code, find bugs, and create fix PRs on GitHub.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 pt-4">
-            {/* Cloud Mode Banner */}
+            {/* Code Analysis Banner */}
             <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-neon-cyan/10 to-neon-violet/10 border border-neon-cyan/30">
               <Sparkles className="h-5 w-5 text-neon-cyan" />
               <div className="text-sm">
-                <span className="font-medium text-neon-cyan">Auto-Generate & Run</span>
+                <span className="font-medium text-neon-cyan">Analyze & Fix Code</span>
                 <span className="text-muted-foreground ml-1">
-                  — QAgent will crawl your app and create tests
+                  — Checks TypeScript, ESLint, build errors and creates fix PRs
                 </span>
               </div>
             </div>
@@ -258,26 +244,26 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
               )}
             </div>
 
-            {/* Optional URL Override */}
+            {/* Optional: Target URL for browser testing */}
             <div className="grid gap-2">
-              <Label htmlFor="quick-url" className="flex items-center gap-2">
+              <Label htmlFor="target-url" className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
-                Target URL <span className="text-muted-foreground text-xs">(optional)</span>
+                Deployed URL <span className="text-muted-foreground text-xs">(optional)</span>
               </Label>
               <Input
-                id="quick-url"
+                id="target-url"
                 type="url"
                 placeholder="https://your-app.vercel.app"
-                value={quickStartUrl}
-                onChange={(e) => setQuickStartUrl(e.target.value)}
+                value={targetUrl}
+                onChange={(e) => setTargetUrl(e.target.value)}
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                Leave empty to auto-detect from Vercel deployment
+                Optional: Provide a public URL to run Browserbase tests. If empty, browser tests are skipped.
               </p>
             </div>
 
-            {/* Generation Progress */}
+            {/* Run Progress */}
             {isGenerating && (
               <div className="space-y-3 p-4 rounded-lg bg-muted/30 border">
                 <div className="flex items-center gap-2">
@@ -285,11 +271,6 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
                   <span className="text-sm font-medium">{generateStatus}</span>
                 </div>
                 <Progress value={generateProgress} className="h-2" />
-                {generatedTests.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Found {generatedTests.length} testable flows
-                  </p>
-                )}
               </div>
             )}
 
@@ -305,12 +286,12 @@ export function NewRunDialog({ onRunCreated }: NewRunDialogProps) {
                 {isGenerating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
+                    Analyzing...
                   </>
                 ) : (
                   <>
                     <Wand2 className="mr-2 h-4 w-4" />
-                    Auto-Generate & Run
+                    Analyze & Fix
                   </>
                 )}
               </Button>

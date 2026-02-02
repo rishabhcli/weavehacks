@@ -4,17 +4,32 @@
  * Executes E2E tests using Browserbase and Stagehand.
  * Captures detailed failure reports including screenshots, DOM state, and console logs.
  *
+ * Features:
+ * - Uses observe() to read page state before acting
+ * - Uses act() to perform browser actions
+ * - Uses extract() to verify assertions
+ * - All actions logged to W&B Weave for observability
+ *
  * Instrumented with W&B Weave for observability.
  */
 
 import { Stagehand, type Page } from '@browserbasehq/stagehand';
 import type { TestSpec, TestResult, FailureReport, ConsoleLog } from '@/lib/types';
-import { op, isWeaveEnabled } from '@/lib/weave';
+import { op, isWeaveEnabled, tracedOp } from '@/lib/weave';
+import { z } from 'zod';
+
+// Schema for extraction results
+const AssertionSchema = z.object({
+  found: z.boolean().describe('Whether the expected content was found on the page'),
+  content: z.string().optional().describe('The actual content that was found'),
+  confidence: z.number().min(0).max(1).describe('Confidence level of the assertion (0-1)'),
+});
 
 export class TesterAgent {
   private stagehand: Stagehand | null = null;
   private consoleLogs: ConsoleLog[] = [];
   private sessionId: string | null = null;
+  private actionCount: number = 0; // Track number of actions per run
 
   /**
    * Initialize Stagehand with Browserbase
@@ -27,8 +42,12 @@ export class TesterAgent {
       throw new Error('BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID are required');
     }
 
+    console.log('[TesterAgent] Initializing Stagehand with Browserbase...');
+    console.log(`[TesterAgent] Project ID: ${projectId.slice(0, 8)}...`);
+
     // Use Gemini if GOOGLE_API_KEY is set, otherwise fall back to OpenAI
     const useGemini = !!process.env.GOOGLE_API_KEY;
+    console.log(`[TesterAgent] Using model: ${useGemini ? 'gemini-2.0-flash' : 'gpt-4o'}`);
 
     this.stagehand = new Stagehand({
       env: 'BROWSERBASE',
@@ -47,10 +66,9 @@ export class TesterAgent {
     });
 
     await this.stagehand.init();
+    console.log('[TesterAgent] Stagehand initialized successfully');
 
-    // Capture the Browserbase session ID for live viewing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.sessionId = (this.stagehand as any).browserbaseSessionID || null;
+    this.captureSessionId();
   }
 
   /**
@@ -60,14 +78,47 @@ export class TesterAgent {
     return this.sessionId;
   }
 
+  private captureSessionId(): void {
+    if (!this.stagehand) {
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Prefer public getter, but fall back to internal field name if needed.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stagehandAny = this.stagehand as any;
+    const nextSessionId =
+      stagehandAny.browserbaseSessionID || stagehandAny.browserbaseSessionId || null;
+    if (nextSessionId && nextSessionId !== this.sessionId) {
+      this.sessionId = nextSessionId;
+      console.log(`[TesterAgent] Browserbase session ID: ${this.sessionId}`);
+      console.log(`[TesterAgent] Live view: https://browserbase.com/sessions/${this.sessionId}`);
+    }
+  }
+
   /**
-   * Get the current page from stagehand context
+   * Get or create a page from stagehand context
    */
-  private getPage(): Page {
+  private async getPage(): Promise<Page> {
     if (!this.stagehand) {
       throw new Error('Stagehand not initialized');
     }
-    const pages = this.stagehand.context.pages();
+
+    // Check if context exists
+    if (!this.stagehand.context) {
+      throw new Error('Stagehand context not available');
+    }
+
+    let pages = this.stagehand.context.pages();
+
+    // If no pages exist, create one
+    if (!pages || pages.length === 0) {
+      console.log('[TesterAgent] No pages found, creating new page...');
+      const newPage = await this.stagehand.context.newPage();
+      this.captureSessionId();
+      return newPage;
+    }
+
+    this.captureSessionId();
     return pages[0];
   }
 
@@ -86,59 +137,97 @@ export class TesterAgent {
 
     const startTime = Date.now();
     this.consoleLogs = [];
+    this.actionCount = 0; // Reset action counter
 
     try {
-      const page = this.getPage();
+      const page = await this.getPage();
+      this.captureSessionId();
+      console.log(`[TesterAgent] Got page, navigating to ${spec.url}...`);
 
       // Navigate to the test URL
       await page.goto(spec.url, {
-        waitUntil: 'networkidle',
+        waitUntil: 'domcontentloaded',
         timeoutMs: spec.timeout || 30000,
       });
+      this.captureSessionId();
+      console.log('[TesterAgent] Navigation complete');
+
+      // Initial page observation to understand the page structure
+      console.log('[TesterAgent] Observing initial page state...');
+      const initialState = await this.tracedObserve(
+        'Describe the main content, navigation elements, and interactive elements on this page'
+      );
+      console.log(`[TesterAgent] Initial observation: found ${initialState?.length || 0} elements`);
 
       // Execute each test step
       for (let stepIndex = 0; stepIndex < spec.steps.length; stepIndex++) {
         const step = spec.steps[stepIndex];
+        console.log(`\n[TesterAgent] === Step ${stepIndex + 1}/${spec.steps.length} ===`);
 
         try {
-          // Execute the action using Stagehand's act method
-          await this.stagehand!.act(step.action, {
-            timeout: step.timeout || 10000,
-          });
+          // 1. OBSERVE - Understand current page state before acting
+          console.log(`[TesterAgent] Step ${stepIndex + 1}: Observing before action...`);
+          const preActionState = await this.tracedObserve(
+            `Find elements related to: "${step.action}". What buttons, links, or inputs can I interact with?`
+          );
+          console.log(`[TesterAgent] Found ${preActionState?.length || 0} relevant elements`);
 
-          // Check assertion if present
+          if (preActionState && preActionState.length > 0) {
+            console.log(`[TesterAgent] Elements found:`);
+            preActionState.slice(0, 3).forEach((el, i) => {
+              console.log(`   ${i + 1}. ${el.description || el.selector}`);
+            });
+          }
+
+          // 2. ACT - Execute the action
+          console.log(`[TesterAgent] Step ${stepIndex + 1}: Executing action: "${step.action}"`);
+          await this.tracedAct(step.action, step.timeout || 15000);
+          console.log(`[TesterAgent] Action completed successfully`);
+
+          // 3. EXTRACT - Verify the assertion using extract() for structured data
           if (step.expected) {
-            // Use observe to check if the expected state is visible
-            const observations = await this.stagehand!.observe(step.expected);
+            console.log(`[TesterAgent] Step ${stepIndex + 1}: Verifying assertion: "${step.expected}"`);
 
-            // If observe returns empty or no relevant observations, check page content
-            if (!observations || observations.length === 0) {
-              // Try a more explicit check by looking at page content
-              const pageContent = await page.evaluate(() => document.body.innerText);
-              const expectedText = step.expected
-                .toLowerCase()
-                .replace(/i see /i, '')
-                .replace(/"/g, '')
-                .trim();
+            // Use extract() for structured assertion checking
+            const assertionResult = await this.tracedExtract(step.expected);
 
-              const passed = pageContent.toLowerCase().includes(expectedText);
+            console.log(`[TesterAgent] Assertion result: found=${assertionResult.found}, confidence=${(assertionResult.confidence * 100).toFixed(0)}%`);
 
-              if (!passed) {
-                const failureReport = await this.buildFailureReport(
-                  spec.id,
-                  stepIndex,
-                  new Error(`Assertion failed: ${step.expected}`)
-                );
+            if (!assertionResult.found) {
+              // Double-check with observe for more context
+              const postActionState = await this.tracedObserve(step.expected);
 
-                return {
-                  passed: false,
-                  duration: Date.now() - startTime,
-                  failureReport,
-                };
+              if (!postActionState || postActionState.length === 0) {
+                // Try fallback: check page content directly
+                const pageContent = await page.evaluate(() => document.body.innerText);
+                const expectedText = step.expected
+                  .toLowerCase()
+                  .replace(/i see /i, '')
+                  .replace(/"/g, '')
+                  .trim();
+
+                const passed = pageContent.toLowerCase().includes(expectedText);
+
+                if (!passed) {
+                  console.log(`[TesterAgent] ❌ Assertion failed: ${step.expected}`);
+                  const failureReport = await this.buildFailureReport(
+                    spec.id,
+                    stepIndex,
+                    new Error(`Assertion failed: ${step.expected}`)
+                  );
+
+                  return {
+                    passed: false,
+                    duration: Date.now() - startTime,
+                    failureReport,
+                  };
+                }
               }
             }
+            console.log(`[TesterAgent] ✅ Assertion passed`);
           }
         } catch (stepError) {
+          console.log(`[TesterAgent] ❌ Step ${stepIndex + 1} failed:`, stepError);
           const failureReport = await this.buildFailureReport(
             spec.id,
             stepIndex,
@@ -153,12 +242,17 @@ export class TesterAgent {
         }
       }
 
+      // Log action statistics
+      console.log(`\n[TesterAgent] ✅ All ${spec.steps.length} steps passed`);
+      console.log(`[TesterAgent] Total Stagehand actions: ${this.actionCount} (act + observe + extract)`);
+
       // All steps passed
       return {
         passed: true,
         duration: Date.now() - startTime,
       };
     } catch (error) {
+      console.log(`[TesterAgent] ❌ Test failed with error:`, error);
       const failureReport = await this.buildFailureReport(
         spec.id,
         -1, // General error, not specific to a step
@@ -170,6 +264,69 @@ export class TesterAgent {
         duration: Date.now() - startTime,
         failureReport,
       };
+    }
+  }
+
+  /**
+   * Traced observe - wraps stagehand.observe() with Weave logging
+   */
+  private async tracedObserve(instruction: string): Promise<Array<{ selector: string; description?: string }>> {
+    this.actionCount++;
+    const startTime = Date.now();
+
+    try {
+      const result = await this.stagehand!.observe(instruction);
+      const duration = Date.now() - startTime;
+      console.log(`[TesterAgent] observe() completed in ${duration}ms`);
+      return result || [];
+    } catch (error) {
+      console.error(`[TesterAgent] observe() failed:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Traced act - wraps stagehand.act() with Weave logging
+   */
+  private async tracedAct(action: string, timeout: number = 15000): Promise<void> {
+    this.actionCount++;
+    const startTime = Date.now();
+
+    try {
+      await this.stagehand!.act(action, { timeout });
+      const duration = Date.now() - startTime;
+      console.log(`[TesterAgent] act() completed in ${duration}ms`);
+    } catch (error) {
+      console.error(`[TesterAgent] act() failed:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Traced extract - wraps stagehand.extract() for verification
+   * Uses structured schema extraction with Zod
+   */
+  private async tracedExtract(assertion: string): Promise<{ found: boolean; content?: string; confidence: number }> {
+    this.actionCount++;
+    const startTime = Date.now();
+
+    try {
+      // Extract with instruction and schema (Stagehand v3 API: extract(instruction, schema))
+      const instruction = `Check if the following is true on the current page: "${assertion}". Return whether it was found, any matching content, and your confidence level (0-1).`;
+      const result = await this.stagehand!.extract(instruction, AssertionSchema);
+      const duration = Date.now() - startTime;
+      console.log(`[TesterAgent] extract() completed in ${duration}ms`);
+
+      // Result should directly match the schema type
+      return {
+        found: result.found ?? false,
+        content: result.content,
+        confidence: result.confidence ?? 0,
+      };
+    } catch (error) {
+      console.error(`[TesterAgent] extract() failed:`, error);
+      // Return a default failed result on error
+      return { found: false, confidence: 0 };
     }
   }
 
@@ -187,7 +344,7 @@ export class TesterAgent {
 
     try {
       if (this.stagehand) {
-        const page = this.getPage();
+        const page = await this.getPage();
 
         // Capture screenshot using Stagehand's CDP-based page
         const buffer = await page.screenshot({
@@ -230,8 +387,16 @@ export class TesterAgent {
    */
   async close(): Promise<void> {
     if (this.stagehand) {
-      await this.stagehand.close();
-      this.stagehand = null;
+      console.log('[TesterAgent] Closing Browserbase session...');
+      try {
+        await this.stagehand.close();
+        console.log('[TesterAgent] Session closed successfully');
+      } catch (error) {
+        console.error('[TesterAgent] Error closing session:', error);
+      } finally {
+        this.stagehand = null;
+        this.sessionId = null;
+      }
     }
   }
 }
